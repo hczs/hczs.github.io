@@ -1,0 +1,1066 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="sunnyc">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Zookeeper 客户端常用的 shell 命令">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Zookeeper客户端常用命令">
+<meta property="og:url" content="https://sunnyc.icu/articles/45393fb1/index.html">
+<meta property="og:site_name" content="程の编程日记">
+<meta property="og:description" content="Zookeeper 客户端常用的 shell 命令">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-05-07T07:17:37.000Z">
+<meta property="article:modified_time" content="2022-05-07T09:03:57.228Z">
+<meta property="article:author" content="sunnyc">
+<meta property="article:tag" content="大数据">
+<meta property="article:tag" content="中间件">
+<meta property="article:tag" content="zookeeper">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>Zookeeper客户端常用命令 - 程の编程日记</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.27.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"sunnyc.icu","root":"/","version":"1.9.2","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":false},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"HeAf8oPmRvDT6HPWilQr18sG-gzGzoHsz","app_key":"n6lMg4VLDXcwnmsooYBs3haq","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="程の编程日记" type="application/atom+xml">
+</head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>程の编程日记</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Zookeeper客户端常用命令"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-05-07 15:17" pubdate>
+          2022年5月7日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          32 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="大数据"
+        id="heading-2c657e7dce6effaecbb458deb45e800a" role="tab" data-toggle="collapse" href="#collapse-2c657e7dce6effaecbb458deb45e800a"
+        aria-expanded="true"
+      >
+        大数据
+        <span class="list-group-count">(8)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-2c657e7dce6effaecbb458deb45e800a"
+           role="tabpanel" aria-labelledby="heading-2c657e7dce6effaecbb458deb45e800a">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/articles/1572aa20/" title="Hadoop概述"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Hadoop概述</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/62974551/" title="Hadoop集群搭建"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Hadoop集群搭建</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/d25e2bb0/" title="Kafka常用命令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Kafka常用命令</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/1267253/" title="Kafka集群搭建"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Kafka集群搭建</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/99c80bc2/" title="Zookeeper安装记录"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Zookeeper安装记录</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/9edea0a3/" title="Zookeeper实现分布式锁"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Zookeeper实现分布式锁</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/45393fb1/" title="Zookeeper客户端常用命令"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">Zookeeper客户端常用命令</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/3c6131bd/" title="Zookeeper选举机制"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Zookeeper选举机制</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Zookeeper客户端常用命令</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    本文最后更新于：2022年5月7日 下午
+                  
+                
+              </p>
+            
+            
+              <div class="markdown-body">
+                
+                <p>Zookeeper 客户端常用的 shell 命令</p>
+<span id="more"></span>
+<!-- markdownlint-disable MD041 MD002--> 
+
+<h1 id="Zookeeper-客户端常用的-shell-命令"><a href="#Zookeeper-客户端常用的-shell-命令" class="headerlink" title="Zookeeper 客户端常用的 shell 命令"></a>Zookeeper 客户端常用的 shell 命令</h1><h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><table>
+<thead>
+<tr>
+<th>命令基本语法</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>help</td>
+<td>显示所有操作命令</td>
+</tr>
+<tr>
+<td>ls path</td>
+<td>使用 ls 命令来查看当前 znode 的子节点 [可监听] -w 监听子节点变化 -s 附加次级信息</td>
+</tr>
+<tr>
+<td>create</td>
+<td>普通创建 -s 含有序列 -e 临时（重启或者超时消失）</td>
+</tr>
+<tr>
+<td>get path</td>
+<td>获得节点的值 [可监听] -w 监听节点内容变化 -s 附加次级信息</td>
+</tr>
+<tr>
+<td>set</td>
+<td>设置节点的具体值</td>
+</tr>
+<tr>
+<td>stat</td>
+<td>查看节点状态</td>
+</tr>
+<tr>
+<td>delete</td>
+<td>删除节点</td>
+</tr>
+<tr>
+<td>deleteall</td>
+<td>递归删除节点</td>
+</tr>
+</tbody></table>
+<h2 id="节点的增删改查"><a href="#节点的增删改查" class="headerlink" title="节点的增删改查"></a>节点的增删改查</h2><h3 id="连接服务端"><a href="#连接服务端" class="headerlink" title="连接服务端"></a>连接服务端</h3><p>不加 <code>-server</code> 就默认连接 localhost</p>
+<p><code>-server</code> 后跟 Zookeeper 服务端的 ip 和端口</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">bin&#x2F;zkCli.sh -server hadoop102:2181</code></pre></div></figure>
+
+<h3 id="创建节点"><a href="#创建节点" class="headerlink" title="创建节点"></a>创建节点</h3><figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">create 普通创建 
+       -s 含有序列 
+       -e 临时（重启或者超时消失）</code></pre></div></figure>
+
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"># 普通创建：在根节点下创建一个 houge 节点
+create &#x2F;houge
+# 含有序列：会自动在 shuaige 后面拼上序列号
+create -s &#x2F;shuaige
+# 临时节点：这个 hehe 节点在客户端断开连接时候会消失
+create -e &#x2F;hehe
+# 创建一个带值的结点
+create &#x2F;qie hehe</code></pre></div></figure>
+
+<h3 id="查看节点列表"><a href="#查看节点列表" class="headerlink" title="查看节点列表"></a>查看节点列表</h3><figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">ls path 使用 ls 命令来查看当前 znode 的子节点 
+		[可监听] -w 监听子节点变化
+        -s 附加次级信息</code></pre></div></figure>
+
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[zk: hadoop102:2181(CONNECTED) 10] ls &#x2F;
+[hehe, houge, qie, shuaige0000000006, zookeeper]
+# 附加次级信息
+[zk: hadoop102:2181(CONNECTED) 26] ls -s &#x2F;
+[hehe, houge, shuaige0000000006, zookeeper]cZxid &#x3D; 0x0
+ctime &#x3D; Thu Jan 01 08:00:00 CST 1970
+mZxid &#x3D; 0x0
+mtime &#x3D; Thu Jan 01 08:00:00 CST 1970
+pZxid &#x3D; 0x200000012
+cversion &#x3D; 14
+dataVersion &#x3D; 0
+aclVersion &#x3D; 0
+ephemeralOwner &#x3D; 0x0
+dataLength &#x3D; 0
+numChildren &#x3D; 4</code></pre></div></figure>
+
+<h3 id="获取节点的值"><a href="#获取节点的值" class="headerlink" title="获取节点的值"></a>获取节点的值</h3><figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[zk: hadoop102:2181(CONNECTED) 11] get &#x2F;qie
+hehe
+# 加上节点信息
+[zk: hadoop102:2181(CONNECTED) 12] get -s &#x2F;qie
+hehe
+cZxid &#x3D; 0x200000015
+ctime &#x3D; Sat May 07 16:34:20 CST 2022
+mZxid &#x3D; 0x200000015
+mtime &#x3D; Sat May 07 16:34:20 CST 2022
+pZxid &#x3D; 0x200000015
+cversion &#x3D; 0
+dataVersion &#x3D; 0
+aclVersion &#x3D; 0
+ephemeralOwner &#x3D; 0x0
+dataLength &#x3D; 4
+numChildren &#x3D; 0</code></pre></div></figure>
+
+<h3 id="修改节点的值"><a href="#修改节点的值" class="headerlink" title="修改节点的值"></a>修改节点的值</h3><figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[zk: hadoop102:2181(CONNECTED) 13] set &#x2F;qie xixi
+[zk: hadoop102:2181(CONNECTED) 14] get &#x2F;qie
+xixi</code></pre></div></figure>
+
+<h3 id="删除节点"><a href="#删除节点" class="headerlink" title="删除节点"></a>删除节点</h3><figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[zk: hadoop102:2181(CONNECTED) 15] ls &#x2F;
+[hehe, houge, qie, shuaige0000000006, zookeeper]
+[zk: hadoop102:2181(CONNECTED) 16] delete &#x2F;houge
+[zk: hadoop102:2181(CONNECTED) 17] ls &#x2F;
+[hehe, qie, shuaige0000000006, zookeeper]</code></pre></div></figure>
+
+<p>递归删除，删除一个非空节点时会提示<code>Node not empty</code></p>
+<p>此时使用 deleteall 命令</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[zk: hadoop102:2181(CONNECTED) 18] create &#x2F;qie&#x2F;ha
+Created &#x2F;qie&#x2F;ha
+[zk: hadoop102:2181(CONNECTED) 19] ls &#x2F;
+[hehe, qie, shuaige0000000006, zookeeper]
+[zk: hadoop102:2181(CONNECTED) 20] delete &#x2F;qie
+Node not empty: &#x2F;qie
+[zk: hadoop102:2181(CONNECTED) 21] deleteall &#x2F;qie
+[zk: hadoop102:2181(CONNECTED) 22] ls &#x2F;
+[hehe, shuaige0000000006, zookeeper]</code></pre></div></figure>
+
+<h3 id="节点信息参数详解"><a href="#节点信息参数详解" class="headerlink" title="节点信息参数详解"></a>节点信息参数详解</h3><p>我们加上 <code>-s</code> 参数的话，会显示节点的详情信息，下面是参数解释：</p>
+<p>以下面节点为例：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[zk: hadoop102:2181(CONNECTED) 23] get -s &#x2F;shuaige0000000006
+null
+cZxid &#x3D; 0x20000000f
+ctime &#x3D; Sat May 07 16:24:03 CST 2022
+mZxid &#x3D; 0x20000000f
+mtime &#x3D; Sat May 07 16:24:03 CST 2022
+pZxid &#x3D; 0x20000000f
+cversion &#x3D; 0
+dataVersion &#x3D; 0
+aclVersion &#x3D; 0
+ephemeralOwner &#x3D; 0x0
+dataLength &#x3D; 0
+numChildren &#x3D; 0</code></pre></div></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cZxid</td>
+<td>创建节点的事务 zxid,每次修改 ZooKeeper 状态都会产生一个 ZooKeeper 事务 ID。事务 ID 是 ZooKeeper 中所有修改总的次序。每次修改都有唯一的 zxid，如果 zxid1 小于 zxid2，那么 zxid1 在 zxid2 之前发生。</td>
+</tr>
+<tr>
+<td>ctime</td>
+<td>节点创建时间，znode 被创建的毫秒数（从 1970 年开始）</td>
+</tr>
+<tr>
+<td>mZxid</td>
+<td>znode 最后更新的事务 zxid</td>
+</tr>
+<tr>
+<td>mtime</td>
+<td>节点修改时间，znode 最后修改的毫秒数（从 1970 年开始）</td>
+</tr>
+<tr>
+<td>pZxid</td>
+<td>znode 最后更新的子节点 zxid</td>
+</tr>
+<tr>
+<td>cversion</td>
+<td>znode 子节点变化号，znode 子节点修改次数</td>
+</tr>
+<tr>
+<td>dataVersion</td>
+<td>znode 数据变化号</td>
+</tr>
+<tr>
+<td>aclVersion</td>
+<td>znode 访问控制列表的变化号</td>
+</tr>
+<tr>
+<td>ephemeralOwner</td>
+<td>如果是临时节点，这个是 znode 拥有者的 session id。如果不是 临时节点则是 0。</td>
+</tr>
+<tr>
+<td>dataLength</td>
+<td>znode 的数据长度</td>
+</tr>
+<tr>
+<td>numChildren</td>
+<td>znode 子节点数量</td>
+</tr>
+</tbody></table>
+<h2 id="节点监听"><a href="#节点监听" class="headerlink" title="节点监听"></a>节点监听</h2><h3 id="监听节点内容变化"><a href="#监听节点内容变化" class="headerlink" title="监听节点内容变化"></a>监听节点内容变化</h3><p>命令：<code>get -w [path]</code></p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"># 先建立一个带值的节点
+[zk: hadoop102:2181(CONNECTED) 1] create &#x2F;houge heihei
+Created &#x2F;houge
+[zk: hadoop102:2181(CONNECTED) 2] ls &#x2F;
+[houge, shuaige0000000006, zookeeper]
+[zk: hadoop102:2181(CONNECTED) 3] get &#x2F;houge
+heihei
+# 开启监听节点内容
+[zk: hadoop102:2181(CONNECTED) 4] get -w &#x2F;houge
+heihei
+# 另一台机器也登到 zk 集群上，修改这个节点内容
+[zk: hadoop103:2181(CONNECTED) 3] get &#x2F;houge
+heihei
+[zk: hadoop103:2181(CONNECTED) 4] set &#x2F;houge xixi
+# 102 上显示出了监听内容
+[zk: hadoop102:2181(CONNECTED) 5]
+WATCHER::
+
+WatchedEvent state:SyncConnected type:NodeDataChanged path:&#x2F;houge</code></pre></div></figure>
+
+<p>注意：监听生效一次，后续就不会生效了，如果还想监听内容变化，需要再次跑命令监听</p>
+<h3 id="监听节点上的路径变化"><a href="#监听节点上的路径变化" class="headerlink" title="监听节点上的路径变化"></a>监听节点上的路径变化</h3><p>命令：<code>ls -w [path]</code></p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"># 启动监听
+[zk: hadoop102:2181(CONNECTED) 6] ls -w &#x2F;houge
+[]
+# 另一台机器上对路径做修改
+[zk: hadoop103:2181(CONNECTED) 6] create &#x2F;houge&#x2F;shuaige
+Created &#x2F;houge&#x2F;shuaige
+# 102 上有相应提示
+[zk: hadoop102:2181(CONNECTED) 7]
+WATCHER::
+
+WatchedEvent state:SyncConnected type:NodeChildrenChanged path:&#x2F;houge</code></pre></div></figure>
+
+<p>注意：监听生效一次，后续就不会生效了，如果还想监听路径变化，需要再次跑命令监听</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" class="category-chain-item">大数据</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/">#大数据</a>
+      
+        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
+      
+        <a href="/tags/zookeeper/">#zookeeper</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Zookeeper客户端常用命令</div>
+      <div>https://sunnyc.icu/articles/45393fb1/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>sunnyc</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年5月7日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                <i class="iconfont icon-nc"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="ND - 禁止演绎">
+                <i class="iconfont icon-nd"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/articles/9edea0a3/" title="Zookeeper实现分布式锁">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Zookeeper实现分布式锁</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/articles/3c6131bd/" title="Zookeeper选举机制">
+                        <span class="hidden-mobile">Zookeeper选举机制</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.4.17/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"HeAf8oPmRvDT6HPWilQr18sG-gzGzoHsz","appKey":"n6lMg4VLDXcwnmsooYBs3haq","path":"window.location.pathname","placeholder":"给我的文章加点评论吧~","avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/components/prism-core.min.js" ></script>
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/plugins/autoloader/prism-autoloader.min.js" ></script>
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>程の编程日记</title>
+  
+  <subtitle>不熬夜</subtitle>
+  <link href="https://sunnyc.icu/atom.xml" rel="self"/>
+  
+  <link href="https://sunnyc.icu/"/>
+  <updated>2022-06-04T07:49:13.241Z</updated>
+  <id>https://sunnyc.icu/</id>
+  
+  <author>
+    <name>sunnyc</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>使用Nexus搭建Maven私服</title>
+    <link href="https://sunnyc.icu/articles/89c305cc/"/>
+    <id>https://sunnyc.icu/articles/89c305cc/</id>
+    <published>2022-06-04T06:20:11.000Z</published>
+    <updated>2022-06-04T07:49:13.241Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;Windows 环境下使用 Nexus 搭建 Maven 私服记录及使用&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="折腾" scheme="https://sunnyc.icu/categories/%E6%8A%98%E8%85%BE/"/>
+    
+    
+    <category term="环境搭建" scheme="https://sunnyc.icu/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Kafka常用命令</title>
+    <link href="https://sunnyc.icu/articles/d25e2bb0/"/>
+    <id>https://sunnyc.icu/articles/d25e2bb0/</id>
+    <published>2022-05-16T14:14:38.000Z</published>
+    <updated>2022-05-17T13:00:41.723Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;Kafka 命令行常用操作总结&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="大数据" scheme="https://sunnyc.icu/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+    
+    <category term="大数据" scheme="https://sunnyc.icu/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+    <category term="Kafka" scheme="https://sunnyc.icu/tags/Kafka/"/>
+    
+    <category term="中间件" scheme="https://sunnyc.icu/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Kafka集群搭建</title>
+    <link href="https://sunnyc.icu/articles/1267253/"/>
+    <id>https://sunnyc.icu/articles/1267253/</id>
+    <published>2022-05-16T12:40:58.000Z</published>
+    <updated>2022-06-04T06:24:31.729Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;关于 Kafka 的集群搭建安装记录&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="大数据" scheme="https://sunnyc.icu/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+    
+    <category term="大数据" scheme="https://sunnyc.icu/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+    <category term="Kafka" scheme="https://sunnyc.icu/tags/Kafka/"/>
+    
+    <category term="中间件" scheme="https://sunnyc.icu/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
+    
+    <category term="环境搭建" scheme="https://sunnyc.icu/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Zookeeper实现分布式锁</title>
+    <link href="https://sunnyc.icu/articles/9edea0a3/"/>
+    <id>https://sunnyc.icu/articles/9edea0a3/</id>
+    <published>2022-05-14T12:36:24.000Z</published>
+    <updated>2022-05-14T14:17:46.349Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;分别使用 Zookeeper 的原生 API 和 Curator 框架实现分布式锁&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="大数据" scheme="https://sunnyc.icu/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+    
+    <category term="大数据" scheme="https://sunnyc.icu/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+    <category term="中间件" scheme="https://sunnyc.icu/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
+    
+    <category term="zookeeper" scheme="https://sunnyc.icu/tags/zookeeper/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Zookeeper客户端常用命令</title>
+    <link href="https://sunnyc.icu/articles/45393fb1/"/>
+    <id>https://sunnyc.icu/articles/45393fb1/</id>
+    <published>2022-05-07T07:17:37.000Z</published>
+    <updated>2022-05-07T09:03:57.228Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;Zookeeper 客户端常用的 shell 命令&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="大数据" scheme="https://sunnyc.icu/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+    
+    <category term="大数据" scheme="https://sunnyc.icu/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+    <category term="中间件" scheme="https://sunnyc.icu/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
+    
+    <category term="zookeeper" scheme="https://sunnyc.icu/tags/zookeeper/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Zookeeper选举机制</title>
+    <link href="https://sunnyc.icu/articles/3c6131bd/"/>
+    <id>https://sunnyc.icu/articles/3c6131bd/</id>
+    <published>2022-05-06T07:36:33.000Z</published>
+    <updated>2022-05-06T12:14:41.263Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;关于 Zookeeper 选举机制的说明&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="大数据" scheme="https://sunnyc.icu/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+    
+    <category term="大数据" scheme="https://sunnyc.icu/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+    <category term="中间件" scheme="https://sunnyc.icu/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
+    
+    <category term="zookeeper" scheme="https://sunnyc.icu/tags/zookeeper/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Zookeeper安装记录</title>
+    <link href="https://sunnyc.icu/articles/99c80bc2/"/>
+    <id>https://sunnyc.icu/articles/99c80bc2/</id>
+    <published>2022-04-27T13:30:26.000Z</published>
+    <updated>2022-06-04T06:24:36.857Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;Zookeeper 单机和集群的安装记录&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="大数据" scheme="https://sunnyc.icu/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+    
+    <category term="大数据" scheme="https://sunnyc.icu/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+    <category term="中间件" scheme="https://sunnyc.icu/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
+    
+    <category term="环境搭建" scheme="https://sunnyc.icu/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"/>
+    
+    <category term="zookeeper" scheme="https://sunnyc.icu/tags/zookeeper/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>装饰器模式（Decorator）</title>
+    <link href="https://sunnyc.icu/articles/edbb2e9c/"/>
+    <id>https://sunnyc.icu/articles/edbb2e9c/</id>
+    <published>2022-04-21T12:02:40.000Z</published>
+    <updated>2022-04-21T12:55:22.594Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;为对象动态的添加功能&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="设计模式" scheme="https://sunnyc.icu/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"/>
+    
+    
+    <category term="设计模式" scheme="https://sunnyc.icu/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Hadoop集群搭建</title>
+    <link href="https://sunnyc.icu/articles/62974551/"/>
+    <id>https://sunnyc.icu/articles/62974551/</id>
+    <published>2022-04-18T06:13:16.000Z</published>
+    <updated>2022-06-04T06:24:21.534Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;本地虚拟环境搭建 Hadoop 集群，是集群搭建的过程记录&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="大数据" scheme="https://sunnyc.icu/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+    
+    <category term="Hadoop" scheme="https://sunnyc.icu/tags/Hadoop/"/>
+    
+    <category term="大数据" scheme="https://sunnyc.icu/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+    <category term="环境搭建" scheme="https://sunnyc.icu/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Hadoop概述</title>
+    <link href="https://sunnyc.icu/articles/1572aa20/"/>
+    <id>https://sunnyc.icu/articles/1572aa20/</id>
+    <published>2022-04-18T02:19:23.000Z</published>
+    <updated>2022-04-18T06:00:46.577Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;关于 Hadoop 概念和组成的基本介绍，以及大数据生态体系的介绍&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="大数据" scheme="https://sunnyc.icu/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+    
+    <category term="Hadoop" scheme="https://sunnyc.icu/tags/Hadoop/"/>
+    
+    <category term="大数据" scheme="https://sunnyc.icu/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>策略模式（Strategy）</title>
+    <link href="https://sunnyc.icu/articles/e54b0c5d/"/>
+    <id>https://sunnyc.icu/articles/e54b0c5d/</id>
+    <published>2022-03-29T14:19:21.000Z</published>
+    <updated>2022-03-31T02:57:45.217Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;诸葛亮的锦囊妙计，每一个锦囊就是一个策略&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="设计模式" scheme="https://sunnyc.icu/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"/>
+    
+    
+    <category term="设计模式" scheme="https://sunnyc.icu/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Python基于内存缓存简单实现</title>
+    <link href="https://sunnyc.icu/articles/47396326/"/>
+    <id>https://sunnyc.icu/articles/47396326/</id>
+    <published>2022-03-19T02:33:30.000Z</published>
+    <updated>2022-03-31T02:57:45.176Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;简单的 key - value 缓存，带有缓存失效时间设置&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Python" scheme="https://sunnyc.icu/categories/Python/"/>
+    
+    
+    <category term="小轮子" scheme="https://sunnyc.icu/tags/%E5%B0%8F%E8%BD%AE%E5%AD%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>责任链模式（Chain of Responsibility）</title>
+    <link href="https://sunnyc.icu/articles/6d929472/"/>
+    <id>https://sunnyc.icu/articles/6d929472/</id>
+    <published>2022-03-15T01:16:55.000Z</published>
+    <updated>2022-03-31T02:57:45.223Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;击鼓传花，层层审批，解决各种 if else 判断的复杂业务情况&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="设计模式" scheme="https://sunnyc.icu/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"/>
+    
+    
+    <category term="设计模式" scheme="https://sunnyc.icu/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>命令模式（Command）</title>
+    <link href="https://sunnyc.icu/articles/346cfbe2/"/>
+    <id>https://sunnyc.icu/articles/346cfbe2/</id>
+    <published>2022-03-13T14:09:06.000Z</published>
+    <updated>2022-03-31T02:57:45.209Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;将命令和实际执行者分离，对外提供统一表现&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="设计模式" scheme="https://sunnyc.icu/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"/>
+    
+    
+    <category term="设计模式" scheme="https://sunnyc.icu/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>观察者模式（Observer）</title>
+    <link href="https://sunnyc.icu/articles/8af60e4d/"/>
+    <id>https://sunnyc.icu/articles/8af60e4d/</id>
+    <published>2022-03-12T12:05:53.000Z</published>
+    <updated>2022-03-31T02:57:45.219Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;老师上完课了，通知学生们说明天要考试&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="设计模式" scheme="https://sunnyc.icu/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"/>
+    
+    
+    <category term="设计模式" scheme="https://sunnyc.icu/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>单例模式（Singleton）</title>
+    <link href="https://sunnyc.icu/articles/2c8b996c/"/>
+    <id>https://sunnyc.icu/articles/2c8b996c/</id>
+    <published>2022-03-10T12:54:43.000Z</published>
+    <updated>2022-03-31T02:57:45.203Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;单例模式的介绍、使用场景、七种写法及测试&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="设计模式" scheme="https://sunnyc.icu/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"/>
+    
+    
+    <category term="设计模式" scheme="https://sunnyc.icu/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>JDK1.8新特性</title>
+    <link href="https://sunnyc.icu/articles/d111bf74/"/>
+    <id>https://sunnyc.icu/articles/d111bf74/</id>
+    <published>2022-03-04T03:12:54.000Z</published>
+    <updated>2022-03-31T02:57:45.161Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;关于lambda表达式、streamAPI、Optional和新的日期时间API的总结&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Java基础" scheme="https://sunnyc.icu/categories/Java%E5%9F%BA%E7%A1%80/"/>
+    
+    
+    <category term="Java" scheme="https://sunnyc.icu/tags/Java/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>模拟并发环境代码段</title>
+    <link href="https://sunnyc.icu/articles/3b4b1d9a/"/>
+    <id>https://sunnyc.icu/articles/3b4b1d9a/</id>
+    <published>2022-02-28T13:41:03.000Z</published>
+    <updated>2022-03-31T02:57:45.214Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;使用&lt;code&gt;CountDownLatch&lt;/code&gt;来控制线程们一起启动模拟并发&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Java基础" scheme="https://sunnyc.icu/categories/Java%E5%9F%BA%E7%A1%80/"/>
+    
+    
+    <category term="多线程" scheme="https://sunnyc.icu/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Java基础总结篇</title>
+    <link href="https://sunnyc.icu/articles/40d12ba0/"/>
+    <id>https://sunnyc.icu/articles/40d12ba0/</id>
+    <published>2022-02-20T07:50:47.000Z</published>
+    <updated>2022-03-31T02:57:45.167Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;关于Java基础方面的总结，快四个月没写过Java了，回忆一下&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Java基础" scheme="https://sunnyc.icu/categories/Java%E5%9F%BA%E7%A1%80/"/>
+    
+    
+    <category term="Java" scheme="https://sunnyc.icu/tags/Java/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>代理模式（Proxy）</title>
+    <link href="https://sunnyc.icu/articles/c46d8518/"/>
+    <id>https://sunnyc.icu/articles/c46d8518/</id>
+    <published>2022-02-19T06:34:00.000Z</published>
+    <updated>2022-03-31T02:57:45.200Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;关于代理模式的介绍，以及动态代理（jdk、cglib）的介绍&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="设计模式" scheme="https://sunnyc.icu/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"/>
+    
+    
+    <category term="设计模式" scheme="https://sunnyc.icu/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"/>
+    
+  </entry>
+  
+</feed>

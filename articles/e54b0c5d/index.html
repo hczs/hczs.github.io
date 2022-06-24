@@ -1,0 +1,1079 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="sunnyc">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="诸葛亮的锦囊妙计，每一个锦囊就是一个策略">
+<meta property="og:type" content="article">
+<meta property="og:title" content="策略模式（Strategy）">
+<meta property="og:url" content="https://sunnyc.icu/articles/e54b0c5d/index.html">
+<meta property="og:site_name" content="程の编程日记">
+<meta property="og:description" content="诸葛亮的锦囊妙计，每一个锦囊就是一个策略">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220330210011236.png">
+<meta property="og:image" content="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220330211347137.png">
+<meta property="article:published_time" content="2022-03-29T14:19:21.000Z">
+<meta property="article:modified_time" content="2022-03-31T02:57:45.217Z">
+<meta property="article:author" content="sunnyc">
+<meta property="article:tag" content="设计模式">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220330210011236.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>策略模式（Strategy） - 程の编程日记</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.27.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"sunnyc.icu","root":"/","version":"1.9.2","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":false},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"HeAf8oPmRvDT6HPWilQr18sG-gzGzoHsz","app_key":"n6lMg4VLDXcwnmsooYBs3haq","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="程の编程日记" type="application/atom+xml">
+</head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>程の编程日记</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="策略模式（Strategy）"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-03-29 22:19" pubdate>
+          2022年3月29日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          49 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="设计模式"
+        id="heading-301a19970448f8e4f27ddae7a7d415fe" role="tab" data-toggle="collapse" href="#collapse-301a19970448f8e4f27ddae7a7d415fe"
+        aria-expanded="true"
+      >
+        设计模式
+        <span class="list-group-count">(8)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-301a19970448f8e4f27ddae7a7d415fe"
+           role="tabpanel" aria-labelledby="heading-301a19970448f8e4f27ddae7a7d415fe">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/articles/c46d8518/" title="代理模式（Proxy）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">代理模式（Proxy）</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/2c8b996c/" title="单例模式（Singleton）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">单例模式（Singleton）</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/346cfbe2/" title="命令模式（Command）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">命令模式（Command）</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/e54b0c5d/" title="策略模式（Strategy）"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">策略模式（Strategy）</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/edbb2e9c/" title="装饰器模式（Decorator）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">装饰器模式（Decorator）</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/8af60e4d/" title="观察者模式（Observer）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">观察者模式（Observer）</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/6d929472/" title="责任链模式（Chain of Responsibility）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">责任链模式（Chain of Responsibility）</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/faafedbd/" title="适配器模式（Adapter）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">适配器模式（Adapter）</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">策略模式（Strategy）</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    本文最后更新于：2022年3月31日 上午
+                  
+                
+              </p>
+            
+            
+              <div class="markdown-body">
+                
+                <p>诸葛亮的锦囊妙计，每一个锦囊就是一个策略</p>
+<span id="more"></span>
+<!-- markdownlint-disable MD041 MD002--> 
+
+<h1 id="策略模式"><a href="#策略模式" class="headerlink" title="策略模式"></a>策略模式</h1><h2 id="简要介绍"><a href="#简要介绍" class="headerlink" title="简要介绍"></a>简要介绍</h2><p>一个一个的策略，就是封装的一个又一个的算法，并且这些算法之间可以互换</p>
+<p>客户端使用时，可以有选择的使用某个算法，算法和客户端解耦，我们可以用多个算法解决同一个问题</p>
+<h2 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h2><ul>
+<li>一个系统需要动态的在几种算法中选择一种（说的就是 if else 里面逻辑一大坨的情况）</li>
+</ul>
+<h2 id="类图"><a href="#类图" class="headerlink" title="类图"></a>类图</h2><p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220330210011236.png" srcset="/img/loading.gif" lazyload alt="策略模式"></p>
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><p>场景描述：商品优惠有多种算法，满减、直减、折扣和 N 元购等等</p>
+<h3 id="正常情况"><a href="#正常情况" class="headerlink" title="正常情况"></a>正常情况</h3><p>我们判断商品价格，然后判断是那种优惠策略，然后再根据优惠算法继续具体计算优惠后的钱</p>
+<p>就是写出了以下的程序：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class OriginalDemo &#123;
+    &#x2F;**
+     * 优惠券折扣计算
+     * @param type 优惠券类型
+     * @param typeContent 优惠券金额
+     * @param skuPrice 商品金额
+     * @param typeExt 满减金额
+     * @return 折扣后的价格
+     *&#x2F;
+    public double discountAmount(int type, double typeContent, double skuPrice, double typeExt) &#123;
+        &#x2F;&#x2F; 直减券
+        if (type &#x3D;&#x3D; 1) &#123;
+            return skuPrice - typeContent;
+        &#125;
+        &#x2F;&#x2F; 满减券
+        if (type &#x3D;&#x3D; 2) &#123;
+            &#x2F;&#x2F; 不够满减金额，还按原价处理
+            if (skuPrice &lt; typeExt) &#123;
+                return skuPrice;
+            &#125;
+            return skuPrice - typeContent;
+        &#125;
+        &#x2F;&#x2F; 折扣券
+        if (type &#x3D;&#x3D; 3) &#123;
+            return skuPrice * typeContent;
+        &#125;
+        &#x2F;&#x2F; n元购
+        if (type &#x3D;&#x3D; 4) &#123;
+            return typeContent;
+        &#125;
+        &#x2F;&#x2F; 类型都没有匹配上，就按原价处理
+        return skuPrice;
+    &#125;
+
+&#125;</code></pre></div></figure>
+
+<p>我们上述写法虽然也能完成功能，但是还有缺点，「扩展性不能满足」比如满减，前三个参数并不能满足这个算法，所以只能添加一个 <code>typeExt</code> 参数，表示满减金额</p>
+<p>如果再出现五花八门的算法呢，这个方法还不知道加多少参数，而且违背了我们的开闭原则，重复改这个方法，极易出错</p>
+<h3 id="使用策略模式"><a href="#使用策略模式" class="headerlink" title="使用策略模式"></a>使用策略模式</h3><p>我们先定义一个顶层接口</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public interface ICouponDiscount&lt;T&gt; &#123;
+
+
+    &#x2F;**
+     * 优惠券金额计算
+     * @param couponInfo 券折扣信息：直减、满减、折扣、n元购
+     * @param skuPrice 商品金额
+     * @param &lt;T&gt; 券折扣信息类型
+     * @return 优惠后的金额
+     *&#x2F;
+     BigDecimal discountAmount(T couponInfo, BigDecimal skuPrice);
+&#125;</code></pre></div></figure>
+
+<p>这样后续有啥算法直接实现这个接口，实现其中的方法就行</p>
+<p>下面是四种优惠算法，四个类：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class MJCouponDiscount implements ICouponDiscount&lt;Map&lt;String, String&gt;&gt; &#123;
+
+    &#x2F;**
+     * 满减计算，判断满 x 元后减去 n 元
+     * 最低得支付 1 元
+     * @param couponInfo 券折扣信息：直减、满减、折扣、n元购
+     * @param skuPrice 商品金额
+     * @return 满减后的价格
+     *&#x2F;
+    @Override
+    public BigDecimal discountAmount(Map&lt;String, String&gt; couponInfo, BigDecimal skuPrice) &#123;
+        String x &#x3D; couponInfo.get(&quot;x&quot;);
+        String n &#x3D; couponInfo.get(&quot;n&quot;);
+
+        &#x2F;&#x2F; 不够满减金额，直接返回商品原价
+        if (skuPrice.compareTo(new BigDecimal(x)) &lt; 0) &#123;
+            return skuPrice;
+        &#125;
+        &#x2F;&#x2F; 可以满减了
+        BigDecimal result &#x3D; skuPrice.subtract(new BigDecimal(n));
+        &#x2F;&#x2F; 最低支付 1 块钱
+        if (result.compareTo(BigDecimal.ONE) &lt; 0) &#123;
+            return BigDecimal.ONE;
+        &#125;
+        return result;
+    &#125;
+&#125;</code></pre></div></figure>
+
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class NYGCouponDiscount implements ICouponDiscount&lt;Double&gt; &#123;
+
+    &#x2F;**
+     * n 元购 直接返回n元 固定价格购买
+     * @param couponInfo 券折扣信息：直减、满减、折扣、n元购
+     * @param skuPrice 商品金额
+     * @return 直接返回n元
+     *&#x2F;
+    @Override
+    public BigDecimal discountAmount(Double couponInfo, BigDecimal skuPrice) &#123;
+        return new BigDecimal(couponInfo);
+    &#125;
+&#125;</code></pre></div></figure>
+
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class ZJCouponDiscount implements ICouponDiscount&lt;Double&gt; &#123;
+
+    &#x2F;**
+     * 直减
+     * 直接减去优惠券的数值
+     * 最低付一元
+     * @param couponInfo 券折扣信息：直减、满减、折扣、n元购
+     * @param skuPrice 商品金额
+     * @return 优惠后的价格
+     *&#x2F;
+    @Override
+    public BigDecimal discountAmount(Double couponInfo, BigDecimal skuPrice) &#123;
+        BigDecimal result &#x3D; skuPrice.subtract(new BigDecimal(couponInfo));
+        &#x2F;&#x2F; 可能是
+        &#x2F;&#x2F; 返回0 等于 1元
+        &#x2F;&#x2F; 返回-1 小于 1元
+        &#x2F;&#x2F; 返回1 大于 1元
+        &#x2F;&#x2F; 所以小于 1 就是（0 or -1） 小于等于 1 元
+        if (result.compareTo(BigDecimal.ONE) &lt; 1) &#123;
+            return BigDecimal.ONE;
+        &#125;
+        return result;
+    &#125;
+&#125;</code></pre></div></figure>
+
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class ZKCouponDiscount implements ICouponDiscount&lt;Double&gt; &#123;
+    &#x2F;**
+     * 折扣
+     * 商品价格乘以折扣比例 就是最后支付金额
+     * 保留两位小数
+     * 最低支付1元
+     * @param couponInfo 券折扣信息：直减、满减、折扣、n元购
+     * @param skuPrice 商品金额
+     * @return 折扣后的金额
+     *&#x2F;
+    @Override
+    public BigDecimal discountAmount(Double couponInfo, BigDecimal skuPrice) &#123;
+        BigDecimal result &#x3D; skuPrice.multiply(new BigDecimal(couponInfo)).setScale(2, BigDecimal.ROUND_HALF_UP);
+        if (result.compareTo(BigDecimal.ONE) &lt; 1) &#123;
+            return BigDecimal.ONE;
+        &#125;
+        return result;
+    &#125;
+&#125;</code></pre></div></figure>
+
+<p>集成所有算法的上下文类</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class Context&lt;T&gt; &#123;
+
+    private ICouponDiscount&lt;T&gt; couponDiscount;
+
+    public Context(ICouponDiscount&lt;T&gt; couponDiscount) &#123;
+        this.couponDiscount &#x3D; couponDiscount;
+    &#125;
+
+    public BigDecimal discountAmount(T couponInfo, BigDecimal skuPrice) &#123;
+        return couponDiscount.discountAmount(couponInfo, skuPrice);
+    &#125;
+&#125;</code></pre></div></figure>
+
+<p>客户端使用：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class MainTest &#123;
+
+    public void zjTest() &#123;
+        &#x2F;&#x2F; 直减
+        Context&lt;Double&gt; context &#x3D; new Context&lt;&gt;(new ZJCouponDiscount());
+        BigDecimal result &#x3D; context.discountAmount(10D, new BigDecimal(&quot;10.5&quot;));
+        System.out.println(&quot;直减策略，10.5 减 10：&quot; + result);
+    &#125;
+
+    public void mjTest() &#123;
+        &#x2F;&#x2F; 满减
+        Context&lt;Map&lt;String, String&gt;&gt; context &#x3D; new Context&lt;&gt;(new MJCouponDiscount());
+        HashMap&lt;String, String&gt; couponInfo &#x3D; new HashMap&lt;&gt;();
+        &#x2F;&#x2F; 满 10.5 减 10 满 x 减 n
+        couponInfo.put(&quot;x&quot;, &quot;10.5&quot;);
+        couponInfo.put(&quot;n&quot;, &quot;10&quot;);
+        BigDecimal result &#x3D; context.discountAmount(couponInfo, new BigDecimal(&quot;10.5&quot;));
+        System.out.println(&quot;满减策略，满 10.5 减 10：&quot; + result);
+    &#125;
+
+    public void zkTest() &#123;
+        &#x2F;&#x2F; 折扣
+        Context&lt;Double&gt; context &#x3D; new Context&lt;&gt;(new ZKCouponDiscount());
+        BigDecimal result &#x3D; context.discountAmount(0.1D, new BigDecimal(&quot;10.5&quot;));
+        System.out.println(&quot;折扣策略，10.5 打一折：&quot; + result);
+    &#125;
+
+    public void nyTest() &#123;
+        Context&lt;Double&gt; context &#x3D; new Context&lt;&gt;(new NYGCouponDiscount());
+        BigDecimal result &#x3D; context.discountAmount(0.5D, new BigDecimal(&quot;10.5&quot;));
+        System.out.println(&quot;n元购策略：直接n元买下：&quot; + result);
+    &#125;
+
+    public static void main(String[] args) &#123;
+        MainTest mainTest &#x3D; new MainTest();
+        mainTest.mjTest();
+        mainTest.zjTest();
+        mainTest.zkTest();
+        mainTest.nyTest();
+    &#125;
+&#125;</code></pre></div></figure>
+
+<h2 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h2><p>以例子中的 <code>zjTest</code> 方法为例，分析策略模式调用的时序图</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220330211347137.png" srcset="/img/loading.gif" lazyload alt="image-20220330211347137"></p>
+<h2 id="为什么需要一个-context？我直接调接口不行吗？"><a href="#为什么需要一个-context？我直接调接口不行吗？" class="headerlink" title="为什么需要一个 context？我直接调接口不行吗？"></a>为什么需要一个 context？我直接调接口不行吗？</h2><p>可以参考上面的时序图，<strong>context 把客户端和算法接口解耦，让上下文去和算法接口打交道，而客户端只知道自己调了一个 context 的某个方法，就可以了</strong>，实际情况我们和算法接口打交道前后会有一些操作，这个时候直接 context 里面写就行，而不用客户端每次调用接口都要记得写</p>
+<p>例如：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class Context&lt;T&gt; &#123;
+
+    private ICouponDiscount&lt;T&gt; couponDiscount;
+
+    public Context(ICouponDiscount&lt;T&gt; couponDiscount) &#123;
+        this.couponDiscount &#x3D; couponDiscount;
+    &#125;
+
+    public BigDecimal discountAmount(T couponInfo, BigDecimal skuPrice) &#123;
+        System.out.println(&quot;优惠金额计算中... 原价：&quot; + skuPrice);
+        return couponDiscount.discountAmount(couponInfo, skuPrice);
+    &#125;
+&#125;</code></pre></div></figure>
+
+<p>我们每次计算优惠金额的时候都要知道原价多少，再次执行 <code>MainTest</code> 类中的主方法：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">优惠金额计算中... 原价：10.5
+满减策略，满 10.5 减 10：1
+优惠金额计算中... 原价：10.5
+直减策略，10.5 减 10：1
+优惠金额计算中... 原价：10.5
+折扣策略，10.5 打一折：1.05
+优惠金额计算中... 原价：10.5
+n元购策略：直接n元买下：0.5</code></pre></div></figure>
+
+<p>客户端代码无需改动，直接动用上下文和算法交互即可</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" class="category-chain-item">设计模式</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">#设计模式</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>策略模式（Strategy）</div>
+      <div>https://sunnyc.icu/articles/e54b0c5d/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>sunnyc</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年3月29日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                <i class="iconfont icon-nc"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="ND - 禁止演绎">
+                <i class="iconfont icon-nd"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/articles/1572aa20/" title="Hadoop概述">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Hadoop概述</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/articles/47396326/" title="Python基于内存缓存简单实现">
+                        <span class="hidden-mobile">Python基于内存缓存简单实现</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.4.17/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"HeAf8oPmRvDT6HPWilQr18sG-gzGzoHsz","appKey":"n6lMg4VLDXcwnmsooYBs3haq","path":"window.location.pathname","placeholder":"给我的文章加点评论吧~","avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/components/prism-core.min.js" ></script>
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/plugins/autoloader/prism-autoloader.min.js" ></script>
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

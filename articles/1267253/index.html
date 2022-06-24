@@ -1,0 +1,1007 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="sunnyc">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="关于 Kafka 的集群搭建安装记录">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka集群搭建">
+<meta property="og:url" content="https://sunnyc.icu/articles/1267253/index.html">
+<meta property="og:site_name" content="程の编程日记">
+<meta property="og:description" content="关于 Kafka 的集群搭建安装记录">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220516205340112.png">
+<meta property="og:image" content="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220516212930946.png">
+<meta property="article:published_time" content="2022-05-16T12:40:58.000Z">
+<meta property="article:modified_time" content="2022-06-04T06:24:31.729Z">
+<meta property="article:author" content="sunnyc">
+<meta property="article:tag" content="大数据">
+<meta property="article:tag" content="Kafka">
+<meta property="article:tag" content="中间件">
+<meta property="article:tag" content="环境搭建">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220516205340112.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>Kafka集群搭建 - 程の编程日记</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.27.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"sunnyc.icu","root":"/","version":"1.9.2","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":false},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"HeAf8oPmRvDT6HPWilQr18sG-gzGzoHsz","app_key":"n6lMg4VLDXcwnmsooYBs3haq","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="程の编程日记" type="application/atom+xml">
+</head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>程の编程日记</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Kafka集群搭建"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-05-16 20:40" pubdate>
+          2022年5月16日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          34 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="大数据"
+        id="heading-2c657e7dce6effaecbb458deb45e800a" role="tab" data-toggle="collapse" href="#collapse-2c657e7dce6effaecbb458deb45e800a"
+        aria-expanded="true"
+      >
+        大数据
+        <span class="list-group-count">(8)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-2c657e7dce6effaecbb458deb45e800a"
+           role="tabpanel" aria-labelledby="heading-2c657e7dce6effaecbb458deb45e800a">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/articles/1572aa20/" title="Hadoop概述"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Hadoop概述</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/62974551/" title="Hadoop集群搭建"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Hadoop集群搭建</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/d25e2bb0/" title="Kafka常用命令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Kafka常用命令</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/1267253/" title="Kafka集群搭建"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">Kafka集群搭建</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/99c80bc2/" title="Zookeeper安装记录"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Zookeeper安装记录</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/9edea0a3/" title="Zookeeper实现分布式锁"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Zookeeper实现分布式锁</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/45393fb1/" title="Zookeeper客户端常用命令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Zookeeper客户端常用命令</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/3c6131bd/" title="Zookeeper选举机制"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Zookeeper选举机制</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Kafka集群搭建</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    本文最后更新于：2022年6月4日 下午
+                  
+                
+              </p>
+            
+            
+              <div class="markdown-body">
+                
+                <p>关于 Kafka 的集群搭建安装记录</p>
+<span id="more"></span>
+<!-- markdownlint-disable MD041 MD002--> 
+
+<h1 id="Kafka-集群搭建"><a href="#Kafka-集群搭建" class="headerlink" title="Kafka 集群搭建"></a>Kafka 集群搭建</h1><h2 id="安装步骤"><a href="#安装步骤" class="headerlink" title="安装步骤"></a>安装步骤</h2><ol start="0">
+<li><p>集群规划</p>
+<table>
+<thead>
+<tr>
+<th>hadoop102</th>
+<th>hadoop103</th>
+<th>hadoop104</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>zk</td>
+<td>zk</td>
+<td>zk</td>
+</tr>
+<tr>
+<td>kafka</td>
+<td>kafka</td>
+<td>kafka</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>官方下载地址：<a target="_blank" rel="noopener" href="https://kafka.apache.org/downloads.html">Apache Kafka</a></p>
+<p>关于 Kafka 版本的说明：kafka_2.12-3.0.0.tgz</p>
+<p>2.12 代表 Scala 的版本，Kafka 的 broker 是用 Scala 写的</p>
+<p>3.0.0 是 Kafka 的版本，Kafka 的 producer 和 consumer 是用 Java 写的</p>
+</li>
+<li><p>前置条件：</p>
+<ul>
+<li>已经安装 JDK：<a target="_blank" rel="noopener" href="https://www.sunnyc.icu/articles/62974551/#JDK-%E5%AE%89%E8%A3%85">Hadoop 集群搭建-JDK安装</a></li>
+<li>已经安装 Zookeeper：<a target="_blank" rel="noopener" href="https://www.sunnyc.icu/articles/99c80bc2/">Zookeeper 安装记录</a></li>
+</ul>
+</li>
+<li><p>压缩包上传至服务器，然后解压</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[root@hadoop102 software]# tar -zxvf kafka_2.12-3.0.0.tgz -C &#x2F;opt&#x2F;module&#x2F;</code></pre></div></figure></li>
+<li><p>进入解压缩后的目录</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[root@hadoop102 kafka_2.12-3.0.0]# pwd
+&#x2F;opt&#x2F;module&#x2F;kafka_2.12-3.0.0
+[root@hadoop102 kafka_2.12-3.0.0]# ll
+总用量 64
+drwxr-xr-x. 3 root root  4096 9月   9 2021 bin
+drwxr-xr-x. 3 root root  4096 9月   9 2021 config
+drwxr-xr-x. 2 root root  8192 5月  16 20:51 libs
+-rw-r--r--. 1 root root 14521 9月   9 2021 LICENSE
+drwxr-xr-x. 2 root root   262 9月   9 2021 licenses
+-rw-r--r--. 1 root root 28184 9月   9 2021 NOTICE
+drwxr-xr-x. 2 root root    44 9月   9 2021 site-docs</code></pre></div></figure></li>
+<li><p>bin 目录下常用脚本</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220516205340112.png" srcset="/img/loading.gif" lazyload alt="image-20220516205340112"></p>
+</li>
+<li><p>进入 config 下，进行一些必要的配置</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[root@hadoop102 config]# vim server.properties</code></pre></div></figure>
+
+<figure><div class="code-wrapper"><pre class="line-numbers language-properties" data-language="properties"><code class="language-properties"># The id of the broker. This must be set to a unique integer for each broker.
+# 每个 broker 的唯一 id 千万不能和其他 broker 重复
+broker.id&#x3D;102
+############################# Log Basics #############################
+
+# A comma separated list of directories under which to store log files
+# kafka 的运行日志（数据）存放的路径，这个路径不存在的话会自己创建 可以配置多个磁盘路径，路径与路径之间可以用&quot;，&quot;分隔
+log.dirs&#x3D;&#x2F;opt&#x2F;module&#x2F;kafka_2.12-3.0.0&#x2F;datas
+############################# Zookeeper #############################
+
+# Zookeeper connection string (see zookeeper docs for details).
+# This is a comma separated host:port pairs, each corresponding to a zk
+# server. e.g. &quot;127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002&quot;.
+# You can also append an optional chroot string to the urls to specify the
+# root directory for all kafka znodes.
+# Zookeeper集群地址 可以单机也可以集群 后面的 &#x2F;kafka 是为了让 Kafka 单独用一个 zk 节点
+zookeeper.connect&#x3D;hadoop102:2181,hadoop103:2181,hadoop104:2181&#x2F;kafka
+</code></pre></div></figure></li>
+<li><p>分发配置好的 kafka 包</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">xsync kafka_2.12-3.0.0&#x2F;</code></pre></div></figure>
+
+<p><strong>分发完毕立即上另外两台机器上修改 broker.id</strong></p>
+</li>
+<li><p>配置环境变量</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">vim &#x2F;etc&#x2F;profile.d&#x2F;my_env.sh
+# 写入以下内容
+# KAFKA_HOME
+export KAFKA_HOME&#x3D;&#x2F;opt&#x2F;module&#x2F;kafka_2.12-3.0.0
+export PATH&#x3D;$PATH:$KAFKA_HOME&#x2F;bin
+# 分发环境变量配置文件
+xsync &#x2F;etc&#x2F;profile.d&#x2F;my_env.sh
+# 在三台机器上分别执行
+source &#x2F;etc&#x2F;profile</code></pre></div></figure></li>
+<li><p>启动集群</p>
+<p>先启动 Zookeeper 集群，再启动 Kafka 集群</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"> # zk.sh 是之前写的 Zookeeper 集群启停脚本
+ zk.sh start
+ # 三台机器分别执行 在 kafka 的安装目录下 &#x2F;opt&#x2F;module&#x2F;kafka_2.12-3.0.0
+ bin&#x2F;kafka-server-start.sh -daemon config&#x2F;server.properties
+ # jps 验证
+ [root@hadoop102 kafka_2.12-3.0.0]# xcall jps
+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; hadoop102 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+44604 Kafka
+44749 Jps
+125294 QuorumPeerMain
+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; hadoop103 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+47090 Jps
+6115 QuorumPeerMain
+47052 Kafka
+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; hadoop104 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+7893 QuorumPeerMain
+105833 Jps
+105807 Kafka</code></pre></div></figure>
+
+<p>集群启动成功</p>
+<p>xcall 脚本是在三台机器分别执行相同的命令，脚本内容为</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">#!&#x2F;bin&#x2F;bash
+
+for host in hadoop102 hadoop103 hadoop104
+do
+        echo &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; $host &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+        ssh $host $1 
+done
+</code></pre></div></figure></li>
+<li><p>可以在 Zookeeper 上清除的看到自行配置的三个 broker id 信息</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220516212930946.png" srcset="/img/loading.gif" lazyload alt="image-20220516212930946"></p>
+</li>
+</ol>
+<h2 id="集群启停脚本"><a href="#集群启停脚本" class="headerlink" title="集群启停脚本"></a>集群启停脚本</h2><p>为了方便，编写 Kafka 集群统一启动及停止脚本</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">cd &#x2F;usr&#x2F;bin
+vim kf.sh</code></pre></div></figure>
+
+<p>脚本内容</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">#! &#x2F;bin&#x2F;bash
+
+case $1 in
+&quot;start&quot;)&#123;
+    for i in hadoop102 hadoop103 hadoop104
+        do
+        echo &quot; --------启动 $i Kafka-------&quot;
+        ssh $i &quot;&#x2F;opt&#x2F;module&#x2F;kafka_2.12-3.0.0&#x2F;bin&#x2F;kafka-server-start.sh -daemon &#x2F;opt&#x2F;module&#x2F;kafka_2.12-3.0.0&#x2F;config&#x2F;server.properties&quot;
+    done
+&#125;;;
+
+&quot;stop&quot;)&#123;
+    for i in hadoop102 hadoop103 hadoop104
+        do
+        echo &quot; --------停止 $i Kafka-------&quot;
+        ssh $i &quot;&#x2F;opt&#x2F;module&#x2F;kafka_2.12-3.0.0&#x2F;bin&#x2F;kafka-server-stop.sh&quot;
+    done
+&#125;;;
+
+esac</code></pre></div></figure>
+
+<p>这样启动停止集群就变成了</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">kf.sh start
+kf.sh stop</code></pre></div></figure>
+
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><ol>
+<li>启动 Kafka 集群之前，一定要先启动 Zookeeper 集群</li>
+<li>停止 Kafka 集群，一定要先停止 Kafka 集群，再停止 Zookeeper 集群，因为 Kafka 集群停止需要用到 Zookeeper，如果 Zookeeper 先停了，Kafka 进程就去 Zookeeper 上找不到自己的信息了，从而无法停止，只能 Kill 掉进程来结束</li>
+</ol>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" class="category-chain-item">大数据</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/">#大数据</a>
+      
+        <a href="/tags/Kafka/">#Kafka</a>
+      
+        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
+      
+        <a href="/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">#环境搭建</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Kafka集群搭建</div>
+      <div>https://sunnyc.icu/articles/1267253/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>sunnyc</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年5月16日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                <i class="iconfont icon-nc"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="ND - 禁止演绎">
+                <i class="iconfont icon-nd"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/articles/d25e2bb0/" title="Kafka常用命令">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Kafka常用命令</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/articles/9edea0a3/" title="Zookeeper实现分布式锁">
+                        <span class="hidden-mobile">Zookeeper实现分布式锁</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.4.17/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"HeAf8oPmRvDT6HPWilQr18sG-gzGzoHsz","appKey":"n6lMg4VLDXcwnmsooYBs3haq","path":"window.location.pathname","placeholder":"给我的文章加点评论吧~","avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/components/prism-core.min.js" ></script>
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/plugins/autoloader/prism-autoloader.min.js" ></script>
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

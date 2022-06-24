@@ -1,0 +1,1042 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="sunnyc">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="关于代理模式的介绍，以及动态代理（jdk、cglib）的介绍">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代理模式（Proxy）">
+<meta property="og:url" content="https://sunnyc.icu/articles/c46d8518/index.html">
+<meta property="og:site_name" content="程の编程日记">
+<meta property="og:description" content="关于代理模式的介绍，以及动态代理（jdk、cglib）的介绍">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/img/image-20220219144804350.png">
+<meta property="article:published_time" content="2022-02-19T06:34:00.000Z">
+<meta property="article:modified_time" content="2022-03-31T02:57:45.200Z">
+<meta property="article:author" content="sunnyc">
+<meta property="article:tag" content="设计模式">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/img/image-20220219144804350.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>代理模式（Proxy） - 程の编程日记</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.27.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"sunnyc.icu","root":"/","version":"1.9.2","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":false},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"HeAf8oPmRvDT6HPWilQr18sG-gzGzoHsz","app_key":"n6lMg4VLDXcwnmsooYBs3haq","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="程の编程日记" type="application/atom+xml">
+</head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>程の编程日记</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="代理模式（Proxy）"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-02-19 14:34" pubdate>
+          2022年2月19日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          45 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="设计模式"
+        id="heading-301a19970448f8e4f27ddae7a7d415fe" role="tab" data-toggle="collapse" href="#collapse-301a19970448f8e4f27ddae7a7d415fe"
+        aria-expanded="true"
+      >
+        设计模式
+        <span class="list-group-count">(8)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-301a19970448f8e4f27ddae7a7d415fe"
+           role="tabpanel" aria-labelledby="heading-301a19970448f8e4f27ddae7a7d415fe">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/articles/c46d8518/" title="代理模式（Proxy）"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">代理模式（Proxy）</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/2c8b996c/" title="单例模式（Singleton）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">单例模式（Singleton）</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/346cfbe2/" title="命令模式（Command）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">命令模式（Command）</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/e54b0c5d/" title="策略模式（Strategy）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">策略模式（Strategy）</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/edbb2e9c/" title="装饰器模式（Decorator）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">装饰器模式（Decorator）</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/8af60e4d/" title="观察者模式（Observer）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">观察者模式（Observer）</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/6d929472/" title="责任链模式（Chain of Responsibility）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">责任链模式（Chain of Responsibility）</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/faafedbd/" title="适配器模式（Adapter）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">适配器模式（Adapter）</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">代理模式（Proxy）</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    本文最后更新于：2022年3月31日 上午
+                  
+                
+              </p>
+            
+            
+              <div class="markdown-body">
+                
+                <p>关于代理模式的介绍，以及动态代理（jdk、cglib）的介绍</p>
+<span id="more"></span>
+<!-- markdownlint-disable MD041 MD002--> 
+
+<h1 id="代理模式"><a href="#代理模式" class="headerlink" title="代理模式"></a>代理模式</h1><h2 id="简要介绍"><a href="#简要介绍" class="headerlink" title="简要介绍"></a>简要介绍</h2><p>代理，就是代理人</p>
+<p>当A想找B做一件事，但是可能B在十万八千里之外，联系不上，但是C又能联系上B，而且A也能找到C，所以A找C办这件事，但真正做事的人是B，C只是个代理人</p>
+<p>一句话：代理人可以控制客户端对其他对象的访问</p>
+<p>代理种类：</p>
+<ul>
+<li>远程代理（Remote Proxy）：控制对远程对象（不同地址空间）的访问，它负责将请求及其参数进行编码，并向不同地址空间中的对象发送已经编码的请求。</li>
+<li>虚拟代理（Virtual Proxy）：根据需要创建开销很大的对象，它可以缓存实体的附加信息，以便延迟对它的访问，例如在网站加载一个很大图片时，不能马上完成，可以用虚拟代理缓存图片的大小信息，然后生成一张临时图片代替原始图片。</li>
+<li>保护代理（Protection Proxy）：按权限控制对象的访问，它负责检查调用者是否具有实现一个请求所必须的访问权限。</li>
+<li>智能代理（Smart Reference）：取代了简单的指针，它在访问对象时执行一些附加操作：记录对象的引用次数；当第一次引用一个对象时，将它装入内存；在访问一个实际对象前，检查是否已经锁定了它，以确保其它对象不能改变它。</li>
+</ul>
+<h2 id="哪里用到这个模式了？"><a href="#哪里用到这个模式了？" class="headerlink" title="哪里用到这个模式了？"></a>哪里用到这个模式了？</h2><ol>
+<li>使用过的一些中间件例如；<code>RPC</code>框架，在拿到jar包对接口的描述后，中间件会在服务启动的时候生成对应的代理类，当调用接口的时候，实际是通过代理类发出的socket信息进行通过。</li>
+<li>另外像我们常用的<code>MyBatis</code>，基本是定义接口但是不需要写实现类，就可以对<code>xml</code>或者自定义注解里的<code>sql</code>语句进行</li>
+</ol>
+<h2 id="类图"><a href="#类图" class="headerlink" title="类图"></a>类图</h2><p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/img/image-20220219144804350.png" srcset="/img/loading.gif" lazyload alt="image-20220219144804350"></p>
+<p>在上图中，Client就是A，Proxy就是C，RealSubject就是B，也就是真正做事的人</p>
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><p>定义一个接口叫<code>HelloService</code>，然后定义一个<code>sayHello</code>方法，我们通过代理来调用这个方法，来实现在目标对象执行<code>sayHello</code>方法的前后记录日志</p>
+<p><code>HelloService</code></p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public interface HelloService &#123;
+
+    &#x2F;**
+     * say hello
+     *&#x2F;
+    void say();
+&#125;</code></pre></div></figure>
+
+<p>实现类（具体做事的人）：<code>HelloServiceImpl</code></p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class HelloServiceImpl implements HelloService&#123;
+    @Override
+    public void say() &#123;
+        System.out.println(&quot;hello!&quot;);
+    &#125;
+&#125;</code></pre></div></figure>
+
+<p>代理：<code>HelloServiceProxy</code></p>
+<p>可以看到我们就是在这里直接调用真正做事的人执行方法，并且前后还可以加额外的东西</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class HelloServiceProxy implements HelloService&#123;
+
+    private final HelloService target;
+
+    public HelloServiceProxy(HelloService target) &#123;
+        this.target &#x3D; target;
+    &#125;
+
+    @Override
+    public void say() &#123;
+        System.out.println(&quot;记录日志&quot;);
+        target.say();
+        System.out.println(&quot;清理数据&quot;);
+    &#125;
+&#125;</code></pre></div></figure>
+
+<p>客户端：<code>Main</code></p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class Main &#123;
+    public static void main(String[] args) &#123;
+        &#x2F;&#x2F; 目标对象
+        HelloService target &#x3D; new HelloServiceImpl();
+        &#x2F;&#x2F; 代理对象
+        HelloServiceProxy helloServiceProxy &#x3D; new HelloServiceProxy(target);
+        helloServiceProxy.say();
+    &#125;
+&#125;</code></pre></div></figure>
+
+<p>执行结果：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">记录日志
+hello!
+清理数据</code></pre></div></figure>
+
+<h2 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h2><p>经过上面的介绍，我们可以发现，一个代理类只能为一个接口服务，平时开发是有N多个接口的，肯定会产生很多的代理类的，所以我们就会想，有没有可能一个代理类，可以完成所有代理的功能，所以就有了动态代理</p>
+<h1 id="动态代理"><a href="#动态代理" class="headerlink" title="动态代理"></a>动态代理</h1><h2 id="JDK"><a href="#JDK" class="headerlink" title="JDK"></a>JDK</h2><p><code>JDK</code>为我们提供了动态代理的支持，我们的代理类需要实现<code> java.lang.reflect.InvocationHandler</code>接口并且调用<code>java.lang.reflect.Proxy</code>类的<code>newProxyInstance</code>方法创建一个代理实例，然后调用具体的方法，其实就是通过反射生成一个实现代理接口的匿名类，在调用具体方法前调用<code>InvokeHandler</code>来处理</p>
+<p>在上述代码基础上加入<code>MyInvocationHandler</code>:</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class MyInvocationHandler implements InvocationHandler &#123;
+
+    private final Object target;
+
+    public MyInvocationHandler(Object target) &#123;
+        this.target &#x3D; target;
+    &#125;
+
+    &#x2F;**
+     * 执行具体方法
+     * @param proxy 代理类
+     * @param method 目标具体的方法
+     * @param args 方法参数
+     * @return 方法返回值
+     *&#x2F;
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable &#123;
+        &#x2F;&#x2F; 打印方法执行信息
+        System.out.println(target.getClass().getName() + &quot;.&quot; + method.getName());
+        &#x2F;&#x2F; 前置通知
+        System.out.println(&quot;记录日志&quot;);
+        Object result &#x3D; method.invoke(target, args);
+        System.out.println(&quot;清理数据&quot;);
+        return result;
+    &#125;
+
+
+    public Object getProxy() &#123;
+        &#x2F;&#x2F; target.getClass().getInterfaces() 这个是获取目标对象实现的接口，也就是jdk的动态代理的对象必须得实现至少一个接口才可以被代理
+        &#x2F;&#x2F; 第三个参数是一个InvocationHandler，可以写到方法里，也可以以这种形式写下来，实现接口然后this
+        return Proxy.newProxyInstance(target.getClass().getClassLoader(),
+                target.getClass().getInterfaces(), this);
+    &#125;
+&#125;</code></pre></div></figure>
+
+<p>关于<code>Proxy.newProxyInstance</code>方法参数的说明：</p>
+<ol>
+<li>该方法用于为指定类装载器、一组接口及调用处理器生成动态代理类实例</li>
+<li>第一个参数指定产生代理对象的类加载器（就是要为谁加代理，就传谁的class），需要将其指定为和目标对象同一个类加载器</li>
+<li>第二个参数要实现和目标对象一样的接口（可以看出jdk的动态代理，其实就是把我们手动创建和代理对象相同接口的代理类自动化了），所以只需要拿到目标对象的实现接口</li>
+<li>第三个参数表明这些被拦截的方法在被拦截时需要执行哪个InvocationHandler的invoke方法</li>
+</ol>
+<p>下面使用一下这个动态代理，看看好使不：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class Main &#123;
+    public static void main(String[] args) &#123;
+        &#x2F;&#x2F; 目标对象
+        HelloService target &#x3D; new HelloServiceImpl();
+        MyInvocationHandler invocationHandler &#x3D; new MyInvocationHandler(target);
+        HelloService proxy &#x3D; (HelloService) invocationHandler.getProxy();
+        proxy.say();
+    &#125;
+&#125;</code></pre></div></figure>
+
+<p>结果：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">com.hc.basics.dynamicproxy.jdk.HelloServiceImpl.say
+记录日志
+hello!
+清理数据</code></pre></div></figure>
+
+<h2 id="cglib"><a href="#cglib" class="headerlink" title="cglib"></a>cglib</h2><p><strong>jdk动态代理的局限性</strong>：只能对实现了接口的类进行代理，对于没有实现接口的类无法代理</p>
+<p>cglib对于没有实现接口的类也可以进行代理</p>
+<p>这个是咋动态生成代理的呢？他利用ASM开源包，对代理对象类的class文件加载进来，通过修改其字节码<strong>生成子类</strong>来处理。</p>
+<p><code>cglib</code>需要引入依赖：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-xml" data-language="xml"><code class="language-xml">&lt;!-- cglib --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;cglib&lt;&#x2F;groupId&gt;
+    &lt;artifactId&gt;cglib&lt;&#x2F;artifactId&gt;
+    &lt;version&gt;3.2.5&lt;&#x2F;version&gt;
+&lt;&#x2F;dependency&gt;</code></pre></div></figure>
+
+<p>在上述基础，再加一个<code>CglibProxyFactory</code>类：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class CglibProxyFactory implements MethodInterceptor &#123;
+
+    &#x2F;**
+     * 工具类
+     *&#x2F;
+    private final Enhancer enhancer &#x3D; new Enhancer();
+
+    private final Object target;
+
+    public CglibProxyFactory(Object target) &#123;
+        this.target &#x3D; target;
+    &#125;
+
+    public Object getProxy() &#123;
+        &#x2F;&#x2F; 设置要创建子类的父类
+        enhancer.setSuperclass(target.getClass());
+        &#x2F;&#x2F; 设置回调
+        enhancer.setCallback(this);
+        &#x2F;&#x2F; 通过字节码技术动态创建子类实例
+        return enhancer.create();
+    &#125;
+
+    @Override
+    public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable &#123;
+        &#x2F;&#x2F; 打印方法执行信息
+        System.out.println(target.getClass().getName() + &quot;.&quot; + method.getName());
+        &#x2F;&#x2F; 前置通知
+        System.out.println(&quot;记录日志&quot;);
+        Object result &#x3D; method.invoke(target, args);
+        System.out.println(&quot;清理数据&quot;);
+        return result;
+    &#125;
+&#125;</code></pre></div></figure>
+
+<p>测试：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class Main &#123;
+    public static void main(String[] args) &#123;
+        HelloService helloService &#x3D; new HelloServiceImpl();
+        CglibProxyFactory helloServiceProxyFactory &#x3D; new CglibProxyFactory(helloService);
+        HelloService helloServiceProxy &#x3D; (HelloService) helloServiceProxyFactory.getProxy();
+        helloServiceProxy.say();
+        &#x2F;&#x2F; 找一个没有实现接口的类进行代理，上面的helloService实现了HelloService接口
+        Student student &#x3D; new Student();
+        CglibProxyFactory studentProxyFactory &#x3D; new CglibProxyFactory(student);
+        Student studentProxy &#x3D; (Student) studentProxyFactory.getProxy();
+        studentProxy.study();
+    &#125;
+&#125;</code></pre></div></figure>
+
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">com.hc.basics.dynamicproxy.jdk.HelloServiceImpl.say
+记录日志
+hello!
+清理数据
+com.hc.basics.dynamicproxy.cglib.Student.study
+记录日志
+student study!
+清理数据</code></pre></div></figure>
+
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" class="category-chain-item">设计模式</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">#设计模式</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>代理模式（Proxy）</div>
+      <div>https://sunnyc.icu/articles/c46d8518/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>sunnyc</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年2月19日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                <i class="iconfont icon-nc"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="ND - 禁止演绎">
+                <i class="iconfont icon-nd"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/articles/40d12ba0/" title="Java基础总结篇">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Java基础总结篇</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/articles/684b776b/" title="Linux系统目录结构">
+                        <span class="hidden-mobile">Linux系统目录结构</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.4.17/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"HeAf8oPmRvDT6HPWilQr18sG-gzGzoHsz","appKey":"n6lMg4VLDXcwnmsooYBs3haq","path":"window.location.pathname","placeholder":"给我的文章加点评论吧~","avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/components/prism-core.min.js" ></script>
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/plugins/autoloader/prism-autoloader.min.js" ></script>
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

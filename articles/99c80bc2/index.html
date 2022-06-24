@@ -1,0 +1,1183 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="sunnyc">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Zookeeper 单机和集群的安装记录">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Zookeeper安装记录">
+<meta property="og:url" content="https://sunnyc.icu/articles/99c80bc2/index.html">
+<meta property="og:site_name" content="程の编程日记">
+<meta property="og:description" content="Zookeeper 单机和集群的安装记录">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220427222812238.png">
+<meta property="article:published_time" content="2022-04-27T13:30:26.000Z">
+<meta property="article:modified_time" content="2022-06-04T06:24:36.857Z">
+<meta property="article:author" content="sunnyc">
+<meta property="article:tag" content="大数据">
+<meta property="article:tag" content="中间件">
+<meta property="article:tag" content="环境搭建">
+<meta property="article:tag" content="zookeeper">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220427222812238.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>Zookeeper安装记录 - 程の编程日记</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.27.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"sunnyc.icu","root":"/","version":"1.9.2","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":false},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"HeAf8oPmRvDT6HPWilQr18sG-gzGzoHsz","app_key":"n6lMg4VLDXcwnmsooYBs3haq","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="程の编程日记" type="application/atom+xml">
+</head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>程の编程日记</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Zookeeper安装记录"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-04-27 21:30" pubdate>
+          2022年4月27日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          10k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          87 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="大数据"
+        id="heading-2c657e7dce6effaecbb458deb45e800a" role="tab" data-toggle="collapse" href="#collapse-2c657e7dce6effaecbb458deb45e800a"
+        aria-expanded="true"
+      >
+        大数据
+        <span class="list-group-count">(8)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-2c657e7dce6effaecbb458deb45e800a"
+           role="tabpanel" aria-labelledby="heading-2c657e7dce6effaecbb458deb45e800a">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/articles/1572aa20/" title="Hadoop概述"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Hadoop概述</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/62974551/" title="Hadoop集群搭建"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Hadoop集群搭建</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/d25e2bb0/" title="Kafka常用命令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Kafka常用命令</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/1267253/" title="Kafka集群搭建"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Kafka集群搭建</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/99c80bc2/" title="Zookeeper安装记录"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">Zookeeper安装记录</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/9edea0a3/" title="Zookeeper实现分布式锁"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Zookeeper实现分布式锁</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/45393fb1/" title="Zookeeper客户端常用命令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Zookeeper客户端常用命令</span>
+        </a>
+      
+    
+      
+      
+        <a href="/articles/3c6131bd/" title="Zookeeper选举机制"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Zookeeper选举机制</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Zookeeper安装记录</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    本文最后更新于：2022年6月4日 下午
+                  
+                
+              </p>
+            
+            
+              <div class="markdown-body">
+                
+                <p>Zookeeper 单机和集群的安装记录</p>
+<span id="more"></span>
+<!-- markdownlint-disable MD041 MD002--> 
+
+<h2 id="本地模式安装（单机）"><a href="#本地模式安装（单机）" class="headerlink" title="本地模式安装（单机）"></a>本地模式安装（单机）</h2><h3 id="安装步骤"><a href="#安装步骤" class="headerlink" title="安装步骤"></a>安装步骤</h3><ol>
+<li><p>服务器需要预先配置好 <code>JDK</code></p>
+</li>
+<li><p>准备安装包：<a target="_blank" rel="noopener" href="https://archive.apache.org/dist/zookeeper/zookeeper-3.5.7/">https://archive.apache.org/dist/zookeeper/zookeeper-3.5.7/</a></p>
+</li>
+<li><p>下载文件：<code>apache-zookeeper-3.5.7-bin.tar.gz</code></p>
+</li>
+<li><p>将此压缩包上传至服务器上</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[root@hadoop102 software]# ll
+总用量 529696
+-rw-r--r--. 1 root root   9311744 4月  27 22:00 apache-zookeeper-3.5.7-bin.tar.gz
+-rw-r--r--. 1 root root 338075860 4月  17 15:46 hadoop-3.1.3.tar.gz
+-rw-r--r--. 1 root root 195013152 4月  17 15:46 jdk-8u212-linux-x64.tar.gz
+[root@hadoop102 software]# pwd
+&#x2F;opt&#x2F;software</code></pre></div></figure></li>
+<li><p>解压此压缩包至指定目录：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">tar -zxvf apache-zookeeper-3.5.7-bin.tar.gz -C &#x2F;opt&#x2F;module&#x2F;
+# 进入到解压后的目录，把文件夹改个名
+[root@hadoop102 ~]# cd &#x2F;opt&#x2F;module&#x2F;
+[root@hadoop102 module]# ll
+总用量 0
+drwxr-xr-x.  6 root  root  134 4月  27 22:03 apache-zookeeper-3.5.7-bin
+drwxr-xr-x. 13 houge houge 204 4月  17 21:16 hadoop-3.1.3
+drwxr-xr-x.  7    10   143 245 4月   2 2019 jdk1.8.0_212
+[root@hadoop102 module]# mv apache-zookeeper-3.5.7-bin&#x2F; zookeeper-3.5.7
+[root@hadoop102 module]# ll
+总用量 0
+drwxr-xr-x. 13 houge houge 204 4月  17 21:16 hadoop-3.1.3
+drwxr-xr-x.  7    10   143 245 4月   2 2019 jdk1.8.0_212
+drwxr-xr-x.  6 root  root  134 4月  27 22:03 zookeeper-3.5.7
+[root@hadoop102 module]# pwd
+&#x2F;opt&#x2F;module</code></pre></div></figure></li>
+<li><p>进入解压缩后的文件目录</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[root@hadoop102 module]# cd zookeeper-3.5.7&#x2F;
+[root@hadoop102 zookeeper-3.5.7]# ll
+总用量 32
+drwxr-xr-x. 2  502 games   232 2月  10 2020 bin
+drwxr-xr-x. 2  502 games    77 2月   7 2020 conf
+drwxr-xr-x. 5  502 games  4096 2月  10 2020 docs
+drwxr-xr-x. 2 root root   4096 4月  27 22:03 lib
+-rw-r--r--. 1  502 games 11358 9月  13 2018 LICENSE.txt
+-rw-r--r--. 1  502 games   432 2月  10 2020 NOTICE.txt
+-rw-r--r--. 1  502 games  1560 2月   7 2020 README.md
+-rw-r--r--. 1  502 games  1347 2月   7 2020 README_packaging.txt</code></pre></div></figure></li>
+<li><p>关于目录的介绍：</p>
+<ul>
+<li>bin: zookeeper 的相关脚本</li>
+<li>conf: zookeeper 的配置文件</li>
+<li>docs: zookeeper  相关文档</li>
+<li>lib: zookeeper 相关依赖包</li>
+</ul>
+</li>
+<li><p>配置修改</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"># 进入配置文件目录
+cd conf&#x2F;
+# zk 提供了一个样例配置文件，我们把这个样例配置文件名改为 zoo.cfg 即可被 zk 检测到
+mv zoo_sample.cfg zoo.cfg
+# 编写配置文件
+vim zoo.cfg
+# 主要改一个地方，就是 zk 的数据存储目录 不能用 tmp，这个目录会被系统定时清除
+# The number of milliseconds of each tick
+tickTime&#x3D;2000
+# The number of ticks that the initial
+# synchronization phase can take
+initLimit&#x3D;10
+# The number of ticks that can pass between
+# sending a request and getting an acknowledgement
+syncLimit&#x3D;5
+# the directory where the snapshot is stored.
+# do not use &#x2F;tmp for storage, &#x2F;tmp here is just
+# example sakes.
+dataDir&#x3D;&#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;zkData
+# the port at which the clients will connect
+clientPort&#x3D;2181
+# 这个数据存储目录必须是存在的，所以创建这个目录
+mkdir &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;zkData</code></pre></div></figure></li>
+<li><p>启动 zookeeper</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[root@hadoop102 zookeeper-3.5.7]# .&#x2F;bin&#x2F;zkServer.sh start
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Starting zookeeper ... STARTED
+[root@hadoop102 zookeeper-3.5.7]# pwd
+&#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7
+# 查看进程是否启动
+[root@hadoop102 zookeeper-3.5.7]# jps
+41593 QuorumPeerMain
+41871 Jps</code></pre></div></figure></li>
+<li><p>查看 zookeeper 状态</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[root@hadoop102 zookeeper-3.5.7]# .&#x2F;bin&#x2F;zkServer.sh status
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Client port found: 2181. Client address: localhost.
+Mode: standalone</code></pre></div></figure></li>
+<li><p>启动 / 退出客户端</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"># 启动
+[root@hadoop102 zookeeper-3.5.7]# .&#x2F;bin&#x2F;zkCli.sh
+# 使用 quit 退出
+[zk: localhost:2181(CONNECTED) 0] quit
+
+WATCHER::
+
+WatchedEvent state:Closed type:None path:null
+2022-04-27 22:21:42,223 [myid:] - INFO  [main:ZooKeeper@1422] - Session: 0x100005c32360000 closed
+2022-04-27 22:21:42,224 [myid:] - INFO  [main-EventThread:ClientCnxn$EventThread@524] - EventThread shut down for session: 0x100005c32360000</code></pre></div></figure></li>
+<li><p>停止 zookeeper</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[root@hadoop102 zookeeper-3.5.7]# .&#x2F;bin&#x2F;zkServer.sh stop
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Stopping zookeeper ... STOPPED
+[root@hadoop102 zookeeper-3.5.7]# jps
+44450 Jps</code></pre></div></figure></li>
+</ol>
+<h3 id="配置文件参数解释"><a href="#配置文件参数解释" class="headerlink" title="配置文件参数解释"></a>配置文件参数解释</h3><ol>
+<li><p>配置文件内容</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"># The number of milliseconds of each tick
+tickTime&#x3D;2000
+# The number of ticks that the initial
+# synchronization phase can take
+initLimit&#x3D;10
+# The number of ticks that can pass between
+# sending a request and getting an acknowledgement
+syncLimit&#x3D;5
+# the directory where the snapshot is stored.
+# do not use &#x2F;tmp for storage, &#x2F;tmp here is just
+# example sakes.
+dataDir&#x3D;&#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;zkData
+# the port at which the clients will connect
+clientPort&#x3D;2181
+# the maximum number of client connections.
+# increase this if you need to handle more clients
+#maxClientCnxns&#x3D;60
+#
+# Be sure to read the maintenance section of the
+# administrator guide before turning on autopurge.
+#
+# http:&#x2F;&#x2F;zookeeper.apache.org&#x2F;doc&#x2F;current&#x2F;zookeeperAdmin.html#sc_maintenance
+#
+# The number of snapshots to retain in dataDir
+#autopurge.snapRetainCount&#x3D;3
+# Purge task interval in hours
+# Set to &quot;0&quot; to disable auto purge feature
+#autopurge.purgeInterval&#x3D;1</code></pre></div></figure></li>
+<li><p>参数解读</p>
+<ul>
+<li><p>tickTime：Zookeeper 服务端与客户端的心跳时间，单位毫秒</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220427222812238.png" srcset="/img/loading.gif" lazyload alt="image-20220427222812238"></p>
+</li>
+<li><p>initLimit：Leader 和 Follower <strong>初始连接</strong>的时候能容忍的最多心跳次数</p>
+</li>
+<li><p>syncLimit： Leader 和 Follower之间通信时间如果超过 syncLimit * tickTime，Leader认为Follwer死掉，从服务器列表中删除 Follwer</p>
+</li>
+<li><p>dataDir： 保存 Zookeeper 中的数据</p>
+</li>
+<li><p>clientPort： 客户端连接端口</p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="集群安装"><a href="#集群安装" class="headerlink" title="集群安装"></a>集群安装</h2><p>一共三台服务器 hadoop102、hadoop103、hadoop104</p>
+<ol>
+<li><p>执行单机安装前八步，完成 zookeeper 安装，此时应该是已经配置了 zookeeper 的 dataDir，并且也同步创建了 zkDara 目录</p>
+</li>
+<li><p>现在进入 zkData 目录，创建 myid 文件</p>
+<p>注意：文件名只能是 myid，不能是其他的名字，zookeeper 靠这个来给机器进行标识，后续选举也会用到这个 myid</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[root@hadoop102 zkData]# pwd
+&#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;zkData
+[root@hadoop102 zkData]# vim myid</code></pre></div></figure>
+
+<p>然后向 myid 中写入一个数字，可以自定义，注意这个数字前后不要有空格，上下不要有空行，我这里是写入的是 2</p>
+</li>
+<li><p>分发配置好的 zookeeper 文件夹</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[root@hadoop102 module]# xsync zookeeper-3.5.7</code></pre></div></figure></li>
+<li><p>然后上另外两台服务器上改 myid，分别改成 3 和 4</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[root@hadoop103 ~]# cd &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;zkData&#x2F;
+[root@hadoop103 zkData]# ll
+总用量 4
+-rw-r--r--. 1 root root  2 5月   6 10:19 myid
+drwxr-xr-x. 2 root root 37 4月  27 22:21 version-2
+[root@hadoop103 zkData]# vim myid
+# 104
+[root@hadoop104 ~]# cd &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;zkData&#x2F;
+[root@hadoop104 zkData]# ll
+总用量 4
+-rw-r--r--. 1 root root  2 5月   6 10:19 myid
+drwxr-xr-x. 2 root root 37 4月  27 22:21 version-2
+[root@hadoop104 zkData]# vim myid</code></pre></div></figure></li>
+<li><p>配置 zoo.cfg</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[root@hadoop102 conf]# pwd
+&#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;conf
+[root@hadoop102 conf]# vim zoo.cfg</code></pre></div></figure>
+
+<p>在 zoo.cfg 中加入如下配置</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">#######################cluster##########################
+server.2&#x3D;hadoop102:2888:3888
+server.3&#x3D;hadoop103:2888:3888
+server.4&#x3D;hadoop104:2888:3888</code></pre></div></figure>
+
+<p>这段配置啥意思？</p>
+<p>把里面的变量用 A B C D 来表示</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">server.A&#x3D;B:C:D</code></pre></div></figure>
+
+<ul>
+<li>A：就是我们在 dataDir 下配置 myid 文件中写入的数字值；Zookeeper 启动时读取此文件，拿到里面的数据与 zoo.cfg 里面的配置信息比 较从而判断到底是哪个 server</li>
+<li>B：这台服务器的地址</li>
+<li>C：是这个服务器 Follower 与集群中的 Leader 服务器交换信息的端口</li>
+<li>D：是万一集群中的 Leader 服务器挂了，需要一个端口来重新进行选举，选出一个新的 Leader，这个端口就是用来执行选举时服务器互相通信的端口</li>
+</ul>
+</li>
+<li><p>同步配置文件</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[root@hadoop102 conf]# xsync zoo.cfg</code></pre></div></figure></li>
+<li><p>在三台机器上分别启动 zookeeper</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"># 103
+[root@hadoop103 zookeeper-3.5.7]# bin&#x2F;zkServer.sh start
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Starting zookeeper ... STARTED
+# 102
+[root@hadoop102 zookeeper-3.5.7]# bin&#x2F;zkServer.sh start
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Starting zookeeper ... STARTED
+# 104
+[root@hadoop104 zookeeper-3.5.7]# bin&#x2F;zkServer.sh start
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Starting zookeeper ... STARTED</code></pre></div></figure></li>
+<li><p>三台机器上查看 zookeeper 的状态</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"># 102
+[root@hadoop102 zookeeper-3.5.7]# bin&#x2F;zkServer.sh status
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Client port found: 2181. Client address: localhost.
+Mode: follower
+# 103
+[root@hadoop103 zookeeper-3.5.7]# bin&#x2F;zkServer.sh status
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Client port found: 2181. Client address: localhost.
+Mode: leader
+# 104
+[root@hadoop104 zookeeper-3.5.7]# bin&#x2F;zkServer.sh status
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Client port found: 2181. Client address: localhost.
+Mode: follower</code></pre></div></figure>
+
+<p>可以看到 103 是 Leader，这个 Leader 咋选出来的呢（zookeeper 选举机制）？</p>
+</li>
+<li><p>可以发现每次启动停止三台机器都得操作，麻烦的不行，所以还是得写一个集群的启动停止脚本</p>
+<p>参考我们编写 xsync 脚本时候的操作：进入到 /usr/bin 在这里写的可执行文件可以全局使用 而且任何用户都可用</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[root@hadoop102 zookeeper-3.5.7]# cd &#x2F;usr&#x2F;bin&#x2F;
+[root@hadoop102 bin]# vim zk.sh</code></pre></div></figure>
+
+<p>写入以下内容：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">#!&#x2F;bin&#x2F;bash
+case $1 in
+&quot;start&quot;)&#123;
+  for i in hadoop102 hadoop103 hadoop104
+  do
+	echo ---------- zookeeper $i 启动 ------------
+    ssh $i &quot;&#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;zkServer.sh start&quot;
+  done
+&#125;;;
+&quot;stop&quot;)&#123;
+  for i in hadoop102 hadoop103 hadoop104
+  do
+    echo ---------- zookeeper $i 停止 ------------ 
+    ssh $i &quot;&#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;zkServer.sh stop&quot;
+  done
+&#125;;;
+&quot;status&quot;)&#123;
+  for i in hadoop102 hadoop103 hadoop104
+  do
+    echo ---------- zookeeper $i 状态 ------------ 
+    ssh $i &quot;&#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;zkServer.sh status&quot;
+  done
+&#125;;;
+esac</code></pre></div></figure>
+
+<p>脚本整体思路：case 脚本执行的时候传入的参数，然后在三台机器中做循环，分别 ssh 到对应机器上以绝对路径的方式执行 zookeeper 的启动、停止和查看状态命令</p>
+<p>编辑完成添加可执行权限</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[root@hadoop102 bin]# chmod +x zk.sh
+# 可以把脚本分发到另外两台机器上，这样在任意一台机器都能跑这个脚本了
+[root@hadoop102 bin]# xsync zk.sh</code></pre></div></figure>
+
+<p>验证一下：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"># 停止
+[root@hadoop102 &#x2F;]# zk.sh stop
+---------- zookeeper hadoop102 停止 ------------
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Stopping zookeeper ... STOPPED
+---------- zookeeper hadoop103 停止 ------------
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Stopping zookeeper ... STOPPED
+---------- zookeeper hadoop104 停止 ------------
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Stopping zookeeper ... STOPPED
+# 启动
+[root@hadoop102 &#x2F;]# zk.sh start
+---------- zookeeper hadoop102 启动 ------------
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Starting zookeeper ... STARTED
+---------- zookeeper hadoop103 启动 ------------
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Starting zookeeper ... STARTED
+---------- zookeeper hadoop104 启动 ------------
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Starting zookeeper ... STARTED
+# 查看状态
+[root@hadoop102 &#x2F;]# zk.sh status
+---------- zookeeper hadoop102 状态 ------------
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Client port found: 2181. Client address: localhost.
+Mode: follower
+---------- zookeeper hadoop103 状态 ------------
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Client port found: 2181. Client address: localhost.
+Mode: leader
+---------- zookeeper hadoop104 状态 ------------
+ZooKeeper JMX enabled by default
+Using config: &#x2F;opt&#x2F;module&#x2F;zookeeper-3.5.7&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+Client port found: 2181. Client address: localhost.
+Mode: follower</code></pre></div></figure></li>
+</ol>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" class="category-chain-item">大数据</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/">#大数据</a>
+      
+        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
+      
+        <a href="/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">#环境搭建</a>
+      
+        <a href="/tags/zookeeper/">#zookeeper</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Zookeeper安装记录</div>
+      <div>https://sunnyc.icu/articles/99c80bc2/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>sunnyc</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年4月27日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                <i class="iconfont icon-nc"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="ND - 禁止演绎">
+                <i class="iconfont icon-nd"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/articles/3c6131bd/" title="Zookeeper选举机制">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Zookeeper选举机制</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/articles/edbb2e9c/" title="装饰器模式（Decorator）">
+                        <span class="hidden-mobile">装饰器模式（Decorator）</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.4.17/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"HeAf8oPmRvDT6HPWilQr18sG-gzGzoHsz","appKey":"n6lMg4VLDXcwnmsooYBs3haq","path":"window.location.pathname","placeholder":"给我的文章加点评论吧~","avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/components/prism-core.min.js" ></script>
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/plugins/autoloader/prism-autoloader.min.js" ></script>
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
