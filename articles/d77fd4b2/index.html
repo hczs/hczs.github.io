@@ -1,0 +1,1359 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="sunnyc">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="使用 Zookeeper + Netty + Spring + Protostuff  实现一个简单的 RPC 框架">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自己动手实现一个RPC框架（simple-rpc）">
+<meta property="og:url" content="https://sunnyc.icu/articles/d77fd4b2/index.html">
+<meta property="og:site_name" content="程の编程日记">
+<meta property="og:description" content="使用 Zookeeper + Netty + Spring + Protostuff  实现一个简单的 RPC 框架">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220625145426377.png">
+<meta property="article:published_time" content="2022-06-25T05:11:41.000Z">
+<meta property="article:modified_time" content="2022-06-25T07:45:18.403Z">
+<meta property="article:author" content="sunnyc">
+<meta property="article:tag" content="造轮子">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220625145426377.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>自己动手实现一个RPC框架（simple-rpc） - 程の编程日记</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.27.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"sunnyc.icu","root":"/","version":"1.9.2","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":false},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"HeAf8oPmRvDT6HPWilQr18sG-gzGzoHsz","app_key":"n6lMg4VLDXcwnmsooYBs3haq","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="程の编程日记" type="application/atom+xml">
+</head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>程の编程日记</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="自己动手实现一个RPC框架（simple-rpc）"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-06-25 13:11" pubdate>
+          2022年6月25日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          16k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          130 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="造轮子"
+        id="heading-171301ced999e34d7cb59500b308ec34" role="tab" data-toggle="collapse" href="#collapse-171301ced999e34d7cb59500b308ec34"
+        aria-expanded="true"
+      >
+        造轮子
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-171301ced999e34d7cb59500b308ec34"
+           role="tabpanel" aria-labelledby="heading-171301ced999e34d7cb59500b308ec34">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/articles/d77fd4b2/" title="自己动手实现一个RPC框架（simple-rpc）"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">自己动手实现一个RPC框架（simple-rpc）</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">自己动手实现一个RPC框架（simple-rpc）</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    本文最后更新于：2022年6月25日 下午
+                  
+                
+              </p>
+            
+            
+              <div class="markdown-body">
+                
+                <p>使用 Zookeeper + Netty + Spring + Protostuff  实现一个简单的 RPC 框架</p>
+<span id="more"></span>
+<!-- markdownlint-disable MD041 MD002--> 
+
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>由于各服务部署在不同机器，服务间的调用免不了网络通信过程，服务消费方每调用一个服务都要写一坨网络通信相关的代码，不仅复杂而且极易出错。</p>
+<p>如果有一种方式能让我们像调用本地服务一样调用远程服务，而让调用者对网络通信这些细节透明，那么将大大提高生产力，比如服务消费方在执行helloWorldService.sayHello(“test”) 时，实质上调用的是远端的服务。这种方式其实就是 RPC（Remote Procedure Call Protocol），在各大互联网公司中被广泛使用，如阿里巴巴的 hsf、dubbo（开源）、Facebook的thrift（开源）、Google grpc（开源）、Twitter 的 finagle（开源）等。</p>
+<p><strong>项目地址：<a target="_blank" rel="noopener" href="https://github.com/hczs/simple-rpc">https://github.com/hczs/simple-rpc</a></strong></p>
+<h2 id="所用技术栈"><a href="#所用技术栈" class="headerlink" title="所用技术栈"></a>所用技术栈</h2><ol>
+<li>首先我们需要发网络请求进行调用，这里使用网络框架 Netty</li>
+<li>然后调用之间的消息需要序列化和反序列化，这里使用序列化框架 protostuff</li>
+<li>再然后呢我们需要知道服务提供方地址是多少，也就是 服务发现/ 服务注册，我们使用 Zookeeper 来管理服务，使用 Curator 框架来操作 Zookeeper</li>
+<li>我们使用 Spring 来方便的管理 Bean 进行随意的注入使用，以及配置文件值注入</li>
+<li>使用 lombok 来精简代码，方便快速开发</li>
+<li>使用 objenesis 库来优化我们反序列化 请求 / 响应对象的速度</li>
+<li>使用 cglib 来优化我们接收响应处理执行方法的速度</li>
+<li>使用 commons.lang3 库中的一些常用工具类</li>
+</ol>
+<h2 id="RPC-框架都帮我们干了些什么"><a href="#RPC-框架都帮我们干了些什么" class="headerlink" title="RPC 框架都帮我们干了些什么"></a>RPC 框架都帮我们干了些什么</h2><p>要让网络通信细节对使用者透明，我们需要对通信细节进行封装，我们先看下一个RPC调用的流程涉及到哪些通信细节</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220625145426377.png" srcset="/img/loading.gif" lazyload alt="image-20220625145426377"></p>
+<ol>
+<li>服务消费方（client）调用以本地调用方式调用服务；</li>
+<li>client stub接收到调用后负责将方法、参数等组装成能够进行网络传输的消息体；</li>
+<li>client stub找到服务地址，并将消息发送到服务端；</li>
+<li>server stub收到消息后进行解码；</li>
+<li>server stub根据解码结果调用本地的服务；</li>
+<li>本地服务执行并将结果返回给server stub；</li>
+<li>server stub将返回结果打包成消息并发送至消费方；</li>
+<li>client stub接收到消息，并进行解码；</li>
+<li>服务消费方得到最终结果。</li>
+</ol>
+<p>RPC的目标就是要2~8这些步骤都封装起来，让用户对这些细节透明。</p>
+<p>简单来说：服务端，启动就自动注册服务，等待客户端调用</p>
+<h2 id="如何将封装上述2-8的步骤"><a href="#如何将封装上述2-8的步骤" class="headerlink" title="如何将封装上述2~8的步骤"></a>如何将封装上述2~8的步骤</h2><p>可以通过动态代理，生成代理对象，然后再 invoke 方法的时候进行网络请求，达到对细节的封装，即下面的 invoke 方法：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">&#x2F;**
+ * RPC 客户端远程调用具体处理器
+ * @author: houcheng
+ * @date: 2022&#x2F;6&#x2F;1 15:56:36
+ *&#x2F;
+@Slf4j
+public class RemoteInvocationHandler implements InvocationHandler &#123;
+
+    &#x2F;**
+     * 服务发现对象
+     *&#x2F;
+    private final ServiceDiscovery serviceDiscovery;
+
+    public RemoteInvocationHandler(ServiceDiscovery serviceDiscovery) &#123;
+        this.serviceDiscovery &#x3D; serviceDiscovery;
+    &#125;
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable &#123;
+        RpcRequest rpcRequest &#x3D; new RpcRequest();
+        rpcRequest.setRequestId(UUID.randomUUID().toString());
+        rpcRequest.setInterfaceName(method.getDeclaringClass().getName());
+        rpcRequest.setMethodName(method.getName());
+        rpcRequest.setParameterTypes(method.getParameterTypes());
+        rpcRequest.setParameters(args);
+        &#x2F;&#x2F; 服务发现 找一个具体能够处理请求的服务地址
+        String serviceAddress &#x3D; serviceDiscovery.discover();
+        if (serviceAddress &#x3D;&#x3D; null) &#123;
+            return null;
+        &#125;
+        String[] hostAndPort &#x3D; serviceAddress.split(&quot;:&quot;);
+        String host &#x3D; hostAndPort[0];
+        int port &#x3D; Integer.parseInt(hostAndPort[1]);
+        &#x2F;&#x2F; 发送请求
+        RpcClient rpcClient &#x3D; new RpcClient(host, port);
+        RpcResponse rpcResponse &#x3D; rpcClient.sendRequest(rpcRequest);
+        log.info(&quot;rpcResponse: &#123;&#125;&quot;, rpcResponse);
+        return rpcResponse.getResult();
+    &#125;
+&#125;</code></pre></div></figure>
+
+<h2 id="请求响应的消息数据结构设计"><a href="#请求响应的消息数据结构设计" class="headerlink" title="请求响应的消息数据结构设计"></a>请求响应的消息数据结构设计</h2><h3 id="请求消息"><a href="#请求消息" class="headerlink" title="请求消息"></a>请求消息</h3><ol>
+<li>接口名称：传过去，服务端知道你想要调用哪个接口</li>
+<li>方法名：接口可能有多个方法，这个也是必须滴</li>
+<li>参数类型 &amp; 参数值：参数类型有很多，比如有bool、int、long、double、string、map、list，甚至如struct（class）；以及相应的参数值；</li>
+<li>超时时间：不能一直请求阻塞着（这里暂未实现）</li>
+<li>requestID：标识唯一请求id，这样请求和响应才能对得上号，要不然发出去多个请求，返回来多个响应，都分不清了</li>
+</ol>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">&#x2F;**
+ * RPC 请求对象
+ * @author: houcheng
+ * @date: 2022&#x2F;5&#x2F;31 16:07:06
+ *&#x2F;
+@Data
+public class RpcRequest &#123;
+
+    &#x2F;**
+     * 请求id
+     *&#x2F;
+    private String requestId;
+
+    &#x2F;**
+     * 接口名
+     *&#x2F;
+    private String interfaceName;
+
+    &#x2F;**
+     * 方法名
+     *&#x2F;
+    private String methodName;
+
+    &#x2F;**
+     * 参数类型
+     *&#x2F;
+    private Class&lt;?&gt;[] parameterTypes;
+
+    &#x2F;**
+     * 参数值
+     *&#x2F;
+    private Object[] parameters;
+&#125;</code></pre></div></figure>
+
+<h3 id="响应消息"><a href="#响应消息" class="headerlink" title="响应消息"></a>响应消息</h3><ol>
+<li>返回值</li>
+<li>状态码</li>
+<li>requestID</li>
+<li>异常信息</li>
+</ol>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">&#x2F;**
+ * RPC 响应对象
+ * @author: houcheng
+ * @date: 2022&#x2F;5&#x2F;31 16:09:27
+ *&#x2F;
+@Data
+public class RpcResponse &#123;
+
+    &#x2F;**
+     * 请求ID
+     *&#x2F;
+    private String requestId;
+
+    &#x2F;**
+     * 响应结果
+     *&#x2F;
+    private Object result;
+
+    &#x2F;**
+     * 状态码
+     *&#x2F;
+    private Integer code;
+
+    &#x2F;**
+     * 错误信息
+     *&#x2F;
+    private Throwable error;
+&#125;</code></pre></div></figure>
+
+<h2 id="消息编解码-序列化"><a href="#消息编解码-序列化" class="headerlink" title="消息编解码 / 序列化"></a>消息编解码 / 序列化</h2><p>为什么要序列化？因为序列化后会方便进行网络之间传输数据</p>
+<p>序列化（编码）：对象转换为二进制数据</p>
+<p>反序列化（解码）：二进制数据转换为对象</p>
+<h3 id="序列化"><a href="#序列化" class="headerlink" title="序列化"></a>序列化</h3><figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">&#x2F;**
+ * 序列化工具类 使用 Protostuff 实现
+ * @author ：hc
+ * @date ：Created in 2022&#x2F;5&#x2F;31 19:48
+ * @modified ：
+ *&#x2F;
+public class SerializationUtil &#123;
+
+    private static Map&lt;Class&lt;?&gt;, Schema&lt;?&gt;&gt; cachedSchema &#x3D; new ConcurrentHashMap&lt;&gt;();
+
+    private static Objenesis objenesis &#x3D; new ObjenesisStd(true);
+
+    private SerializationUtil() &#123;
+
+    &#125;
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private static &lt;T&gt; Schema&lt;T&gt; getSchema(Class&lt;T&gt; cls) &#123;
+        return (Schema&lt;T&gt;) cachedSchema.computeIfAbsent(cls, key -&gt; RuntimeSchema.createFrom(cls));
+    &#125;
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static &lt;T&gt; byte[] serialize(T obj) &#123;
+        Class&lt;T&gt; cls &#x3D; (Class&lt;T&gt;) obj.getClass();
+        LinkedBuffer buffer &#x3D; LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE);
+        try &#123;
+            Schema&lt;T&gt; schema &#x3D; getSchema(cls);
+            return ProtobufIOUtil.toByteArray(obj, schema, buffer);
+        &#125; catch (Exception e) &#123;
+            throw new IllegalStateException(e.getMessage(), e);
+        &#125; finally &#123;
+            buffer.clear();
+        &#125;
+    &#125;
+
+    public static &lt;T&gt; T deserialize(byte[] data, Class&lt;T&gt; cls) &#123;
+        try &#123;
+            T message &#x3D; objenesis.newInstance(cls);
+            Schema&lt;T&gt; schema &#x3D; getSchema(cls);
+            ProtobufIOUtil.mergeFrom(data, message, schema);
+            return message;
+        &#125; catch (Exception e) &#123;
+            throw new IllegalStateException(e.getMessage(), e);
+        &#125;
+    &#125;
+&#125;</code></pre></div></figure>
+
+<h3 id="编解码处理器"><a href="#编解码处理器" class="headerlink" title="编解码处理器"></a>编解码处理器</h3><figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">&#x2F;**
+ * @author ：hc
+ * @date ：Created in 2022&#x2F;5&#x2F;31 19:40
+ * @modified ：
+ *&#x2F;
+public class RpcDecoder extends ByteToMessageDecoder &#123;
+
+    private Class&lt;?&gt; genericClass;
+
+    public RpcDecoder(Class&lt;?&gt; genericClass) &#123;
+        this.genericClass &#x3D; genericClass;
+    &#125;
+
+    @Override
+    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List&lt;Object&gt; out) throws Exception &#123;
+        if (in.readableBytes() &lt; 4 ) &#123;
+            return;
+        &#125;
+
+        in.markReaderIndex();
+        int dataLength &#x3D; in.readInt();
+
+        if (dataLength &lt; 0) &#123;
+            ctx.close();
+        &#125;
+
+        if (in.readableBytes() &lt; dataLength) &#123;
+            in.resetReaderIndex();
+            return;
+        &#125;
+
+        byte[] data &#x3D; new byte[dataLength];
+        in.readBytes(data);
+
+        Object obj &#x3D; SerializationUtil.deserialize(data, genericClass);
+        out.add(obj);
+    &#125;
+&#125;</code></pre></div></figure>
+
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">&#x2F;**
+ * @author ：hc
+ * @date ：Created in 2022&#x2F;5&#x2F;31 19:40
+ * @modified ：
+ *&#x2F;
+public class RpcEncoder extends MessageToByteEncoder &#123;
+
+    private Class&lt;?&gt; genericClass;
+
+    public RpcEncoder(Class&lt;?&gt; genericClass) &#123;
+        this.genericClass &#x3D; genericClass;
+    &#125;
+
+    @Override
+    public void encode(ChannelHandlerContext ctx, Object in, ByteBuf out) &#123;
+        if (genericClass.isInstance(in)) &#123;
+            byte[] data &#x3D; SerializationUtil.serialize(in);
+            out.writeInt(data.length);
+            out.writeBytes(data);
+        &#125;
+    &#125;
+&#125;</code></pre></div></figure>
+
+<h2 id="通信"><a href="#通信" class="headerlink" title="通信"></a>通信</h2><p>现在消息有了，该怎么发出去呢？就涉及到网络通信了，这里使用的是网络框架 Netty</p>
+<h3 id="服务端启动-Netty-Server"><a href="#服务端启动-Netty-Server" class="headerlink" title="服务端启动 Netty Server"></a>服务端启动 Netty Server</h3><figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">&#x2F;**
+ * RPC Server &#x2F; Netty Server
+ * @author: houcheng
+ * @date: 2022&#x2F;5&#x2F;31 16:57:13
+ *&#x2F;
+@Slf4j
+@Component
+@PropertySource(&quot;classpath:simple-rpc.properties&quot;)
+public class RpcServer &#123;
+
+    &#x2F;**
+     * 注册中心地址
+     *&#x2F;
+    @Value(&quot;$&#123;registry.address:&#125;&quot;)
+    private String registryAddress;
+
+    &#x2F;**
+     * RPC 服务启动地址
+     *&#x2F;
+    @Value(&quot;$&#123;service.address:&#125;&quot;)
+    private String serviceAddress;
+
+    &#x2F;**
+     * 存放接口名和服务对象（实现类对象）之间的映射关系
+     *&#x2F;
+    private final Map&lt;String, Object&gt; handlerMap &#x3D; new HashMap&lt;&gt;();
+
+    &#x2F;**
+     * RpcServer 启动
+     * @param applicationContext ApplicationContext
+     *&#x2F;
+    public void start(ApplicationContext applicationContext) &#123;
+        log.info(&quot;注册中心地址：&#123;&#125;&quot;, registryAddress);
+        log.info(&quot;RPC 服务启动地址：&#123;&#125;&quot;, serviceAddress);
+        if (StringUtils.isBlank(registryAddress) || StringUtils.isBlank(serviceAddress)) &#123;
+            log.warn(&quot;RPC 服务启动失败，请检查是否配置了 registry.address 和 service.address&quot;);
+            return;
+        &#125;
+        scanRpcServiceBean(applicationContext);
+        startRpcServer();
+    &#125;
+
+    &#x2F;**
+     * 获取 Spring 中所有带 RpcService 注解的 Bean
+     * @param applicationContext ApplicationContext
+     *&#x2F;
+    private void scanRpcServiceBean(ApplicationContext applicationContext) &#123;
+        &#x2F;&#x2F; 扫描所有带 RpcService 注解的 Bean
+        Map&lt;String, Object&gt; serviceBeanMap &#x3D; applicationContext.getBeansWithAnnotation(RpcService.class);
+        if (serviceBeanMap.isEmpty()) &#123;
+            log.warn(&quot;No service bean found&quot;);
+        &#125;
+        for (Object serviceBean : serviceBeanMap.values()) &#123;
+            &#x2F;&#x2F; 获取 RpcService 注解的 value 值
+            String interfaceName &#x3D; serviceBean.getClass().getAnnotation(RpcService.class).value().getName();
+            handlerMap.put(interfaceName, serviceBean);
+        &#125;
+    &#125;
+
+    private void startRpcServer() &#123;
+        EventLoopGroup bossGroup &#x3D; new NioEventLoopGroup();
+        EventLoopGroup workerGroup &#x3D; new NioEventLoopGroup();
+        try &#123;
+            ServerBootstrap serverBootstrap &#x3D; new ServerBootstrap();
+            serverBootstrap.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new ChannelInitializer&lt;SocketChannel&gt;() &#123;
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception &#123;
+                            &#x2F;&#x2F; 服务端 对请求解码 对响应编码
+                            ch.pipeline().addLast(new RpcDecoder(RpcRequest.class))
+                                    .addLast(new RpcEncoder(RpcResponse.class))
+                                    &#x2F;&#x2F; 服务端处理 RPC 请求的 Handler
+                                    .addLast(new RpcServerHandler(handlerMap));
+                        &#125;
+                    &#125;)
+                    .option(ChannelOption.SO_BACKLOG, 128)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true);
+            &#x2F;&#x2F; 解析服务地址
+            String[] array &#x3D; serviceAddress.split(&quot;:&quot;);
+            String host &#x3D; array[0];
+            int port &#x3D; Integer.parseInt(array[1]);
+
+            &#x2F;&#x2F; 启动 RPC 服务
+            ChannelFuture channelFuture &#x3D; serverBootstrap.bind(host, port).sync();
+            log.info(&quot;RPC 服务器启动成功，监听端口：&#123;&#125;&quot;, port);
+            &#x2F;&#x2F; 服务注册
+            ServiceRegistry zookeeperServiceRegistry &#x3D; new ServiceRegistry(registryAddress);
+            zookeeperServiceRegistry.register(serviceAddress);
+            channelFuture.channel().closeFuture().sync();
+        &#125; catch (InterruptedException e) &#123;
+            log.error(&quot;RpcServer start error&quot;, e);
+            Thread.currentThread().interrupt();
+        &#125; finally &#123;
+            bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
+        &#125;
+    &#125;
+
+&#125;</code></pre></div></figure>
+
+<h3 id="客户端调用"><a href="#客户端调用" class="headerlink" title="客户端调用"></a>客户端调用</h3><figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">&#x2F;**
+ * RPC Server &#x2F; Netty Server
+ * @author: houcheng
+ * @date: 2022&#x2F;5&#x2F;31 16:57:13
+ *&#x2F;
+@Slf4j
+@Component
+@PropertySource(&quot;classpath:simple-rpc.properties&quot;)
+public class RpcServer &#123;
+
+    &#x2F;**
+     * 注册中心地址
+     *&#x2F;
+    @Value(&quot;$&#123;registry.address:&#125;&quot;)
+    private String registryAddress;
+
+    &#x2F;**
+     * RPC 服务启动地址
+     *&#x2F;
+    @Value(&quot;$&#123;service.address:&#125;&quot;)
+    private String serviceAddress;
+
+    &#x2F;**
+     * 存放接口名和服务对象（实现类对象）之间的映射关系
+     *&#x2F;
+    private final Map&lt;String, Object&gt; handlerMap &#x3D; new HashMap&lt;&gt;();
+
+    &#x2F;**
+     * RpcServer 启动
+     * @param applicationContext ApplicationContext
+     *&#x2F;
+    public void start(ApplicationContext applicationContext) &#123;
+        log.info(&quot;注册中心地址：&#123;&#125;&quot;, registryAddress);
+        log.info(&quot;RPC 服务启动地址：&#123;&#125;&quot;, serviceAddress);
+        if (StringUtils.isBlank(registryAddress) || StringUtils.isBlank(serviceAddress)) &#123;
+            log.warn(&quot;RPC 服务启动失败，请检查是否配置了 registry.address 和 service.address&quot;);
+            return;
+        &#125;
+        scanRpcServiceBean(applicationContext);
+        startRpcServer();
+    &#125;
+
+    &#x2F;**
+     * 获取 Spring 中所有带 RpcService 注解的 Bean
+     * @param applicationContext ApplicationContext
+     *&#x2F;
+    private void scanRpcServiceBean(ApplicationContext applicationContext) &#123;
+        &#x2F;&#x2F; 扫描所有带 RpcService 注解的 Bean
+        Map&lt;String, Object&gt; serviceBeanMap &#x3D; applicationContext.getBeansWithAnnotation(RpcService.class);
+        if (serviceBeanMap.isEmpty()) &#123;
+            log.warn(&quot;No service bean found&quot;);
+        &#125;
+        for (Object serviceBean : serviceBeanMap.values()) &#123;
+            &#x2F;&#x2F; 获取 RpcService 注解的 value 值
+            String interfaceName &#x3D; serviceBean.getClass().getAnnotation(RpcService.class).value().getName();
+            handlerMap.put(interfaceName, serviceBean);
+        &#125;
+    &#125;
+
+    private void startRpcServer() &#123;
+        EventLoopGroup bossGroup &#x3D; new NioEventLoopGroup();
+        EventLoopGroup workerGroup &#x3D; new NioEventLoopGroup();
+        try &#123;
+            ServerBootstrap serverBootstrap &#x3D; new ServerBootstrap();
+            serverBootstrap.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new ChannelInitializer&lt;SocketChannel&gt;() &#123;
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception &#123;
+                            &#x2F;&#x2F; 服务端 对请求解码 对响应编码
+                            ch.pipeline().addLast(new RpcDecoder(RpcRequest.class))
+                                    .addLast(new RpcEncoder(RpcResponse.class))
+                                    &#x2F;&#x2F; 服务端处理 RPC 请求的 Handler
+                                    .addLast(new RpcServerHandler(handlerMap));
+                        &#125;
+                    &#125;)
+                    .option(ChannelOption.SO_BACKLOG, 128)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true);
+            &#x2F;&#x2F; 解析服务地址
+            String[] array &#x3D; serviceAddress.split(&quot;:&quot;);
+            String host &#x3D; array[0];
+            int port &#x3D; Integer.parseInt(array[1]);
+
+            &#x2F;&#x2F; 启动 RPC 服务
+            ChannelFuture channelFuture &#x3D; serverBootstrap.bind(host, port).sync();
+            log.info(&quot;RPC 服务器启动成功，监听端口：&#123;&#125;&quot;, port);
+            &#x2F;&#x2F; 服务注册
+            ServiceRegistry zookeeperServiceRegistry &#x3D; new ServiceRegistry(registryAddress);
+            zookeeperServiceRegistry.register(serviceAddress);
+            channelFuture.channel().closeFuture().sync();
+        &#125; catch (InterruptedException e) &#123;
+            log.error(&quot;RpcServer start error&quot;, e);
+            Thread.currentThread().interrupt();
+        &#125; finally &#123;
+            bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
+        &#125;
+    &#125;
+
+&#125;</code></pre></div></figure>
+
+<h2 id="如何进行服务注册-服务发现"><a href="#如何进行服务注册-服务发现" class="headerlink" title="如何进行服务注册 / 服务发现"></a>如何进行服务注册 / 服务发现</h2><p>就是现在我们知道怎么发网络请求了，但是不知道发给谁，所以我们需要一个服务表里面存储所有服务信息；</p>
+<p>这里我们使用 Zookeeper，可以做到服务上下线自动通知（节点监控），非常方便</p>
+<h3 id="服务注册"><a href="#服务注册" class="headerlink" title="服务注册"></a>服务注册</h3><figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">&#x2F;**
+ * Zookeeper Server Registry
+ * @author: houcheng
+ * @date: 2022&#x2F;5&#x2F;31 16:58:41
+ *&#x2F;
+@Slf4j
+public class ServiceRegistry &#123;
+
+    private final CuratorFramework curatorZkClient;
+
+    public ServiceRegistry(String zkAddress) &#123;
+        curatorZkClient &#x3D; ZookeeperUtil.getCuratorZookeeperClient(zkAddress);
+    &#125;
+
+    &#x2F;**
+     * 服务注册
+     * @param serviceAddress 服务地址
+     *&#x2F;
+    public void register(String serviceAddress) &#123;
+        log.info(&quot;Registering service address &#123;&#125;&quot;, serviceAddress);
+        byte[] data &#x3D; serviceAddress.getBytes(StandardCharsets.UTF_8);
+        String servicePath &#x3D; ZookeeperConstant.ZK_SERVICE_PATH_PREFIX;
+        try &#123;
+            String resultPath &#x3D; curatorZkClient.create().creatingParentsIfNeeded()
+                    .withMode(CreateMode.EPHEMERAL_SEQUENTIAL)
+                    .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
+                    .forPath(servicePath, data);
+            log.info(&quot;Service &#123;&#125; registered at path: &#123;&#125;&quot;, serviceAddress, resultPath);
+        &#125; catch (Exception e) &#123;
+            log.error(&quot;Registering service address &#123;&#125; failed&quot;, serviceAddress, e);
+        &#125;
+    &#125;
+&#125;</code></pre></div></figure>
+
+<h3 id="服务发现"><a href="#服务发现" class="headerlink" title="服务发现"></a>服务发现</h3><figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">&#x2F;**
+ * Zookeeper Server Discovery
+ * @author ：hc
+ * @date ：Created in 2022&#x2F;5&#x2F;31 20:52
+ * @modified ：
+ *&#x2F;
+@Slf4j
+@Component
+@PropertySource(&quot;classpath:simple-rpc.properties&quot;)
+public class ServiceDiscovery &#123;
+
+    &#x2F;**
+     * 服务注册中心地址
+     *&#x2F;
+    @Value(&quot;$&#123;registry.address&#125;&quot;)
+    private String registryAddress;
+
+    &#x2F;**
+     * 服务列表
+     *&#x2F;
+    private volatile List&lt;String&gt; serviceList &#x3D; new ArrayList&lt;&gt;();
+
+    @PostConstruct
+    public void init() &#123;
+        &#x2F;&#x2F; 注册永久监听
+        watchNode();
+    &#125;
+
+    &#x2F;**
+     * 返回一个可用的服务地址
+     * 持续阻塞直到有可用的服务地址
+     * @return 服务地址 ip:port 字符串
+     *&#x2F;
+    public String discover() &#123;
+        int size &#x3D; serviceList.size();
+        String result;
+        &#x2F;&#x2F; 如果服务列表为空，则返回null
+        if (size &#x3D;&#x3D; 0) &#123;
+            log.warn(&quot;No available service, please check the service registry address or service status &quot;);
+            return null;
+        &#125;
+        &#x2F;&#x2F; 如果服务列表只有一个服务地址，则直接返回
+        if (size &#x3D;&#x3D; 1) &#123;
+            result &#x3D; serviceList.get(0);
+            log.info(&quot;Only one service available, return it directly: &#123;&#125;&quot;, result);
+            return result;
+        &#125;
+        &#x2F;&#x2F; 如果服务列表大于 1 个，则随机返回一个服务地址
+        result &#x3D; serviceList.get(ThreadLocalRandom.current().nextInt(size));
+        log.info(&quot;Randomly select a service: &#123;&#125;&quot;, result);
+        return result;
+    &#125;
+
+    &#x2F;**
+     * 注册永久监听
+     *&#x2F;
+    private void watchNode() &#123;
+        log.info(&quot;Start watching the service registry node: &#123;&#125;&quot;, ZookeeperConstant.ZK_REGISTRY_PATH);
+        log.info(&quot;Service registry address: &#123;&#125;&quot;, registryAddress);
+        CuratorFramework curatorZkClient &#x3D; ZookeeperUtil.getCuratorZookeeperClient(registryAddress);
+        PathChildrenCache pathChildrenCache &#x3D; new PathChildrenCache(curatorZkClient, ZookeeperConstant.ZK_REGISTRY_PATH, true);
+        try &#123;
+            &#x2F;&#x2F; 同步初始化 初始化后即可获取到当前服务列表
+            pathChildrenCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
+            &#x2F;&#x2F; 初次加载 获取服务列表
+            flushServiceList(pathChildrenCache);
+            &#x2F;&#x2F; 添加永久监听 监听节点变化 并及时刷新服务列表
+            pathChildrenCache.getListenable().addListener((client, event) -&gt; &#123;
+                log.info(&quot;Node change event: &#123;&#125;&quot;, event.getType());
+                &#x2F;&#x2F; 监听到子节点变化 刷新服务列表
+                flushServiceList(pathChildrenCache);
+            &#125;);
+        &#125; catch (Exception e) &#123;
+            log.error(&quot;An exception occurred while listening for the change of zookeeper node&quot;, e);
+        &#125;
+
+    &#125;
+
+    &#x2F;**
+     * 刷新服务列表
+     * @param pathChildrenCache PathChildrenCache
+     *&#x2F;
+    private void flushServiceList(PathChildrenCache pathChildrenCache) &#123;
+        List&lt;ChildData&gt; childDataList &#x3D; pathChildrenCache.getCurrentData();
+        ArrayList&lt;String&gt; curServiceList &#x3D; new ArrayList&lt;&gt;();
+        childDataList.forEach(childData -&gt; curServiceList.add(new String(childData.getData())));
+        serviceList &#x3D; curServiceList;
+    &#125;
+&#125;</code></pre></div></figure>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E9%80%A0%E8%BD%AE%E5%AD%90/" class="category-chain-item">造轮子</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E9%80%A0%E8%BD%AE%E5%AD%90/">#造轮子</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>自己动手实现一个RPC框架（simple-rpc）</div>
+      <div>https://sunnyc.icu/articles/d77fd4b2/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>sunnyc</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年6月25日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                <i class="iconfont icon-nc"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+              <span class="hint--top hint--rounded" aria-label="ND - 禁止演绎">
+                <i class="iconfont icon-nd"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/articles/89c305cc/" title="使用Nexus搭建Maven私服">
+                        <span class="hidden-mobile">使用Nexus搭建Maven私服</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.4.17/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"HeAf8oPmRvDT6HPWilQr18sG-gzGzoHsz","appKey":"n6lMg4VLDXcwnmsooYBs3haq","path":"window.location.pathname","placeholder":"给我的文章加点评论吧~","avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/components/prism-core.min.js" ></script>
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/plugins/autoloader/prism-autoloader.min.js" ></script>
+
+  <script  src="https://lib.baomitu.com/prism/1.27.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
