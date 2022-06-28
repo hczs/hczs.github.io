@@ -58,6 +58,57 @@ DateTime DateUtil.date(Long date)</code></pre></div></figure>
       </tags>
   </entry>
   <entry>
+    <title>模拟并发环境代码段</title>
+    <url>/articles/3b4b1d9a/</url>
+    <content><![CDATA[<p>使用<code>CountDownLatch</code>来控制线程们一起启动模拟并发</p>
+<span id="more"></span>
+<!-- markdownlint-disable MD041 MD002--> 
+
+<p>总体思路：</p>
+<p>使用两个计数器，一个计数器<code>start</code>只有一个数，每个线程启动后都卡这个计数器这里<code>start.await();</code></p>
+<p>再用第二个计数器<code>end</code>，当一个线程执行完，这个计数器-1</p>
+<p>然后start-1，所有线程瞬间不会阻塞了，也就是模拟了一个并发的环境</p>
+<p>最后<code>end.await();</code>主线程阻塞到执行完毕，后面可以加个计时或者啥的算一下时间等等</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class Main &#123;
+    public static void main(String[] args) throws InterruptedException &#123;
+
+        int threadNumber &#x3D; 100;
+        CountDownLatch start &#x3D; new CountDownLatch(1);
+        CountDownLatch end &#x3D; new CountDownLatch(threadNumber);
+        ExecutorService executorService &#x3D; Executors.newFixedThreadPool(threadNumber);
+        for (int i &#x3D; 0; i &lt; threadNumber; i++) &#123;
+            executorService.submit(() -&gt; &#123;
+                try &#123;
+                    &#x2F;&#x2F; 先阻塞这别让这个线程跑起来
+                    start.await();
+                    &#x2F;&#x2F; 具体的业务方法（本地方法 or 远程调用）
+                &#125; catch (InterruptedException e) &#123;
+                    e.printStackTrace();
+                &#125; finally &#123;
+                    &#x2F;&#x2F; 一个线程跑完 end计数器-1
+                    end.countDown();
+                &#125;
+            &#125;);
+        &#125;
+
+        &#x2F;&#x2F; start-1 所有线程启动，模拟并发
+        start.countDown();
+        &#x2F;&#x2F; 阻塞直到执行完毕
+        end.await();
+        executorService.shutdown();
+
+    &#125;
+&#125;</code></pre></div></figure>
+
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>多线程</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Python函数</title>
     <url>/articles/c8f562d1/</url>
     <content><![CDATA[<p>Python函数基础，涉及到的有函数定义、参数传递、匿名函数和装饰器等等</p>
@@ -574,54 +625,81 @@ my_github:  hczs
       </tags>
   </entry>
   <entry>
-    <title>模拟并发环境代码段</title>
-    <url>/articles/3b4b1d9a/</url>
-    <content><![CDATA[<p>使用<code>CountDownLatch</code>来控制线程们一起启动模拟并发</p>
+    <title>vue+introjs实现新手引导功能</title>
+    <url>/articles/7ab166e6/</url>
+    <content><![CDATA[<p>就是进入网站前的功能介绍引导功能</p>
 <span id="more"></span>
 <!-- markdownlint-disable MD041 MD002--> 
 
-<p>总体思路：</p>
-<p>使用两个计数器，一个计数器<code>start</code>只有一个数，每个线程启动后都卡这个计数器这里<code>start.await();</code></p>
-<p>再用第二个计数器<code>end</code>，当一个线程执行完，这个计数器-1</p>
-<p>然后start-1，所有线程瞬间不会阻塞了，也就是模拟了一个并发的环境</p>
-<p>最后<code>end.await();</code>主线程阻塞到执行完毕，后面可以加个计时或者啥的算一下时间等等</p>
-<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public class Main &#123;
-    public static void main(String[] args) throws InterruptedException &#123;
+<h2 id="效果展示"><a href="#效果展示" class="headerlink" title="效果展示"></a>效果展示</h2><h3 id="静态"><a href="#静态" class="headerlink" title="静态"></a>静态</h3><p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/img/image-20220213124704018.png" alt="image-20220213124704018"></p>
+<h3 id="动态演示"><a href="#动态演示" class="headerlink" title="动态演示"></a>动态演示</h3><p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/img/introgif.gif" alt="introgif"></p>
+<h2 id="相关技术"><a href="#相关技术" class="headerlink" title="相关技术"></a>相关技术</h2><ul>
+<li><code>vue-2.5.2</code></li>
+<li><code>intro.js-5.0.0</code></li>
+</ul>
+<h3 id="intro-js的一分钟入门说明"><a href="#intro-js的一分钟入门说明" class="headerlink" title="intro.js的一分钟入门说明"></a><code>intro.js</code>的一分钟入门说明</h3><p><code>intro.js</code>是一个提供了新手引导相关功能的<code>js</code>库，使用呢也很简单，给你想要加入引导说明的<code>html</code>元素上加入<code>data-intro</code>属性，并赋值，然后在<code>script</code>中调用<code>introJs().start()</code>方法，刷新页面就行了；</p>
+<p>更多内容请参考官网教程，这个库很容易上手：<a href="https://introjs.com/docs/examples/basic/hello-world">https://introjs.com/docs/examples/basic/hello-world</a></p>
+<h2 id="在vue项目中使用intro-js"><a href="#在vue项目中使用intro-js" class="headerlink" title="在vue项目中使用intro.js"></a>在<code>vue</code>项目中使用<code>intro.js</code></h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>我是通过<code>npm</code>安装的</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">npm install intro.js --save</code></pre></div></figure>
 
-        int threadNumber &#x3D; 100;
-        CountDownLatch start &#x3D; new CountDownLatch(1);
-        CountDownLatch end &#x3D; new CountDownLatch(threadNumber);
-        ExecutorService executorService &#x3D; Executors.newFixedThreadPool(threadNumber);
-        for (int i &#x3D; 0; i &lt; threadNumber; i++) &#123;
-            executorService.submit(() -&gt; &#123;
-                try &#123;
-                    &#x2F;&#x2F; 先阻塞这别让这个线程跑起来
-                    start.await();
-                    &#x2F;&#x2F; 具体的业务方法（本地方法 or 远程调用）
-                &#125; catch (InterruptedException e) &#123;
-                    e.printStackTrace();
-                &#125; finally &#123;
-                    &#x2F;&#x2F; 一个线程跑完 end计数器-1
-                    end.countDown();
-                &#125;
-            &#125;);
-        &#125;
+<p>当然也支持其他方式安装，可以参考官网：<a href="https://introjs.com/docs/getting-started/install">https://introjs.com/docs/getting-started/install</a></p>
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><ol>
+<li><p>在项目的<code>main.js</code>中，引入<code>intro.js</code>库和相关样式文件</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-js" data-language="js"><code class="language-js">import intro from &#39;intro.js&#39; &#x2F;&#x2F; introjs库
+import &#39;intro.js&#x2F;introjs.css&#39; &#x2F;&#x2F; introjs默认css样式
+&#x2F;&#x2F; introjs还提供了多种主题，可以通过以下方式引入
+import &#39;intro.js&#x2F;themes&#x2F;introjs-modern.css&#39; &#x2F;&#x2F; introjs主题</code></pre></div></figure></li>
+<li><p>把<code>intro.js</code>加入到<code>vue</code>的<code>prototype</code>中，方便使用，就可以直接通过<code>this.$intro()</code>来调用了</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-js" data-language="js"><code class="language-js">&#x2F;&#x2F; 加到prototype中，直接通过vue实例就能调用intro了
+Vue.prototype.$intro &#x3D; intro</code></pre></div></figure>
 
-        &#x2F;&#x2F; start-1 所有线程启动，模拟并发
-        start.countDown();
-        &#x2F;&#x2F; 阻塞直到执行完毕
-        end.await();
-        executorService.shutdown();
+<p>关于<code>prototype</code>的说明：<a href="https://cn.vuejs.org/v2/cookbook/adding-instance-properties.html">https://cn.vuejs.org/v2/cookbook/adding-instance-properties.html</a></p>
+</li>
+</ol>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><ol>
+<li><p>选定一个<code>html</code>标签，加上<code>data-intro</code>属性，赋值内容，以下面为例</p>
+ <figure><div class="code-wrapper"><pre class="line-numbers language-html" data-language="html"><code class="language-html">&lt;img data-intro&#x3D;&quot;这是一张普通的图片&quot; data-step&#x3D;&quot;1&quot; src&#x3D;&quot;.&#x2F;assets&#x2F;logo.png&quot;&gt;</code></pre></div></figure>
+<p> <code>data-step</code>是展示的步骤设置，填写数字即可</p>
+</li>
+<li><p>在<code>script</code>中，加入<code>mounted</code>方法，启动<code>intro</code></p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-js" data-language="js"><code class="language-js">mounted () &#123;
+   this.$intro().start()
+&#125;,</code></pre></div></figure></li>
+<li><p>刷新页面即可看到效果</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/img/image-20220213131251753.png" alt="image-20220213131251753"></p>
+</li>
+</ol>
+<h2 id="一些问题"><a href="#一些问题" class="headerlink" title="一些问题"></a>一些问题</h2><h3 id="只首次进入的时候显示引导"><a href="#只首次进入的时候显示引导" class="headerlink" title="只首次进入的时候显示引导"></a>只首次进入的时候显示引导</h3><p>新手引导一般只有我们第一次进入这个网站的时候才会出现引导内容，后续都不会再显示，我们这里如何实现？</p>
+<p>可以通过<code>localstorge</code>来存储一个<code>key</code>，来判断用户是否是第一次进入这个网站，只需要在引导启动时候加个判断就行，代码如下：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-js" data-language="js"><code class="language-js">mounted () &#123;
+    this.$nextTick(() &#x3D;&gt; &#123;
+      if (localStorage.getItem(&#39;isFirst&#39;) &#x3D;&#x3D;&#x3D; null || localStorage.getItem(&#39;isFirst&#39;) !&#x3D;&#x3D; &#39;1&#39;) &#123;
+        this.$intro().start()
+        localStorage.setItem(&#39;isFirst&#39;, 1)
+      &#125;
+    &#125;)
+  &#125;,</code></pre></div></figure>
 
+<h3 id="如果是v-for循环出来的元素，我们咋显示引导内容呢？"><a href="#如果是v-for循环出来的元素，我们咋显示引导内容呢？" class="headerlink" title="如果是v-for循环出来的元素，我们咋显示引导内容呢？"></a>如果是<code>v-for</code>循环出来的元素，我们咋显示引导内容呢？</h3><p>解决办法就是封装一个<code>v-intro-if</code>指令，在循环中判断，指定条件的显示引导内容即可</p>
+<p>在<code>main.js</code>中加入以下代码：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-js" data-language="js"><code class="language-js">&#x2F;&#x2F; 封装一个v-intro-if指令，这样就可以在循环中展示符合特定条件的引导了
+Vue.directive(&#39;intro-if&#39;, &#123;
+  bind: function (el, binding) &#123;
+    if (binding.value &#x3D;&#x3D;&#x3D; false) &#123;
+      delete el.dataset.intro
+      delete el.dataset.hint
     &#125;
-&#125;</code></pre></div></figure>
+  &#125;
+&#125;)</code></pre></div></figure>
 
+<p>关于<code>vue</code>自定义指令：<a href="https://cn.vuejs.org/v2/guide/custom-directive.html">https://cn.vuejs.org/v2/guide/custom-directive.html</a></p>
+<h2 id="demo源代码"><a href="#demo源代码" class="headerlink" title="demo源代码"></a><code>demo</code>源代码</h2><p>上述案例源码地址：<a href="https://github.com/hczs/vue-introjs-example">https://github.com/hczs/vue-introjs-example</a></p>
 ]]></content>
       <categories>
-        <category>Java基础</category>
+        <category>前端</category>
       </categories>
       <tags>
-        <tag>多线程</tag>
+        <tag>vue</tag>
       </tags>
   </entry>
   <entry>
@@ -772,84 +850,6 @@ fi</code></pre></div></figure>
       </categories>
       <tags>
         <tag>Linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>vue+introjs实现新手引导功能</title>
-    <url>/articles/7ab166e6/</url>
-    <content><![CDATA[<p>就是进入网站前的功能介绍引导功能</p>
-<span id="more"></span>
-<!-- markdownlint-disable MD041 MD002--> 
-
-<h2 id="效果展示"><a href="#效果展示" class="headerlink" title="效果展示"></a>效果展示</h2><h3 id="静态"><a href="#静态" class="headerlink" title="静态"></a>静态</h3><p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/img/image-20220213124704018.png" alt="image-20220213124704018"></p>
-<h3 id="动态演示"><a href="#动态演示" class="headerlink" title="动态演示"></a>动态演示</h3><p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/img/introgif.gif" alt="introgif"></p>
-<h2 id="相关技术"><a href="#相关技术" class="headerlink" title="相关技术"></a>相关技术</h2><ul>
-<li><code>vue-2.5.2</code></li>
-<li><code>intro.js-5.0.0</code></li>
-</ul>
-<h3 id="intro-js的一分钟入门说明"><a href="#intro-js的一分钟入门说明" class="headerlink" title="intro.js的一分钟入门说明"></a><code>intro.js</code>的一分钟入门说明</h3><p><code>intro.js</code>是一个提供了新手引导相关功能的<code>js</code>库，使用呢也很简单，给你想要加入引导说明的<code>html</code>元素上加入<code>data-intro</code>属性，并赋值，然后在<code>script</code>中调用<code>introJs().start()</code>方法，刷新页面就行了；</p>
-<p>更多内容请参考官网教程，这个库很容易上手：<a href="https://introjs.com/docs/examples/basic/hello-world">https://introjs.com/docs/examples/basic/hello-world</a></p>
-<h2 id="在vue项目中使用intro-js"><a href="#在vue项目中使用intro-js" class="headerlink" title="在vue项目中使用intro.js"></a>在<code>vue</code>项目中使用<code>intro.js</code></h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>我是通过<code>npm</code>安装的</p>
-<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">npm install intro.js --save</code></pre></div></figure>
-
-<p>当然也支持其他方式安装，可以参考官网：<a href="https://introjs.com/docs/getting-started/install">https://introjs.com/docs/getting-started/install</a></p>
-<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><ol>
-<li><p>在项目的<code>main.js</code>中，引入<code>intro.js</code>库和相关样式文件</p>
-<figure><div class="code-wrapper"><pre class="line-numbers language-js" data-language="js"><code class="language-js">import intro from &#39;intro.js&#39; &#x2F;&#x2F; introjs库
-import &#39;intro.js&#x2F;introjs.css&#39; &#x2F;&#x2F; introjs默认css样式
-&#x2F;&#x2F; introjs还提供了多种主题，可以通过以下方式引入
-import &#39;intro.js&#x2F;themes&#x2F;introjs-modern.css&#39; &#x2F;&#x2F; introjs主题</code></pre></div></figure></li>
-<li><p>把<code>intro.js</code>加入到<code>vue</code>的<code>prototype</code>中，方便使用，就可以直接通过<code>this.$intro()</code>来调用了</p>
-<figure><div class="code-wrapper"><pre class="line-numbers language-js" data-language="js"><code class="language-js">&#x2F;&#x2F; 加到prototype中，直接通过vue实例就能调用intro了
-Vue.prototype.$intro &#x3D; intro</code></pre></div></figure>
-
-<p>关于<code>prototype</code>的说明：<a href="https://cn.vuejs.org/v2/cookbook/adding-instance-properties.html">https://cn.vuejs.org/v2/cookbook/adding-instance-properties.html</a></p>
-</li>
-</ol>
-<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><ol>
-<li><p>选定一个<code>html</code>标签，加上<code>data-intro</code>属性，赋值内容，以下面为例</p>
- <figure><div class="code-wrapper"><pre class="line-numbers language-html" data-language="html"><code class="language-html">&lt;img data-intro&#x3D;&quot;这是一张普通的图片&quot; data-step&#x3D;&quot;1&quot; src&#x3D;&quot;.&#x2F;assets&#x2F;logo.png&quot;&gt;</code></pre></div></figure>
-<p> <code>data-step</code>是展示的步骤设置，填写数字即可</p>
-</li>
-<li><p>在<code>script</code>中，加入<code>mounted</code>方法，启动<code>intro</code></p>
-<figure><div class="code-wrapper"><pre class="line-numbers language-js" data-language="js"><code class="language-js">mounted () &#123;
-   this.$intro().start()
-&#125;,</code></pre></div></figure></li>
-<li><p>刷新页面即可看到效果</p>
-<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/img/image-20220213131251753.png" alt="image-20220213131251753"></p>
-</li>
-</ol>
-<h2 id="一些问题"><a href="#一些问题" class="headerlink" title="一些问题"></a>一些问题</h2><h3 id="只首次进入的时候显示引导"><a href="#只首次进入的时候显示引导" class="headerlink" title="只首次进入的时候显示引导"></a>只首次进入的时候显示引导</h3><p>新手引导一般只有我们第一次进入这个网站的时候才会出现引导内容，后续都不会再显示，我们这里如何实现？</p>
-<p>可以通过<code>localstorge</code>来存储一个<code>key</code>，来判断用户是否是第一次进入这个网站，只需要在引导启动时候加个判断就行，代码如下：</p>
-<figure><div class="code-wrapper"><pre class="line-numbers language-js" data-language="js"><code class="language-js">mounted () &#123;
-    this.$nextTick(() &#x3D;&gt; &#123;
-      if (localStorage.getItem(&#39;isFirst&#39;) &#x3D;&#x3D;&#x3D; null || localStorage.getItem(&#39;isFirst&#39;) !&#x3D;&#x3D; &#39;1&#39;) &#123;
-        this.$intro().start()
-        localStorage.setItem(&#39;isFirst&#39;, 1)
-      &#125;
-    &#125;)
-  &#125;,</code></pre></div></figure>
-
-<h3 id="如果是v-for循环出来的元素，我们咋显示引导内容呢？"><a href="#如果是v-for循环出来的元素，我们咋显示引导内容呢？" class="headerlink" title="如果是v-for循环出来的元素，我们咋显示引导内容呢？"></a>如果是<code>v-for</code>循环出来的元素，我们咋显示引导内容呢？</h3><p>解决办法就是封装一个<code>v-intro-if</code>指令，在循环中判断，指定条件的显示引导内容即可</p>
-<p>在<code>main.js</code>中加入以下代码：</p>
-<figure><div class="code-wrapper"><pre class="line-numbers language-js" data-language="js"><code class="language-js">&#x2F;&#x2F; 封装一个v-intro-if指令，这样就可以在循环中展示符合特定条件的引导了
-Vue.directive(&#39;intro-if&#39;, &#123;
-  bind: function (el, binding) &#123;
-    if (binding.value &#x3D;&#x3D;&#x3D; false) &#123;
-      delete el.dataset.intro
-      delete el.dataset.hint
-    &#125;
-  &#125;
-&#125;)</code></pre></div></figure>
-
-<p>关于<code>vue</code>自定义指令：<a href="https://cn.vuejs.org/v2/guide/custom-directive.html">https://cn.vuejs.org/v2/guide/custom-directive.html</a></p>
-<h2 id="demo源代码"><a href="#demo源代码" class="headerlink" title="demo源代码"></a><code>demo</code>源代码</h2><p>上述案例源码地址：<a href="https://github.com/hczs/vue-introjs-example">https://github.com/hczs/vue-introjs-example</a></p>
-]]></content>
-      <categories>
-        <category>前端</category>
-      </categories>
-      <tags>
-        <tag>vue</tag>
       </tags>
   </entry>
   <entry>
@@ -1491,6 +1491,254 @@ kf.sh stop</code></pre></div></figure>
       </tags>
   </entry>
   <entry>
+    <title>Docker使用笔记</title>
+    <url>/articles/ccc46239/</url>
+    <content><![CDATA[<p>关于 Docker 的使用总结；包括基本介绍、常用命令和项目打包部署说明</p>
+<span id="more"></span>
+<!-- markdownlint-disable MD041 MD002--> 
+
+<h1 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h1><h2 id="什么是-Docker"><a href="#什么是-Docker" class="headerlink" title="什么是 Docker"></a>什么是 Docker</h2><blockquote>
+<p><strong>Docker</strong> 使用 <code>Google</code> 公司推出的 <a href="https://golang.google.cn/">Go 语言 (opens new window)</a>进行开发实现，基于 <code>Linux</code> 内核的 <a href="https://zh.wikipedia.org/wiki/Cgroups">cgroup (opens new window)</a>，<a href="https://en.wikipedia.org/wiki/Linux_namespaces">namespace (opens new window)</a>，以及 <a href="https://docs.docker.com/storage/storagedriver/overlayfs-driver/">OverlayFS (opens new window)</a>类的 <a href="https://en.wikipedia.org/wiki/Union_mount">Union FS (opens new window)</a>等技术，对进程进行封装隔离，属于 <a href="https://en.wikipedia.org/wiki/Operating-system-level_virtualization">操作系统层面的虚拟化技术 (opens new window)</a>。由于隔离的进程独立于宿主和其它的隔离的进程，因此也称其为容器。</p>
+</blockquote>
+<p>也可以说 docker 是一个方便我们对应用进行打包分发部署的工具，可以认为这就是一个轻量级的虚拟机，但是这个虚拟机里面只有你软件需要的环境。</p>
+<h2 id="为什么要用-Docker"><a href="#为什么要用-Docker" class="headerlink" title="为什么要用 Docker"></a>为什么要用 Docker</h2><ol>
+<li>更高效的利用系统资源：容器不需要进行硬件虚拟以及运行完整操作系统等额外开销</li>
+<li>更快速的启动时间：由于直接运行于宿主内核，无需启动完整的操作系统，因此可以做到秒级、甚至毫秒级的启动时间</li>
+<li>一致的运行环境：<code>Docker</code> 的镜像提供了除内核外完整的运行时环境，确保了应用运行环境一致性，从而不会再出现 <em>「这段代码在我机器上没问题啊」</em> 这类问题；</li>
+<li>持续交付和部署：使用 <a href="https://vuepress.mirror.docker-practice.com/image/build.html"><code>Dockerfile</code></a> 使镜像构建透明化，一次创建或配置，可以在任意地方正常运行</li>
+<li>更轻松的迁移：<code>Docker</code> 可以在很多平台上运行，无论是物理机、虚拟机、公有云、私有云，甚至是笔记本，其运行结果是一致的</li>
+<li>更轻松的维护和扩展：<code>Docker</code> 使用的分层存储以及镜像的技术，使得应用重复部分的复用更为容易，也使得应用的维护更新更加简单，基于基础镜像进一步扩展镜像也变得非常简单</li>
+</ol>
+<h2 id="如何安装"><a href="#如何安装" class="headerlink" title="如何安装"></a>如何安装</h2><p>桌面版：<a href="https://www.docker.com/products/docker-desktop">https://www.docker.com/products/docker-desktop</a><br>服务器版：<a href="https://docs.docker.com/engine/install/#server">https://docs.docker.com/engine/install/#server</a></p>
+<p>Windows 安装图文教程及配置镜像源：<a href="https://docker.easydoc.net/doc/81170005/cCewZWoN/lTKfePfP">https://docker.easydoc.net/doc/81170005/cCewZWoN/lTKfePfP</a></p>
+<h1 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h1><h2 id="在线练习网站"><a href="#在线练习网站" class="headerlink" title="在线练习网站"></a>在线练习网站</h2><ol>
+<li><p>使用 Docker Hub 账号登录网站：<a href="https://labs.play-with-docker.com/">https://labs.play-with-docker.com/</a></p>
+</li>
+<li><p>点击左侧 ADD NEW INSTANCE（添加新实例）</p>
+</li>
+<li><p>网页上不方便操作，可以使用 ssh 连接</p>
+<p>参考：<a href="https://github.com/play-with-docker/play-with-docker/issues/238">https://github.com/play-with-docker/play-with-docker/issues/238</a></p>
+<p>看 issue 里面这位大哥的评论：**<a href="https://github.com/ParampreetR">ParampreetR</a>**</p>
+<blockquote>
+<p>To all those who are here for same issue.<br>Thanks <a href="https://github.com/sidebo">@sidebo</a><br><a href="https://github.com/play-with-docker/play-with-docker/issues/247">#247</a> solved my problem.</p>
+<ol>
+<li>Run <code>ssh-keygen</code> and fill out name of file and empty passphrase.</li>
+<li>Run <code>ssh -i &lt;File name entered in first step&gt; &lt;docker ssh address&gt;</code>. Example: <code>ssh -i ida_rsa ip172-18-0-9-bfe8s7iv9dig00cuhdsg@direct.labs.play-with-docker.com</code></li>
+</ol>
+</blockquote>
+</li>
+<li><p>就是在终端执行 <code>ssh-keygen</code> 命令，文件名随便定义，我这里定义为 test，输完文件名一路回车</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">[hczs8.houcheng] ➤ ssh-keygen
+Generating public&#x2F;private rsa key pair.
+Enter file in which to save the key (&#x2F;home&#x2F;mobaxterm&#x2F;.ssh&#x2F;id_rsa): test
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in test.
+Your public key has been saved in test.pub.
+...</code></pre></div></figure></li>
+<li><p>然后执行命令 <code>ssh -i &lt;File name entered in first step&gt; &lt;docker ssh address&gt;</code></p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">ssh -i test ip172-18-0-10-catfl8433d5g00cfsd10@direct.labs.play-with-docker.com</code></pre></div></figure></li>
+<li><p>成功连接！</p>
+</li>
+</ol>
+<h2 id="镜像"><a href="#镜像" class="headerlink" title="镜像"></a>镜像</h2><h3 id="拉取镜像"><a href="#拉取镜像" class="headerlink" title="拉取镜像"></a>拉取镜像</h3><figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">docker pull [选项] [Docker Registry 地址[:端口号]&#x2F;]仓库名[:标签]</code></pre></div></figure>
+
+<p>具体的选项可以通过 <code>docker pull --help</code> 命令看到，这里我们说一下镜像名称的格式。</p>
+<ul>
+<li>Docker 镜像仓库地址：地址的格式一般是 <code>&lt;域名/IP&gt;[:端口号]</code>。默认地址是 Docker Hub(<code>docker.io</code>)。</li>
+<li>仓库名：如之前所说，这里的仓库名是两段式名称，即 <code>&lt;用户名&gt;/&lt;软件名&gt;</code>。对于 Docker Hub，如果不给出用户名，则默认为 <code>library</code>，也就是官方镜像。</li>
+</ul>
+<p>如：我想把我在 Docker Hub 上的一个打包好的镜像拉下来：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">$ docker pull hsunnyc&#x2F;code-generator-server:1.0.0
+1.0.0: Pulling from hsunnyc&#x2F;code-generator-server
+e7c96db7181b: Pull complete
+f910a506b6cb: Pull complete
+c2274a1a0e27: Pull complete
+793ba85783f1: Pull complete
+71c649eb535e: Pull complete
+c8874db75fe6: Pull complete
+94fd546d83cd: Pull complete
+Digest: sha256:4ac93c777e8c9ce1531e4f5aae6c9b8ca93ddde0d752d6f66563dd6b06e8c0c3
+Status: Downloaded newer image for hsunnyc&#x2F;code-generator-server:1.0.0
+docker.io&#x2F;hsunnyc&#x2F;code-generator-server:1.0.0</code></pre></div></figure>
+
+<p>通过 &lt;用户名&gt;/&lt;软件名&gt;[:标签] 来定位，不写 Dcoker 镜像仓库地址就是默认 Docker Hub</p>
+<h3 id="列出镜像"><a href="#列出镜像" class="headerlink" title="列出镜像"></a>列出镜像</h3><figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">$ docker image ls
+REPOSITORY                      TAG       IMAGE ID       CREATED        SIZE
+hsunnyc&#x2F;code-generator-ui       1.0.0     5f8c36545d4b   12 hours ago   143MB
+hsunnyc&#x2F;code-generator-server   1.0.0     51ff06c51802   52 years ago   142MB</code></pre></div></figure>
+
+<p>列出镜像摘要：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">docker image ls --digests</code></pre></div></figure>
+
+<p>还可能会出现标签和名称都是 <code>&lt;none&gt;</code> 的镜像，这种叫做虚悬镜像，也就是没啥意义了，出现这种镜像是因为原来有个叫 a:1.0 的镜像，然后又仓库里面的 a:1.0 镜像更新了，但是标签还是这个标签，docker pull 下来之后，原来的 a:1.0 就是 <code>&lt;none&gt;</code> 了，删掉这种镜像的命令：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">docker image prune</code></pre></div></figure>
+
+<h3 id="删除本地镜像"><a href="#删除本地镜像" class="headerlink" title="删除本地镜像"></a>删除本地镜像</h3><figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">$ docker image rm [选项] &lt;镜像1&gt; [&lt;镜像2&gt; ...]</code></pre></div></figure>
+
+<p>这个里面的 &lt;镜像&gt; 可以是镜像短 ID（IMAGE_ID 前几位）、镜像长 ID（IMAGE_ID 全部）、镜像名（REPOSITORY 列内容）或者镜像摘要（不常用）</p>
+<h3 id="保存镜像为文件"><a href="#保存镜像为文件" class="headerlink" title="保存镜像为文件"></a>保存镜像为文件</h3><figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">docker save [镜像名] &gt; test.tar</code></pre></div></figure>
+
+<h3 id="加载镜像文件"><a href="#加载镜像文件" class="headerlink" title="加载镜像文件"></a>加载镜像文件</h3><figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">docker load -i test.tar</code></pre></div></figure>
+
+<h3 id="构建镜像"><a href="#构建镜像" class="headerlink" title="构建镜像"></a>构建镜像</h3><p>构建镜像基于一个 Dockerfile 文件，在 Dockerfile 文件所在目录执行</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">docker build -t &lt;用户名&gt;&#x2F;&lt;软件名&gt;:&lt;标签&gt;</code></pre></div></figure>
+
+<h2 id="容器"><a href="#容器" class="headerlink" title="容器"></a>容器</h2><h3 id="启动容器"><a href="#启动容器" class="headerlink" title="启动容器"></a>启动容器</h3><p>比如说启动个 nginx 容器</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">docker run -d -p 8090:80 nginx</code></pre></div></figure>
+
+<ul>
+<li>起手式：docker run</li>
+<li>-d：后台启动</li>
+<li>-p：端口映射，规则为 &lt;宿主机端口&gt;:&lt;容器端口&gt;</li>
+<li>-v：目录挂载，规则为 &lt;宿主机目录&gt;:&lt;容器内目录&gt;，如果宿主机目录不存在会自动创建</li>
+<li>nginx：镜像名</li>
+</ul>
+<p>如果后面的镜像不存在的话，docker 会去镜像仓库下载然后再启动</p>
+<h3 id="启动已终止容器"><a href="#启动已终止容器" class="headerlink" title="启动已终止容器"></a>启动已终止容器</h3><p>如果一个容器跑着跑着挂了，我们如何再把这个容器启动起来呢</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">docker container start [容器id]</code></pre></div></figure>
+
+<h3 id="重启容器"><a href="#重启容器" class="headerlink" title="重启容器"></a>重启容器</h3><figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">docker container restart [容器id]</code></pre></div></figure>
+
+<h3 id="停止容器"><a href="#停止容器" class="headerlink" title="停止容器"></a>停止容器</h3><figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">docker container stop [容器id]</code></pre></div></figure>
+
+<h3 id="列出容器"><a href="#列出容器" class="headerlink" title="列出容器"></a>列出容器</h3><ul>
+<li><p>列出正在运行的容器</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">docker ps</code></pre></div></figure></li>
+<li><p>列出所有容器</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">docker ps -a
+docker container ls -a</code></pre></div></figure></li>
+</ul>
+<h3 id="进入容器"><a href="#进入容器" class="headerlink" title="进入容器"></a>进入容器</h3><figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">docker exec -it [容器id] sh
+# 退出 (退出不会导致容器停止运行)
+exit;</code></pre></div></figure>
+
+<h3 id="导出容器快照"><a href="#导出容器快照" class="headerlink" title="导出容器快照"></a>导出容器快照</h3><p>这个不同于 docker save，只是导出快照，不保存镜像的历史数据和元数据</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">docker export [容器id] &gt; test.tar</code></pre></div></figure>
+
+<h3 id="导入容器快照到本地镜像库"><a href="#导入容器快照到本地镜像库" class="headerlink" title="导入容器快照到本地镜像库"></a>导入容器快照到本地镜像库</h3><figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">cat test.tar | docker import - test:1.0
+# 然后 docker image ls 会出现一个 test 镜像
+# 也可以从某个 URL 导入
+docker import http:&#x2F;&#x2F;example.com&#x2F;exampleimage.tgz example&#x2F;imagerepo</code></pre></div></figure>
+
+<h2 id="Docker-镜像仓库"><a href="#Docker-镜像仓库" class="headerlink" title="Docker 镜像仓库"></a>Docker 镜像仓库</h2><p>仓库是集中存放镜像的地方</p>
+<h3 id="Docker-Hub"><a href="#Docker-Hub" class="headerlink" title="Docker Hub"></a>Docker Hub</h3><p>Docker Hub 是 Docker 官方仓库：<a href="https://hub.docker.com/">https://hub.docker.com/</a></p>
+<ul>
+<li>登录 / 退出：<code>docker login / docker logout</code></li>
+<li>搜索镜像：<code>docker search [关键字]</code></li>
+<li>推送镜像（先登录）：<code>docker push &lt;用户名&gt;/&lt;软件名&gt;:&lt;标签&gt; </code></li>
+</ul>
+<h3 id="私有仓库"><a href="#私有仓库" class="headerlink" title="私有仓库"></a>私有仓库</h3><p><a href="https://vuepress.mirror.docker-practice.com/repository/registry/">https://vuepress.mirror.docker-practice.com/repository/registry/</a></p>
+<h2 id="Docker-Compose"><a href="#Docker-Compose" class="headerlink" title="Docker Compose"></a>Docker Compose</h2><p><code>Docker Compose</code> 是 Docker 官方编排（Orchestration）项目之一，负责快速的部署分布式应用。</p>
+<h3 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h3><figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">docker compose [-f&#x3D;&lt;arg&gt;...] [options] [COMMAND] [ARGS...]</code></pre></div></figure>
+
+<p>命令选项</p>
+<ul>
+<li><code>-f, --file FILE</code> 指定使用的 Compose 模板文件，默认为 <code>docker-compose.yml</code>，可以多次指定。</li>
+<li><code>-p, --project-name NAME</code> 指定项目名称，默认将使用所在目录名称作为项目名。</li>
+<li><code>--verbose</code> 输出更多调试信息。</li>
+<li><code>-v, --version</code> 打印版本并退出</li>
+</ul>
+<h1 id="项目打包部署"><a href="#项目打包部署" class="headerlink" title="项目打包部署"></a>项目打包部署</h1><p>项目打包部署基于一个 SpringBoot + Vue 的前后端分离的应用</p>
+<h2 id="Vue-项目打包镜像"><a href="#Vue-项目打包镜像" class="headerlink" title="Vue 项目打包镜像"></a>Vue 项目打包镜像</h2><p>教程：<a href="https://cli.vuejs.org/zh/guide/deployment.html#docker-nginx">https://cli.vuejs.org/zh/guide/deployment.html#docker-nginx</a></p>
+<p>参考：<a href="https://github.com/hczs/code-generator/blob/master/code-generator-ui/Dockerfile">https://github.com/hczs/code-generator/blob/master/code-generator-ui/Dockerfile</a></p>
+<p>Dockerfile 如下：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-dockerfile" data-language="dockerfile"><code class="language-dockerfile"># 基础镜像 node 环境 16.5.0
+FROM node:16.5.0 as build-prod
+# 把代码复制到镜像里
+COPY .&#x2F; &#x2F;app
+# 切换到 &#x2F;app 即复制过去的代码目录
+WORKDIR &#x2F;app
+# 执行命令 安装依赖并打包
+RUN npm install &amp;&amp; npm run build:prod
+
+# 第二阶段构建 基于 nginx 镜像构建
+FROM nginx
+# 把 build 好的 dist 放入 nginx 镜像这边的 &#x2F;usr&#x2F;share&#x2F;nginx&#x2F;html 目录
+COPY --from&#x3D;build-prod &#x2F;app&#x2F;dist &#x2F;usr&#x2F;share&#x2F;nginx&#x2F;html
+# 其中 nginx.conf 中就配置了 80 端口的 根目录是 &#x2F;usr&#x2F;share&#x2F;nginx&#x2F;html
+COPY nginx.conf &#x2F;etc&#x2F;nginx&#x2F;nginx.conf</code></pre></div></figure>
+
+<p>打包发布远程仓库</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">docker build -t hsunnyc&#x2F;code-generator-ui:1.0.0
+# 发布
+docker push hsunnyc&#x2F;code-generator-ui:1.0.0</code></pre></div></figure>
+
+<h2 id="SpringBoot-项目打包镜像"><a href="#SpringBoot-项目打包镜像" class="headerlink" title="SpringBoot 项目打包镜像"></a>SpringBoot 项目打包镜像</h2><p>参考：<a href="https://juejin.cn/post/6844903983392243720">https://juejin.cn/post/6844903983392243720</a></p>
+<p>本次使用的是 Maven + Jib 插件</p>
+<p>文档：<a href="https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin">https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin</a></p>
+<ol>
+<li><p>在 pom.xml 的 <code>&lt;plugins&gt;</code> 标签 中添加如下内容</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-xml" data-language="xml"><code class="language-xml">&lt;!-- jib docker 打包插件 --&gt;
+&lt;plugin&gt;
+    &lt;groupId&gt;com.google.cloud.tools&lt;&#x2F;groupId&gt;
+    &lt;artifactId&gt;jib-maven-plugin&lt;&#x2F;artifactId&gt;
+    &lt;version&gt;3.2.1&lt;&#x2F;version&gt;
+    &lt;configuration&gt;
+        &lt;from&gt;
+            &lt;image&gt;openjdk:8-jdk-alpine&lt;&#x2F;image&gt;
+        &lt;&#x2F;from&gt;
+        &lt;to&gt;
+            &lt;image&gt;docker.io&#x2F;hsunnyc&#x2F;$&#123;project.name&#125;:$&#123;project.version&#125;&lt;&#x2F;image&gt;
+        &lt;&#x2F;to&gt;
+    &lt;&#x2F;configuration&gt;
+    &lt;!--绑定到maven lifecicle--&gt;
+    &lt;executions&gt;
+        &lt;execution&gt;
+            &lt;phase&gt;package&lt;&#x2F;phase&gt;
+            &lt;goals&gt;
+                &lt;goal&gt;build&lt;&#x2F;goal&gt;
+            &lt;&#x2F;goals&gt;
+        &lt;&#x2F;execution&gt;
+    &lt;&#x2F;executions&gt;
+&lt;&#x2F;plugin&gt;</code></pre></div></figure></li>
+<li><p>打开终端，先 docker login 上</p>
+</li>
+<li><p>然后执行插件</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220628222707025.png" alt="image-20220628222707025"></p>
+</li>
+<li><p>jib:build：构建并推送远程仓库</p>
+</li>
+<li><p>jib:buildTar：将镜像生成 tar 文件，保存在项目的 target 目录下，在任何 docker 环境执行 docker load –input xxx.tar 即可导入到本地镜像仓库</p>
+</li>
+<li><p>jib:dockerBuild：将镜像存入当前镜像仓库，该仓库是当前 docker 客户端可以连接的 docker daemon，一般是指本地镜像仓库</p>
+</li>
+</ol>
+<h2 id="使用-docker-compose-部署"><a href="#使用-docker-compose-部署" class="headerlink" title="使用 docker-compose 部署"></a>使用 docker-compose 部署</h2><ol>
+<li><p>创建 docker-compose.yml 文件，21345 可以改成任意你喜欢的端口号，后续通过此端口号访问项目</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml">version: &quot;3&quot;
+services:
+  api:
+    image: hsunnyc&#x2F;code-generator-server:1.0.0
+    restart: always
+    volumes:
+      - .&#x2F;templates:&#x2F;opt&#x2F;service&#x2F;code-generator&#x2F;templates
+      - .&#x2F;deleted:&#x2F;opt&#x2F;service&#x2F;code-generator&#x2F;deleted
+    environment:
+      TZ: Asia&#x2F;Shanghai
+  web:
+    image: hsunnyc&#x2F;code-generator-ui:1.0.0
+    restart: always
+    environment:
+      TZ: Asia&#x2F;Shanghai
+    ports:
+      - &quot;21345:80&quot;
+    depends_on:
+      - api</code></pre></div></figure></li>
+<li><p>启动，在 docker-compose.yml 同级目录下</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"># 前台启动
+docker-compose up
+# 后台启动 [推荐]
+docker-compose up -d
+# 停止
+docker-compose down</code></pre></div></figure></li>
+</ol>
+]]></content>
+      <categories>
+        <category>工具使用</category>
+      </categories>
+  </entry>
+  <entry>
     <title>Zookeeper客户端常用命令</title>
     <url>/articles/45393fb1/</url>
     <content><![CDATA[<p>Zookeeper 客户端常用的 shell 命令</p>
@@ -1725,206 +1973,6 @@ WatchedEvent state:SyncConnected type:NodeChildrenChanged path:&#x2F;houge</code
         <tag>大数据</tag>
         <tag>中间件</tag>
         <tag>zookeeper</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用Nexus搭建Maven私服</title>
-    <url>/articles/89c305cc/</url>
-    <content><![CDATA[<p>Windows 环境下使用 Nexus 搭建 Maven 私服记录及使用</p>
-<span id="more"></span>
-<!-- markdownlint-disable MD041 MD002--> 
-
-<h2 id="什么是-Maven-私服"><a href="#什么是-Maven-私服" class="headerlink" title="什么是 Maven 私服"></a>什么是 Maven 私服</h2><p>Maven 私服可以理解为我们自己在服务器上搭建一个 Maven 仓库，一般在公司的内网里面搭建 maven 私服，配置了 Maven 私服之后，用户需要下载依赖时，先去本地查找，本地没有在去私服获取，私服没有，会去配置的中央仓库获取，然后保存在私服上。这样其他用户在去获取的话，就不会在去中央仓库获取，直接可以从私服上获取。</p>
-<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604145440949.png" alt="image-20220604145440949"></p>
-<h2 id="Maven-私服的好处"><a href="#Maven-私服的好处" class="headerlink" title="Maven 私服的好处"></a>Maven 私服的好处</h2><ol>
-<li>节约外网的带宽：一般私服都是搭建在公司内部局域网，用户需要下载依赖时，先去本地查找，本地没有在去私服获取，私服没有，会去配置的中央仓库获取，然后保存在私服上。这样其他用户在去获取的话，就不会在去中央仓库获取，直接可以从私服上获取</li>
-<li>项目内的依赖进行统一管理：可以把一些中央仓库没有的第三方依赖，或者是自己项目中的依赖放入私服的私库中，以供其他同事使用</li>
-<li>加快构建速度：在项目构建时访问内网下载依赖，大大提高效率</li>
-<li>即使没有网络也不会影响项目构建</li>
-</ol>
-<h2 id="什么是-Nexus"><a href="#什么是-Nexus" class="headerlink" title="什么是 Nexus"></a>什么是 Nexus</h2><p>Nexus 是 Sonatype 公司发布的一款仓库（Repository）管理软件，常用来搭建 Maven 私服，所以也有人将 Nexus 称为“Maven仓库管理器”。</p>
-<p>能够帮助我们建立私服的软件被称为 Maven 仓库管理器，主要有以下 3 种：</p>
-<ul>
-<li>Apache Archiva</li>
-<li>JFrog Artifactory</li>
-<li>Sonatype Nexus</li>
-</ul>
-<p>Nexus 分为开源版和专业版，其中开源版足以满足大部分 Maven 用户的需求。</p>
-<p>Nexus 开源版具有以下特性：</p>
-<ul>
-<li>占用内存小（28 M 左右）</li>
-<li>具有基于 ExtJs 得操作界面，用户体验较好</li>
-<li>使用基于 Restlet 的完全 REST API</li>
-<li>支持代理仓库、宿主仓库和仓库组</li>
-<li>基于文件系统，不需要依赖数据库</li>
-<li>支持仓库索引以及搜索</li>
-<li>支持在界面上上传构件</li>
-<li>安全控制</li>
-</ul>
-<h2 id="搭建"><a href="#搭建" class="headerlink" title="搭建"></a>搭建</h2><ol>
-<li><p>下载 Nexus</p>
-<p><a href="https://help.sonatype.com/repomanager3/product-information/download/download-archives---repository-manager-3">https://help.sonatype.com/repomanager3/product-information/download/download-archives---repository-manager-3</a></p>
-</li>
-<li><p>解压后配置环境变量</p>
-<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604143706276.png" alt="image-20220604143706276"></p>
-</li>
-<li><p>使用管理员身份打开 cmd，执行以下命令：</p>
-<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"># 安装
-nexus.exe &#x2F;install
-# 前台运行 窗口打印 log
-nexus.exe &#x2F;run
-# 相关命令
-&#x2F;install：安装
-&#x2F;uninstall：卸载
-&#x2F;stop：停止后台运行
-&#x2F;start：后台运行
-&#x2F;status：查看运行状态
-&#x2F;run：前台运行，可在 cmd 命令行查看 log</code></pre></div></figure></li>
-<li><p>run 起来后到这个页面代表完成</p>
-<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604144124808.png" alt="image-20220604144124808"></p>
-</li>
-<li><p>访问 <a href="http://localhost:8081/">http://localhost:8081/</a> 出来如下页面代表搭建完成</p>
-<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604144201243.png" alt="image-20220604144201243"></p>
-</li>
-</ol>
-<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><ol>
-<li><p>先登录，点击右上角的 Sing in，对话框会提示管理员的密码在哪里看</p>
-<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604144414554.png" alt="image-20220604144414554"></p>
-</li>
-<li><p>第一次登录上会有一个新手引导界面，需要修改一下 admin 的密码</p>
-<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604144532563.png" alt="image-20220604144532563"></p>
-</li>
-<li><p>点击上方的设置，在这里可以添加用户、角色和对接 LDAP 等相关设置</p>
-<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604144753385.png" alt="image-20220604144753385"></p>
-</li>
-<li><p>可以在 Support 里面的 System Information 查看系统信息</p>
-<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604144858562.png" alt="image-20220604144858562"></p>
-</li>
-</ol>
-<h2 id="使用及发布包"><a href="#使用及发布包" class="headerlink" title="使用及发布包"></a>使用及发布包</h2><h3 id="Nexus-仓库类型介绍"><a href="#Nexus-仓库类型介绍" class="headerlink" title="Nexus 仓库类型介绍"></a>Nexus 仓库类型介绍</h3><ul>
-<li>hosted，本地仓库，通常我们会部署自己的构件到这一类型的仓库。比如公司的第二方库。</li>
-<li>proxy，代理仓库，它们被用来代理远程的公共仓库，如maven中央仓库。</li>
-<li>group，仓库组，用来合并多个hosted/proxy仓库，当你的项目希望在多个repository使用资源时就不需要多次引用了，只需要引用一个group即可。</li>
-</ul>
-<h3 id="管理本地仓库"><a href="#管理本地仓库" class="headerlink" title="管理本地仓库"></a>管理本地仓库</h3><p>我们前面讲到类型为hosted的为本地仓库，Nexus预定义了3个本地仓库，分别是Releases, Snapshots, 3rd Party. 分别讲一下这三个预置的仓库都是做什么用的</p>
-<ul>
-<li>Releases：这里存放我们自己项目中发布的依赖包，通常是正式版本依赖包发布的，然后大家都可以使用了</li>
-<li>Snapshots：这里存放一些非正式版本发布的依赖包，并不是稳定版本的，比如别的同事依赖我现在开发的项目，但是我还没有开发出稳定版本的，可以先发布一个 Snapshots 版本给他先用着点</li>
-<li>3rd Party：顾名思义，就是第三方库，这里可以添加自己的第三方库，比如有的依赖是是中央仓库不存在的，比如在中央仓库找不到 Oracle 的 JDBC 驱动，可以自己添加到这里</li>
-</ul>
-<h3 id="配置-Maven-的-Settings-xml-文件"><a href="#配置-Maven-的-Settings-xml-文件" class="headerlink" title="配置 Maven 的 Settings.xml 文件"></a>配置 Maven 的 Settings.xml 文件</h3><figure><div class="code-wrapper"><pre class="line-numbers language-xml" data-language="xml"><code class="language-xml">&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot;?&gt;
-
-&lt;settings xmlns&#x3D;&quot;http:&#x2F;&#x2F;maven.apache.org&#x2F;SETTINGS&#x2F;1.0.0&quot; 
-          xmlns:xsi&#x3D;&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2001&#x2F;XMLSchema-instance&quot; 
-          xsi:schemaLocation&#x3D;&quot;http:&#x2F;&#x2F;maven.apache.org&#x2F;SETTINGS&#x2F;1.0.0 http:&#x2F;&#x2F;maven.apache.org&#x2F;xsd&#x2F;settings-1.0.0.xsd&quot;&gt;
-&lt;localRepository&gt;D:\maven\repo&lt;&#x2F;localRepository&gt;
-&lt;servers&gt;
-    &lt;server&gt;
-        &lt;id&gt;release&lt;&#x2F;id&gt;
-        &lt;username&gt;admin&lt;&#x2F;username&gt;
-        &lt;password&gt;123456&lt;&#x2F;password&gt;
-    &lt;&#x2F;server&gt;
-
-    &lt;server&gt;
-        &lt;id&gt;snapshots&lt;&#x2F;id&gt;
-        &lt;username&gt;admin&lt;&#x2F;username&gt;
-        &lt;password&gt;123456&lt;&#x2F;password&gt;
-    &lt;&#x2F;server&gt;
-&lt;&#x2F;servers&gt;
-  
-  &lt;mirrors&gt;
-    &lt;mirror&gt;
-	  &lt;id&gt;nexus&lt;&#x2F;id&gt;
-	  &lt;mirrorOf&gt;*&lt;&#x2F;mirrorOf&gt;
-	  &lt;url&gt;http:&#x2F;&#x2F;localhost:8081&#x2F;repository&#x2F;maven-public&#x2F;&lt;&#x2F;url&gt;
-    &lt;&#x2F;mirror&gt;
-  &lt;&#x2F;mirrors&gt;
-  
-&lt;profiles&gt;
-    &lt;profile&gt;
-        &lt;id&gt;default_profile&lt;&#x2F;id&gt;
-        &lt;repositories&gt;
-            &lt;!--包含需要连接到远程仓库的信息 --&gt;
-            &lt;repository&gt;
-                &lt;!--远程仓库唯一标识 --&gt;
-                &lt;id&gt;sunnyc-maven-releases&lt;&#x2F;id&gt;
-                &lt;!--远程仓库名称 --&gt;
-                &lt;name&gt;maven-releases&lt;&#x2F;name&gt;
-                &lt;!--如何处理远程仓库里发布版本的下载 --&gt;
-                &lt;releases&gt;
-                    &lt;!--true或者false表示该仓库是否为下载某种类型构件（发布版，快照版）开启。 --&gt;
-                    &lt;enabled&gt;true&lt;&#x2F;enabled&gt;
-                    &lt;!--该元素指定更新发生的频率。Maven会比较本地POM和远程POM的时间戳。这里的选项是：always（一直），daily（默认，每日），interval：X（这里X是以分钟为单位的时间间隔），或者never（从不）。 --&gt;
-                    &lt;updatePolicy&gt;never&lt;&#x2F;updatePolicy&gt;
-                    &lt;!--当Maven验证构件校验文件失败时该怎么做-ignore（忽略），fail（失败），或者warn（警告）。 --&gt;
-                    &lt;checksumPolicy&gt;warn&lt;&#x2F;checksumPolicy&gt;
-                &lt;&#x2F;releases&gt;
-                &lt;!--如何处理远程仓库里快照版本的下载。有了releases和snapshots这两组配置，POM就可以在每个单独的仓库中，为每种类型的构件采取不同的策略。例如，可能有人会决定只为开发目的开启对快照版本下载的支持。参见repositories&#x2F;repository&#x2F;releases元素 --&gt;
-                &lt;snapshots&gt;
-                    &lt;!--true或者false表示该仓库是否为下载某种类型构件（发布版，快照版）开启。 --&gt;
-                    &lt;enabled&gt;true&lt;&#x2F;enabled&gt;
-                    &lt;!--该元素指定更新发生的频率。Maven会比较本地POM和远程POM的时间戳。这里的选项是：always（一直），daily（默认，每日），interval：X（这里X是以分钟为单位的时间间隔），或者never（从不）。 --&gt;
-                    &lt;updatePolicy&gt;always&lt;&#x2F;updatePolicy&gt;
-                    &lt;!--当Maven验证构件校验文件失败时该怎么做-ignore（忽略），fail（失败），或者warn（警告）。 --&gt;
-                    &lt;checksumPolicy&gt;warn&lt;&#x2F;checksumPolicy&gt;
-                &lt;&#x2F;snapshots&gt;
-                &lt;!--远程仓库URL，按protocol:&#x2F;&#x2F;hostname&#x2F;path形式 --&gt;
-                &lt;url&gt;http:&#x2F;&#x2F;localhost:8081&#x2F;repository&#x2F;maven-public&#x2F;&lt;&#x2F;url&gt;
-                &lt;!--用于定位和排序构件的仓库布局类型-可以是default（默认）或者legacy（遗留）。Maven 2为其仓库提供了一个默认的布局；然而，Maven 1.x有一种不同的布局。我们可以使用该元素指定布局是default（默认）还是legacy（遗留）。 --&gt;
-                &lt;layout&gt;default&lt;&#x2F;layout&gt;
-            &lt;&#x2F;repository&gt;
-        &lt;&#x2F;repositories&gt;
-
-        &lt;pluginRepositories&gt;
-            &lt;pluginRepository&gt;
-                &lt;!--远程仓库唯一标识 --&gt;
-                &lt;id&gt;sunnyc-maven-releases&lt;&#x2F;id&gt;
-                &lt;!--远程仓库名称 --&gt;
-                &lt;name&gt;maven-releases&lt;&#x2F;name&gt;
-                &lt;url&gt;http:&#x2F;&#x2F;localhost:8081&#x2F;repository&#x2F;maven-public&#x2F;&lt;&#x2F;url&gt;
-                &lt;releases&gt;
-                    &lt;enabled&gt;true&lt;&#x2F;enabled&gt;
-                &lt;&#x2F;releases&gt;
-                &lt;snapshots&gt;
-                    &lt;enabled&gt;true&lt;&#x2F;enabled&gt;
-                &lt;&#x2F;snapshots&gt;
-            &lt;&#x2F;pluginRepository&gt;
-        &lt;&#x2F;pluginRepositories&gt;
-    &lt;&#x2F;profile&gt;
-&lt;&#x2F;profiles&gt;
-
-&lt;activeProfiles&gt;
-    &lt;activeProfile&gt;default_profile&lt;&#x2F;activeProfile&gt;
-&lt;&#x2F;activeProfiles&gt;
-
-&lt;&#x2F;settings&gt;
-</code></pre></div></figure>
-
-<h3 id="配置项目-pom-xml"><a href="#配置项目-pom-xml" class="headerlink" title="配置项目 pom.xml"></a>配置项目 pom.xml</h3><figure><div class="code-wrapper"><pre class="line-numbers language-xml" data-language="xml"><code class="language-xml">&lt;distributionManagement&gt;
-    &lt;repository&gt;
-        &lt;id&gt;release&lt;&#x2F;id&gt;
-        &lt;name&gt;Releases&lt;&#x2F;name&gt;
-        &lt;url&gt;http:&#x2F;&#x2F;localhost:8081&#x2F;repository&#x2F;maven-releases&lt;&#x2F;url&gt;
-        &lt;uniqueVersion&gt;true&lt;&#x2F;uniqueVersion&gt;
-    &lt;&#x2F;repository&gt;
-    &lt;snapshotRepository&gt;
-        &lt;id&gt;snapshots&lt;&#x2F;id&gt;
-        &lt;name&gt;Snapshots&lt;&#x2F;name&gt;
-        &lt;url&gt;http:&#x2F;&#x2F;localhost:8081&#x2F;repository&#x2F;maven-snapshots&lt;&#x2F;url&gt;
-    &lt;&#x2F;snapshotRepository&gt;
-&lt;&#x2F;distributionManagement&gt;</code></pre></div></figure>
-
-<h3 id="发布依赖包到私服"><a href="#发布依赖包到私服" class="headerlink" title="发布依赖包到私服"></a>发布依赖包到私服</h3><p>使用 maven deploy 即可</p>
-<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604153929781.png" alt="image-20220604153929781"></p>
-<p>上私服上验证：</p>
-<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604154103739.png" alt="image-20220604154103739"></p>
-<p> 其他小伙伴可以使用右下角的坐标来使用你发布的依赖包了！</p>
-]]></content>
-      <categories>
-        <category>折腾</category>
-      </categories>
-      <tags>
-        <tag>环境搭建</tag>
       </tags>
   </entry>
   <entry>
@@ -2278,6 +2326,206 @@ Mode: follower</code></pre></div></figure></li>
       </tags>
   </entry>
   <entry>
+    <title>使用Nexus搭建Maven私服</title>
+    <url>/articles/89c305cc/</url>
+    <content><![CDATA[<p>Windows 环境下使用 Nexus 搭建 Maven 私服记录及使用</p>
+<span id="more"></span>
+<!-- markdownlint-disable MD041 MD002--> 
+
+<h2 id="什么是-Maven-私服"><a href="#什么是-Maven-私服" class="headerlink" title="什么是 Maven 私服"></a>什么是 Maven 私服</h2><p>Maven 私服可以理解为我们自己在服务器上搭建一个 Maven 仓库，一般在公司的内网里面搭建 maven 私服，配置了 Maven 私服之后，用户需要下载依赖时，先去本地查找，本地没有在去私服获取，私服没有，会去配置的中央仓库获取，然后保存在私服上。这样其他用户在去获取的话，就不会在去中央仓库获取，直接可以从私服上获取。</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604145440949.png" alt="image-20220604145440949"></p>
+<h2 id="Maven-私服的好处"><a href="#Maven-私服的好处" class="headerlink" title="Maven 私服的好处"></a>Maven 私服的好处</h2><ol>
+<li>节约外网的带宽：一般私服都是搭建在公司内部局域网，用户需要下载依赖时，先去本地查找，本地没有在去私服获取，私服没有，会去配置的中央仓库获取，然后保存在私服上。这样其他用户在去获取的话，就不会在去中央仓库获取，直接可以从私服上获取</li>
+<li>项目内的依赖进行统一管理：可以把一些中央仓库没有的第三方依赖，或者是自己项目中的依赖放入私服的私库中，以供其他同事使用</li>
+<li>加快构建速度：在项目构建时访问内网下载依赖，大大提高效率</li>
+<li>即使没有网络也不会影响项目构建</li>
+</ol>
+<h2 id="什么是-Nexus"><a href="#什么是-Nexus" class="headerlink" title="什么是 Nexus"></a>什么是 Nexus</h2><p>Nexus 是 Sonatype 公司发布的一款仓库（Repository）管理软件，常用来搭建 Maven 私服，所以也有人将 Nexus 称为“Maven仓库管理器”。</p>
+<p>能够帮助我们建立私服的软件被称为 Maven 仓库管理器，主要有以下 3 种：</p>
+<ul>
+<li>Apache Archiva</li>
+<li>JFrog Artifactory</li>
+<li>Sonatype Nexus</li>
+</ul>
+<p>Nexus 分为开源版和专业版，其中开源版足以满足大部分 Maven 用户的需求。</p>
+<p>Nexus 开源版具有以下特性：</p>
+<ul>
+<li>占用内存小（28 M 左右）</li>
+<li>具有基于 ExtJs 得操作界面，用户体验较好</li>
+<li>使用基于 Restlet 的完全 REST API</li>
+<li>支持代理仓库、宿主仓库和仓库组</li>
+<li>基于文件系统，不需要依赖数据库</li>
+<li>支持仓库索引以及搜索</li>
+<li>支持在界面上上传构件</li>
+<li>安全控制</li>
+</ul>
+<h2 id="搭建"><a href="#搭建" class="headerlink" title="搭建"></a>搭建</h2><ol>
+<li><p>下载 Nexus</p>
+<p><a href="https://help.sonatype.com/repomanager3/product-information/download/download-archives---repository-manager-3">https://help.sonatype.com/repomanager3/product-information/download/download-archives---repository-manager-3</a></p>
+</li>
+<li><p>解压后配置环境变量</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604143706276.png" alt="image-20220604143706276"></p>
+</li>
+<li><p>使用管理员身份打开 cmd，执行以下命令：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"># 安装
+nexus.exe &#x2F;install
+# 前台运行 窗口打印 log
+nexus.exe &#x2F;run
+# 相关命令
+&#x2F;install：安装
+&#x2F;uninstall：卸载
+&#x2F;stop：停止后台运行
+&#x2F;start：后台运行
+&#x2F;status：查看运行状态
+&#x2F;run：前台运行，可在 cmd 命令行查看 log</code></pre></div></figure></li>
+<li><p>run 起来后到这个页面代表完成</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604144124808.png" alt="image-20220604144124808"></p>
+</li>
+<li><p>访问 <a href="http://localhost:8081/">http://localhost:8081/</a> 出来如下页面代表搭建完成</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604144201243.png" alt="image-20220604144201243"></p>
+</li>
+</ol>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><ol>
+<li><p>先登录，点击右上角的 Sing in，对话框会提示管理员的密码在哪里看</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604144414554.png" alt="image-20220604144414554"></p>
+</li>
+<li><p>第一次登录上会有一个新手引导界面，需要修改一下 admin 的密码</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604144532563.png" alt="image-20220604144532563"></p>
+</li>
+<li><p>点击上方的设置，在这里可以添加用户、角色和对接 LDAP 等相关设置</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604144753385.png" alt="image-20220604144753385"></p>
+</li>
+<li><p>可以在 Support 里面的 System Information 查看系统信息</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604144858562.png" alt="image-20220604144858562"></p>
+</li>
+</ol>
+<h2 id="使用及发布包"><a href="#使用及发布包" class="headerlink" title="使用及发布包"></a>使用及发布包</h2><h3 id="Nexus-仓库类型介绍"><a href="#Nexus-仓库类型介绍" class="headerlink" title="Nexus 仓库类型介绍"></a>Nexus 仓库类型介绍</h3><ul>
+<li>hosted，本地仓库，通常我们会部署自己的构件到这一类型的仓库。比如公司的第二方库。</li>
+<li>proxy，代理仓库，它们被用来代理远程的公共仓库，如maven中央仓库。</li>
+<li>group，仓库组，用来合并多个hosted/proxy仓库，当你的项目希望在多个repository使用资源时就不需要多次引用了，只需要引用一个group即可。</li>
+</ul>
+<h3 id="管理本地仓库"><a href="#管理本地仓库" class="headerlink" title="管理本地仓库"></a>管理本地仓库</h3><p>我们前面讲到类型为hosted的为本地仓库，Nexus预定义了3个本地仓库，分别是Releases, Snapshots, 3rd Party. 分别讲一下这三个预置的仓库都是做什么用的</p>
+<ul>
+<li>Releases：这里存放我们自己项目中发布的依赖包，通常是正式版本依赖包发布的，然后大家都可以使用了</li>
+<li>Snapshots：这里存放一些非正式版本发布的依赖包，并不是稳定版本的，比如别的同事依赖我现在开发的项目，但是我还没有开发出稳定版本的，可以先发布一个 Snapshots 版本给他先用着点</li>
+<li>3rd Party：顾名思义，就是第三方库，这里可以添加自己的第三方库，比如有的依赖是是中央仓库不存在的，比如在中央仓库找不到 Oracle 的 JDBC 驱动，可以自己添加到这里</li>
+</ul>
+<h3 id="配置-Maven-的-Settings-xml-文件"><a href="#配置-Maven-的-Settings-xml-文件" class="headerlink" title="配置 Maven 的 Settings.xml 文件"></a>配置 Maven 的 Settings.xml 文件</h3><figure><div class="code-wrapper"><pre class="line-numbers language-xml" data-language="xml"><code class="language-xml">&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot;?&gt;
+
+&lt;settings xmlns&#x3D;&quot;http:&#x2F;&#x2F;maven.apache.org&#x2F;SETTINGS&#x2F;1.0.0&quot; 
+          xmlns:xsi&#x3D;&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2001&#x2F;XMLSchema-instance&quot; 
+          xsi:schemaLocation&#x3D;&quot;http:&#x2F;&#x2F;maven.apache.org&#x2F;SETTINGS&#x2F;1.0.0 http:&#x2F;&#x2F;maven.apache.org&#x2F;xsd&#x2F;settings-1.0.0.xsd&quot;&gt;
+&lt;localRepository&gt;D:\maven\repo&lt;&#x2F;localRepository&gt;
+&lt;servers&gt;
+    &lt;server&gt;
+        &lt;id&gt;release&lt;&#x2F;id&gt;
+        &lt;username&gt;admin&lt;&#x2F;username&gt;
+        &lt;password&gt;123456&lt;&#x2F;password&gt;
+    &lt;&#x2F;server&gt;
+
+    &lt;server&gt;
+        &lt;id&gt;snapshots&lt;&#x2F;id&gt;
+        &lt;username&gt;admin&lt;&#x2F;username&gt;
+        &lt;password&gt;123456&lt;&#x2F;password&gt;
+    &lt;&#x2F;server&gt;
+&lt;&#x2F;servers&gt;
+  
+  &lt;mirrors&gt;
+    &lt;mirror&gt;
+	  &lt;id&gt;nexus&lt;&#x2F;id&gt;
+	  &lt;mirrorOf&gt;*&lt;&#x2F;mirrorOf&gt;
+	  &lt;url&gt;http:&#x2F;&#x2F;localhost:8081&#x2F;repository&#x2F;maven-public&#x2F;&lt;&#x2F;url&gt;
+    &lt;&#x2F;mirror&gt;
+  &lt;&#x2F;mirrors&gt;
+  
+&lt;profiles&gt;
+    &lt;profile&gt;
+        &lt;id&gt;default_profile&lt;&#x2F;id&gt;
+        &lt;repositories&gt;
+            &lt;!--包含需要连接到远程仓库的信息 --&gt;
+            &lt;repository&gt;
+                &lt;!--远程仓库唯一标识 --&gt;
+                &lt;id&gt;sunnyc-maven-releases&lt;&#x2F;id&gt;
+                &lt;!--远程仓库名称 --&gt;
+                &lt;name&gt;maven-releases&lt;&#x2F;name&gt;
+                &lt;!--如何处理远程仓库里发布版本的下载 --&gt;
+                &lt;releases&gt;
+                    &lt;!--true或者false表示该仓库是否为下载某种类型构件（发布版，快照版）开启。 --&gt;
+                    &lt;enabled&gt;true&lt;&#x2F;enabled&gt;
+                    &lt;!--该元素指定更新发生的频率。Maven会比较本地POM和远程POM的时间戳。这里的选项是：always（一直），daily（默认，每日），interval：X（这里X是以分钟为单位的时间间隔），或者never（从不）。 --&gt;
+                    &lt;updatePolicy&gt;never&lt;&#x2F;updatePolicy&gt;
+                    &lt;!--当Maven验证构件校验文件失败时该怎么做-ignore（忽略），fail（失败），或者warn（警告）。 --&gt;
+                    &lt;checksumPolicy&gt;warn&lt;&#x2F;checksumPolicy&gt;
+                &lt;&#x2F;releases&gt;
+                &lt;!--如何处理远程仓库里快照版本的下载。有了releases和snapshots这两组配置，POM就可以在每个单独的仓库中，为每种类型的构件采取不同的策略。例如，可能有人会决定只为开发目的开启对快照版本下载的支持。参见repositories&#x2F;repository&#x2F;releases元素 --&gt;
+                &lt;snapshots&gt;
+                    &lt;!--true或者false表示该仓库是否为下载某种类型构件（发布版，快照版）开启。 --&gt;
+                    &lt;enabled&gt;true&lt;&#x2F;enabled&gt;
+                    &lt;!--该元素指定更新发生的频率。Maven会比较本地POM和远程POM的时间戳。这里的选项是：always（一直），daily（默认，每日），interval：X（这里X是以分钟为单位的时间间隔），或者never（从不）。 --&gt;
+                    &lt;updatePolicy&gt;always&lt;&#x2F;updatePolicy&gt;
+                    &lt;!--当Maven验证构件校验文件失败时该怎么做-ignore（忽略），fail（失败），或者warn（警告）。 --&gt;
+                    &lt;checksumPolicy&gt;warn&lt;&#x2F;checksumPolicy&gt;
+                &lt;&#x2F;snapshots&gt;
+                &lt;!--远程仓库URL，按protocol:&#x2F;&#x2F;hostname&#x2F;path形式 --&gt;
+                &lt;url&gt;http:&#x2F;&#x2F;localhost:8081&#x2F;repository&#x2F;maven-public&#x2F;&lt;&#x2F;url&gt;
+                &lt;!--用于定位和排序构件的仓库布局类型-可以是default（默认）或者legacy（遗留）。Maven 2为其仓库提供了一个默认的布局；然而，Maven 1.x有一种不同的布局。我们可以使用该元素指定布局是default（默认）还是legacy（遗留）。 --&gt;
+                &lt;layout&gt;default&lt;&#x2F;layout&gt;
+            &lt;&#x2F;repository&gt;
+        &lt;&#x2F;repositories&gt;
+
+        &lt;pluginRepositories&gt;
+            &lt;pluginRepository&gt;
+                &lt;!--远程仓库唯一标识 --&gt;
+                &lt;id&gt;sunnyc-maven-releases&lt;&#x2F;id&gt;
+                &lt;!--远程仓库名称 --&gt;
+                &lt;name&gt;maven-releases&lt;&#x2F;name&gt;
+                &lt;url&gt;http:&#x2F;&#x2F;localhost:8081&#x2F;repository&#x2F;maven-public&#x2F;&lt;&#x2F;url&gt;
+                &lt;releases&gt;
+                    &lt;enabled&gt;true&lt;&#x2F;enabled&gt;
+                &lt;&#x2F;releases&gt;
+                &lt;snapshots&gt;
+                    &lt;enabled&gt;true&lt;&#x2F;enabled&gt;
+                &lt;&#x2F;snapshots&gt;
+            &lt;&#x2F;pluginRepository&gt;
+        &lt;&#x2F;pluginRepositories&gt;
+    &lt;&#x2F;profile&gt;
+&lt;&#x2F;profiles&gt;
+
+&lt;activeProfiles&gt;
+    &lt;activeProfile&gt;default_profile&lt;&#x2F;activeProfile&gt;
+&lt;&#x2F;activeProfiles&gt;
+
+&lt;&#x2F;settings&gt;
+</code></pre></div></figure>
+
+<h3 id="配置项目-pom-xml"><a href="#配置项目-pom-xml" class="headerlink" title="配置项目 pom.xml"></a>配置项目 pom.xml</h3><figure><div class="code-wrapper"><pre class="line-numbers language-xml" data-language="xml"><code class="language-xml">&lt;distributionManagement&gt;
+    &lt;repository&gt;
+        &lt;id&gt;release&lt;&#x2F;id&gt;
+        &lt;name&gt;Releases&lt;&#x2F;name&gt;
+        &lt;url&gt;http:&#x2F;&#x2F;localhost:8081&#x2F;repository&#x2F;maven-releases&lt;&#x2F;url&gt;
+        &lt;uniqueVersion&gt;true&lt;&#x2F;uniqueVersion&gt;
+    &lt;&#x2F;repository&gt;
+    &lt;snapshotRepository&gt;
+        &lt;id&gt;snapshots&lt;&#x2F;id&gt;
+        &lt;name&gt;Snapshots&lt;&#x2F;name&gt;
+        &lt;url&gt;http:&#x2F;&#x2F;localhost:8081&#x2F;repository&#x2F;maven-snapshots&lt;&#x2F;url&gt;
+    &lt;&#x2F;snapshotRepository&gt;
+&lt;&#x2F;distributionManagement&gt;</code></pre></div></figure>
+
+<h3 id="发布依赖包到私服"><a href="#发布依赖包到私服" class="headerlink" title="发布依赖包到私服"></a>发布依赖包到私服</h3><p>使用 maven deploy 即可</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604153929781.png" alt="image-20220604153929781"></p>
+<p>上私服上验证：</p>
+<p><img src="https://sunnyc-1306675975.cos.ap-beijing.myqcloud.com/image-20220604154103739.png" alt="image-20220604154103739"></p>
+<p> 其他小伙伴可以使用右下角的坐标来使用你发布的依赖包了！</p>
+]]></content>
+      <categories>
+        <category>折腾</category>
+      </categories>
+      <tags>
+        <tag>环境搭建</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>为什么要搭建此博客</title>
     <url>/articles/d08b229d/</url>
     <content><![CDATA[<p>流氓CSDN</p>
@@ -2537,6 +2785,39 @@ Mode: follower</code></pre></div></figure></li>
       </tags>
   </entry>
   <entry>
+    <title>Spring使用@Value值注入不成功问题</title>
+    <url>/articles/2edfbfe8/</url>
+    <content><![CDATA[<p>使用@Value注解获取配置文件中的值不成功</p>
+<span id="more"></span>
+<!-- markdownlint-disable MD041 MD002--> 
+
+<h3 id="先查看这个注解导入的对不对"><a href="#先查看这个注解导入的对不对" class="headerlink" title="先查看这个注解导入的对不对"></a>先查看这个注解导入的对不对</h3><figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">import org.springframework.beans.factory.annotation.Value;</code></pre></div></figure>
+
+<h3 id="再查看里面的变量是否是-这种形式取的值"><a href="#再查看里面的变量是否是-这种形式取的值" class="headerlink" title="再查看里面的变量是否是${} 这种形式取的值"></a>再查看里面的变量是否是<code>$&#123;&#125;</code> 这种形式取的值</h3><figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">@Value(&quot;$&#123;example.useTable&#125;&quot;)
+private boolean useTable;
+
+&#x2F;&#x2F; yml中配置
+example:
+  useTable: true</code></pre></div></figure>
+
+<h3 id="再查看注入此属性的类是否加了-Component注解"><a href="#再查看注入此属性的类是否加了-Component注解" class="headerlink" title="再查看注入此属性的类是否加了@Component注解"></a>再查看注入此属性的类是否加了@Component注解</h3><p>没加注解就代表没有注册到spring容器中，自然也是没办法注入值的</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">@Component
+public class Example &#123;
+
+    @Value(&quot;$&#123;example.useTable&#125;&quot;)
+    private boolean useTable;
+&#125;</code></pre></div></figure>
+
+<h3 id="【最关键】查看用这个类的地方"><a href="#【最关键】查看用这个类的地方" class="headerlink" title="【最关键】查看用这个类的地方"></a>【最关键】<strong>查看用这个类的地方</strong></h3><p>是否是从spring中获取的，如果是从spring中拿的，值是肯定有的，<strong>如果是手动<code>new</code> 出来的，肯定不会注入成功的！</strong></p>
+]]></content>
+      <categories>
+        <category>经验（Bug）总结</category>
+      </categories>
+      <tags>
+        <tag>Spring</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>向GitHub提交代码超时的解决办法</title>
     <url>/articles/13c77623/</url>
     <content><![CDATA[<p>通过修改系统hosts的方法，绕过国内DNS解析，直接访问GitHub的CDN节点，从而达到加速的目的</p>
@@ -2572,48 +2853,73 @@ github.global.ssl.fastly.net</code></pre></div></figure></li>
       </tags>
   </entry>
   <entry>
-    <title>leetcode#633-平方数之和</title>
-    <url>/articles/f5dea4b3/</url>
-    <content><![CDATA[<p>考虑两个int相乘溢出问题</p>
+    <title>如何在普通的类中获取spring容器中的bean</title>
+    <url>/articles/dfc1f761/</url>
+    <content><![CDATA[<p>最常见的情况大概就是有一个类他的<strong>属性的是通过spring的配置文件读取</strong>的。这样这个<strong>类必然要交给Spring容器</strong>进行管理。这个时候如果我们在普通类中<strong>直接new这个类是不可以拿到的</strong>。属性值不会加载成功。</p>
 <span id="more"></span>
 <!-- markdownlint-disable MD041 MD002--> 
 
-<h2 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h2><p>给定一个非负整数 c ，你要判断是否存在两个整数 a 和 b，使得 a2 + b2 = c 。</p>
-<p>示例 1：</p>
-<p>输入：c = 5<br>输出：true<br>解释：1 * 1 + 2 * 2 = 5<br>示例 2：</p>
-<p>输入：c = 3<br>输出：false<br>示例 3：</p>
-<p>输入：c = 4<br>输出：true</p>
-<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>其实就是从<code>0~c</code>之间，找出两个数的平方和等于c，为了再次缩短找的距离，先对c进行开方运算，再从<code>0~sqrt(c)</code>之间找出两个合适的值，和之前的两数之和一样，两个指针，一个从后往前，一个从前往后。</p>
-<p>如果：sum = a^2 + b^2</p>
-<ul>
-<li>sum == c， return true</li>
-<li>sum &gt; c， b–</li>
-<li>sum &lt; c，a++</li>
-</ul>
-<p>到现在，题目还没完，当c特别大（2147483600）的时候，从<code>0~sqrt(c)</code>计算sum的过程中，两个int相乘，得出的结果值大于int的范围时会溢出，导致找不到正确答案，所以两个指针a和b需要定义为long型</p>
-<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>Java</p>
-<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public boolean judgeSquareSum(int c) &#123;
-        long a &#x3D; 0;
-        long b &#x3D; (long) Math.sqrt(c);
-        while (a &lt;&#x3D; b) &#123;
-            if (a * a + b * b &#x3D;&#x3D; c) &#123;
-                return true;
-            &#125; else if (a * a + b * b &lt; c) &#123;
-                a++;
-            &#125; else &#123;
-                b--;
-            &#125;
+<h3 id="整体思路"><a href="#整体思路" class="headerlink" title="整体思路"></a>整体思路</h3><p>封装一个SpringContextUtil来获取bean，然后普通类直接通过这个工具类来从容器中拿bean即可</p>
+<h3 id="封装SpringContextUtil"><a href="#封装SpringContextUtil" class="headerlink" title="封装SpringContextUtil"></a>封装SpringContextUtil</h3><p>思路就是获取<code>applicationContext</code>，然后通过<code>applicationContext</code> 的<code>getBean</code>方法获取容器中的<code>bean</code>。</p>
+<p>那么，<code>applicationContext</code> 从哪里获取呢？</p>
+<p>就是通过实现<code>ApplicationContextAware</code>  接口，实现<code>setApplicationContext</code> 方法，然后spring启动的时候会自动调用这个set方法，将<code>applicationContext</code> 加进去，然后就可以用这个工具类做各种操作了！</p>
+<p>具体实现代码：</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.stereotype.Component;
+
+&#x2F;**
+ * @author hc
+ *&#x2F;
+@Component
+public class SpringContextUtil implements ApplicationContextAware &#123;
+    private static ApplicationContext applicationContext;
+
+    public SpringContextUtil() &#123;
+    &#125;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException &#123;
+        if (SpringContextUtil.applicationContext &#x3D;&#x3D; null) &#123;
+            SpringContextUtil.applicationContext &#x3D; applicationContext;
         &#125;
-        return false;
-    &#125;</code></pre></div></figure>
+
+    &#125;
+
+    public static ApplicationContext getApplicationContext() &#123;
+        return applicationContext;
+    &#125;
+
+    public static Object getBean(String name) &#123;
+        return getApplicationContext().getBean(name);
+    &#125;
+
+    public static &lt;T&gt; T getBean(Class&lt;T&gt; clazz) &#123;
+        return getApplicationContext().getBean(clazz);
+    &#125;
+
+    public static &lt;T&gt; T getBean(String name, Class&lt;T&gt; clazz) &#123;
+        return getApplicationContext().getBean(name, clazz);
+    &#125;
+
+    public static void publishEvent(ApplicationEvent event) &#123;
+        if (applicationContext !&#x3D; null) &#123;
+            applicationContext.publishEvent(event);
+        &#125;
+    &#125;
+&#125;</code></pre></div></figure>
+
+<h3 id="使用SpringContextUtil获取bean"><a href="#使用SpringContextUtil获取bean" class="headerlink" title="使用SpringContextUtil获取bean"></a>使用SpringContextUtil获取bean</h3><p>这样就可以在任何地方获取spring容器中的bean了</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">Example bean &#x3D; SpringContextUtil.getBean(Example.class);</code></pre></div></figure>
 
 ]]></content>
       <categories>
-        <category>数据结构与算法</category>
+        <category>经验（Bug）总结</category>
       </categories>
       <tags>
-        <tag>Leetcode</tag>
-        <tag>双指针</tag>
+        <tag>Spring</tag>
       </tags>
   </entry>
   <entry>
@@ -2728,109 +3034,6 @@ github.global.ssl.fastly.net</code></pre></div></figure></li>
       <tags>
         <tag>计算机网络</tag>
         <tag>HTTP</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>如何在普通的类中获取spring容器中的bean</title>
-    <url>/articles/dfc1f761/</url>
-    <content><![CDATA[<p>最常见的情况大概就是有一个类他的<strong>属性的是通过spring的配置文件读取</strong>的。这样这个<strong>类必然要交给Spring容器</strong>进行管理。这个时候如果我们在普通类中<strong>直接new这个类是不可以拿到的</strong>。属性值不会加载成功。</p>
-<span id="more"></span>
-<!-- markdownlint-disable MD041 MD002--> 
-
-<h3 id="整体思路"><a href="#整体思路" class="headerlink" title="整体思路"></a>整体思路</h3><p>封装一个SpringContextUtil来获取bean，然后普通类直接通过这个工具类来从容器中拿bean即可</p>
-<h3 id="封装SpringContextUtil"><a href="#封装SpringContextUtil" class="headerlink" title="封装SpringContextUtil"></a>封装SpringContextUtil</h3><p>思路就是获取<code>applicationContext</code>，然后通过<code>applicationContext</code> 的<code>getBean</code>方法获取容器中的<code>bean</code>。</p>
-<p>那么，<code>applicationContext</code> 从哪里获取呢？</p>
-<p>就是通过实现<code>ApplicationContextAware</code>  接口，实现<code>setApplicationContext</code> 方法，然后spring启动的时候会自动调用这个set方法，将<code>applicationContext</code> 加进去，然后就可以用这个工具类做各种操作了！</p>
-<p>具体实现代码：</p>
-<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.stereotype.Component;
-
-&#x2F;**
- * @author hc
- *&#x2F;
-@Component
-public class SpringContextUtil implements ApplicationContextAware &#123;
-    private static ApplicationContext applicationContext;
-
-    public SpringContextUtil() &#123;
-    &#125;
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException &#123;
-        if (SpringContextUtil.applicationContext &#x3D;&#x3D; null) &#123;
-            SpringContextUtil.applicationContext &#x3D; applicationContext;
-        &#125;
-
-    &#125;
-
-    public static ApplicationContext getApplicationContext() &#123;
-        return applicationContext;
-    &#125;
-
-    public static Object getBean(String name) &#123;
-        return getApplicationContext().getBean(name);
-    &#125;
-
-    public static &lt;T&gt; T getBean(Class&lt;T&gt; clazz) &#123;
-        return getApplicationContext().getBean(clazz);
-    &#125;
-
-    public static &lt;T&gt; T getBean(String name, Class&lt;T&gt; clazz) &#123;
-        return getApplicationContext().getBean(name, clazz);
-    &#125;
-
-    public static void publishEvent(ApplicationEvent event) &#123;
-        if (applicationContext !&#x3D; null) &#123;
-            applicationContext.publishEvent(event);
-        &#125;
-    &#125;
-&#125;</code></pre></div></figure>
-
-<h3 id="使用SpringContextUtil获取bean"><a href="#使用SpringContextUtil获取bean" class="headerlink" title="使用SpringContextUtil获取bean"></a>使用SpringContextUtil获取bean</h3><p>这样就可以在任何地方获取spring容器中的bean了</p>
-<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">Example bean &#x3D; SpringContextUtil.getBean(Example.class);</code></pre></div></figure>
-
-]]></content>
-      <categories>
-        <category>经验（Bug）总结</category>
-      </categories>
-      <tags>
-        <tag>Spring</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Spring使用@Value值注入不成功问题</title>
-    <url>/articles/2edfbfe8/</url>
-    <content><![CDATA[<p>使用@Value注解获取配置文件中的值不成功</p>
-<span id="more"></span>
-<!-- markdownlint-disable MD041 MD002--> 
-
-<h3 id="先查看这个注解导入的对不对"><a href="#先查看这个注解导入的对不对" class="headerlink" title="先查看这个注解导入的对不对"></a>先查看这个注解导入的对不对</h3><figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">import org.springframework.beans.factory.annotation.Value;</code></pre></div></figure>
-
-<h3 id="再查看里面的变量是否是-这种形式取的值"><a href="#再查看里面的变量是否是-这种形式取的值" class="headerlink" title="再查看里面的变量是否是${} 这种形式取的值"></a>再查看里面的变量是否是<code>$&#123;&#125;</code> 这种形式取的值</h3><figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">@Value(&quot;$&#123;example.useTable&#125;&quot;)
-private boolean useTable;
-
-&#x2F;&#x2F; yml中配置
-example:
-  useTable: true</code></pre></div></figure>
-
-<h3 id="再查看注入此属性的类是否加了-Component注解"><a href="#再查看注入此属性的类是否加了-Component注解" class="headerlink" title="再查看注入此属性的类是否加了@Component注解"></a>再查看注入此属性的类是否加了@Component注解</h3><p>没加注解就代表没有注册到spring容器中，自然也是没办法注入值的</p>
-<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">@Component
-public class Example &#123;
-
-    @Value(&quot;$&#123;example.useTable&#125;&quot;)
-    private boolean useTable;
-&#125;</code></pre></div></figure>
-
-<h3 id="【最关键】查看用这个类的地方"><a href="#【最关键】查看用这个类的地方" class="headerlink" title="【最关键】查看用这个类的地方"></a>【最关键】<strong>查看用这个类的地方</strong></h3><p>是否是从spring中获取的，如果是从spring中拿的，值是肯定有的，<strong>如果是手动<code>new</code> 出来的，肯定不会注入成功的！</strong></p>
-]]></content>
-      <categories>
-        <category>经验（Bug）总结</category>
-      </categories>
-      <tags>
-        <tag>Spring</tag>
       </tags>
   </entry>
   <entry>
@@ -2963,46 +3166,6 @@ public class Example &#123;
       <tags>
         <tag>计算机网络</tag>
         <tag>TCP/IP</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>关于带宽、网速和流量</title>
-    <url>/articles/f18c951f/</url>
-    <content><![CDATA[<p>什么是带宽？带宽和网速又是如何换算的？</p>
-<span id="more"></span>
-<!-- markdownlint-disable MD041 MD002--> 
-
-<h2 id="计算机存储单位"><a href="#计算机存储单位" class="headerlink" title="计算机存储单位"></a>计算机存储单位</h2><p>所有的知识都在计算机的存储单位上来说的。</p>
-<p>计算机常用存储单位有：bit、Byte、KB、MB、GB、TB、PB等等</p>
-<p>有一个最重要的要记清楚：<strong>1字节（Byte）= 8 位（bit）</strong>，所谓bit（Binary Digits）也就是一个二进制位（0或1）</p>
-<ul>
-<li><p>1 KB( Kilobyte，千字节)=1024 B</p>
-</li>
-<li><p>1 MB( Megabyte，兆字节)=1024 KB</p>
-</li>
-<li><p>1 GB( Gigabyte，吉字节，千兆)=1024 MB</p>
-</li>
-<li><p>1 TB( Trillionbyte，万亿字节，太字节)=1024 GB</p>
-</li>
-<li><p>1 PB( Petabyte，千万亿字节，拍字节)=1024 TB</p>
-</li>
-</ul>
-<h2 id="带宽"><a href="#带宽" class="headerlink" title="带宽"></a>带宽</h2><p>带宽指单位时间能通过链路的数据量。通常以bps（bit per second）来表示，即每秒可传输之位数；通俗点来说就是每秒可以传输多少个bit。</p>
-<p>比如办理了一个 100 M的宽带，这是啥意思呢？其实就是 100 Mbps，也就是每秒可以传输100 M的bit</p>
-<h2 id="网速"><a href="#网速" class="headerlink" title="网速"></a>网速</h2><p>那么，我办理了100 M的宽带，网速实际能跑到多少？</p>
-<p>上面已经说到，100 M的宽带，就是每秒可以传输100 M的bit，但是网速的单位通常是 B/s、KB/s和MB/s，如何转换？</p>
-<p>众所周知：1字节（Byte）= 8 位（bit）</p>
-<p>所以，100 Mbps = 100 / 8 MBps = 12.5 MBps = 12.5 MB/s</p>
-<p>注意大写B和小写b是不一样的，大写B是 Byte ，小写b是 bit</p>
-<p>经过计算，也就是100 M带宽，实际网速最高能达到 12.5 MB/s</p>
-<h2 id="流量"><a href="#流量" class="headerlink" title="流量"></a>流量</h2><p>流量就是用户上网发送和接收的数据量的总和，单位可以用字节（Byte）来表示</p>
-<p>注意：流量其实是上传和下载消耗的流量总和，只不过下载的场景比较多</p>
-]]></content>
-      <categories>
-        <category>计算机网络</category>
-      </categories>
-      <tags>
-        <tag>计算机基础</tag>
       </tags>
   </entry>
   <entry>
@@ -3218,6 +3381,46 @@ student study!
       </categories>
       <tags>
         <tag>设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>关于带宽、网速和流量</title>
+    <url>/articles/f18c951f/</url>
+    <content><![CDATA[<p>什么是带宽？带宽和网速又是如何换算的？</p>
+<span id="more"></span>
+<!-- markdownlint-disable MD041 MD002--> 
+
+<h2 id="计算机存储单位"><a href="#计算机存储单位" class="headerlink" title="计算机存储单位"></a>计算机存储单位</h2><p>所有的知识都在计算机的存储单位上来说的。</p>
+<p>计算机常用存储单位有：bit、Byte、KB、MB、GB、TB、PB等等</p>
+<p>有一个最重要的要记清楚：<strong>1字节（Byte）= 8 位（bit）</strong>，所谓bit（Binary Digits）也就是一个二进制位（0或1）</p>
+<ul>
+<li><p>1 KB( Kilobyte，千字节)=1024 B</p>
+</li>
+<li><p>1 MB( Megabyte，兆字节)=1024 KB</p>
+</li>
+<li><p>1 GB( Gigabyte，吉字节，千兆)=1024 MB</p>
+</li>
+<li><p>1 TB( Trillionbyte，万亿字节，太字节)=1024 GB</p>
+</li>
+<li><p>1 PB( Petabyte，千万亿字节，拍字节)=1024 TB</p>
+</li>
+</ul>
+<h2 id="带宽"><a href="#带宽" class="headerlink" title="带宽"></a>带宽</h2><p>带宽指单位时间能通过链路的数据量。通常以bps（bit per second）来表示，即每秒可传输之位数；通俗点来说就是每秒可以传输多少个bit。</p>
+<p>比如办理了一个 100 M的宽带，这是啥意思呢？其实就是 100 Mbps，也就是每秒可以传输100 M的bit</p>
+<h2 id="网速"><a href="#网速" class="headerlink" title="网速"></a>网速</h2><p>那么，我办理了100 M的宽带，网速实际能跑到多少？</p>
+<p>上面已经说到，100 M的宽带，就是每秒可以传输100 M的bit，但是网速的单位通常是 B/s、KB/s和MB/s，如何转换？</p>
+<p>众所周知：1字节（Byte）= 8 位（bit）</p>
+<p>所以，100 Mbps = 100 / 8 MBps = 12.5 MBps = 12.5 MB/s</p>
+<p>注意大写B和小写b是不一样的，大写B是 Byte ，小写b是 bit</p>
+<p>经过计算，也就是100 M带宽，实际网速最高能达到 12.5 MB/s</p>
+<h2 id="流量"><a href="#流量" class="headerlink" title="流量"></a>流量</h2><p>流量就是用户上网发送和接收的数据量的总和，单位可以用字节（Byte）来表示</p>
+<p>注意：流量其实是上传和下载消耗的流量总和，只不过下载的场景比较多</p>
+]]></content>
+      <categories>
+        <category>计算机网络</category>
+      </categories>
+      <tags>
+        <tag>计算机基础</tag>
       </tags>
   </entry>
   <entry>
@@ -4532,6 +4735,51 @@ ERROR -- ERROR 日志测试</code></pre></div></figure>
       </categories>
       <tags>
         <tag>设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>leetcode#633-平方数之和</title>
+    <url>/articles/f5dea4b3/</url>
+    <content><![CDATA[<p>考虑两个int相乘溢出问题</p>
+<span id="more"></span>
+<!-- markdownlint-disable MD041 MD002--> 
+
+<h2 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h2><p>给定一个非负整数 c ，你要判断是否存在两个整数 a 和 b，使得 a2 + b2 = c 。</p>
+<p>示例 1：</p>
+<p>输入：c = 5<br>输出：true<br>解释：1 * 1 + 2 * 2 = 5<br>示例 2：</p>
+<p>输入：c = 3<br>输出：false<br>示例 3：</p>
+<p>输入：c = 4<br>输出：true</p>
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>其实就是从<code>0~c</code>之间，找出两个数的平方和等于c，为了再次缩短找的距离，先对c进行开方运算，再从<code>0~sqrt(c)</code>之间找出两个合适的值，和之前的两数之和一样，两个指针，一个从后往前，一个从前往后。</p>
+<p>如果：sum = a^2 + b^2</p>
+<ul>
+<li>sum == c， return true</li>
+<li>sum &gt; c， b–</li>
+<li>sum &lt; c，a++</li>
+</ul>
+<p>到现在，题目还没完，当c特别大（2147483600）的时候，从<code>0~sqrt(c)</code>计算sum的过程中，两个int相乘，得出的结果值大于int的范围时会溢出，导致找不到正确答案，所以两个指针a和b需要定义为long型</p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>Java</p>
+<figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java">public boolean judgeSquareSum(int c) &#123;
+        long a &#x3D; 0;
+        long b &#x3D; (long) Math.sqrt(c);
+        while (a &lt;&#x3D; b) &#123;
+            if (a * a + b * b &#x3D;&#x3D; c) &#123;
+                return true;
+            &#125; else if (a * a + b * b &lt; c) &#123;
+                a++;
+            &#125; else &#123;
+                b--;
+            &#125;
+        &#125;
+        return false;
+    &#125;</code></pre></div></figure>
+
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+      </categories>
+      <tags>
+        <tag>Leetcode</tag>
+        <tag>双指针</tag>
       </tags>
   </entry>
   <entry>
