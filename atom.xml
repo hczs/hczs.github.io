@@ -111,11 +111,11 @@
     
     <category term="大数据" scheme="https://sunnyc.icu/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
     
-    <category term="环境搭建" scheme="https://sunnyc.icu/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"/>
-    
     <category term="Kafka" scheme="https://sunnyc.icu/tags/Kafka/"/>
     
     <category term="中间件" scheme="https://sunnyc.icu/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
+    
+    <category term="环境搭建" scheme="https://sunnyc.icu/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"/>
     
   </entry>
   
@@ -205,9 +205,9 @@
     
     <category term="大数据" scheme="https://sunnyc.icu/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
     
-    <category term="环境搭建" scheme="https://sunnyc.icu/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"/>
-    
     <category term="中间件" scheme="https://sunnyc.icu/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
+    
+    <category term="环境搭建" scheme="https://sunnyc.icu/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"/>
     
     <category term="zookeeper" scheme="https://sunnyc.icu/tags/zookeeper/"/>
     

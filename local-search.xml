@@ -120,11 +120,11 @@
       
       <tag>大数据</tag>
       
-      <tag>环境搭建</tag>
-      
       <tag>Kafka</tag>
       
       <tag>中间件</tag>
+      
+      <tag>环境搭建</tag>
       
     </tags>
     
@@ -238,9 +238,9 @@
       
       <tag>大数据</tag>
       
-      <tag>环境搭建</tag>
-      
       <tag>中间件</tag>
+      
+      <tag>环境搭建</tag>
       
       <tag>zookeeper</tag>
       
@@ -1137,6 +1137,17 @@
   
   
   <entry>
+    <title>关于我</title>
+    <link href="/"/>
+    <url>/</url>
+    
+    <content type="html"><![CDATA[<ul><li>狂奔的蜗牛<ul><li>后端开发</li><li>常用语言Java &amp; Python</li></ul></li><li>联系方式<ul><li>邮箱：<a href="mailto:&#x68;&#x63;&#122;&#115;&#x68;&#x64;&#x40;&#x67;&#x6d;&#x61;&#105;&#x6c;&#x2e;&#x63;&#x6f;&#109;">&#x68;&#x63;&#122;&#115;&#x68;&#x64;&#x40;&#x67;&#x6d;&#x61;&#105;&#x6c;&#x2e;&#x63;&#x6f;&#109;</a></li><li>微信：geniush15</li><li>Github：<a href="https://github.com/hczs">https://github.com/hczs</a></li></ul></li></ul>]]></content>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>书单</title>
     <link href="/"/>
     <url>/</url>
@@ -1159,17 +1170,6 @@
   
   
   <entry>
-    <title>关于我</title>
-    <link href="/"/>
-    <url>/</url>
-    
-    <content type="html"><![CDATA[<ul><li>狂奔的蜗牛<ul><li>后端开发</li><li>常用语言Java &amp; Python</li></ul></li><li>联系方式<ul><li>邮箱：<a href="mailto:&#104;&#x63;&#122;&#x73;&#104;&#x64;&#64;&#x67;&#x6d;&#97;&#105;&#108;&#x2e;&#99;&#x6f;&#x6d;">&#104;&#x63;&#122;&#x73;&#104;&#x64;&#64;&#x67;&#x6d;&#97;&#105;&#108;&#x2e;&#99;&#x6f;&#x6d;</a></li><li>微信：geniush15</li><li>Github：<a href="https://github.com/hczs">https://github.com/hczs</a></li></ul></li></ul>]]></content>
-    
-  </entry>
-  
-  
-  
-  <entry>
     <title>友情链接</title>
     <link href="/"/>
     <url>/</url>
@@ -1181,7 +1181,7 @@
   
   
   <entry>
-    <title>标签</title>
+    <title>Repositories</title>
     <link href="/"/>
     <url>/</url>
     
@@ -1192,7 +1192,7 @@
   
   
   <entry>
-    <title>Repositories</title>
+    <title>标签</title>
     <link href="/"/>
     <url>/</url>
     
