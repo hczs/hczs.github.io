@@ -6,7 +6,7 @@
   <link href="https://sunnyc.icu/atom.xml" rel="self"/>
   
   <link href="https://sunnyc.icu/"/>
-  <updated>2022-06-30T03:30:52.378Z</updated>
+  <updated>2022-07-21T07:33:58.445Z</updated>
   <id>https://sunnyc.icu/</id>
   
   <author>
@@ -15,6 +15,25 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>FreeMarker模板编写指南</title>
+    <link href="https://sunnyc.icu/articles/4bfb823a/"/>
+    <id>https://sunnyc.icu/articles/4bfb823a/</id>
+    <published>2022-07-21T06:54:34.000Z</published>
+    <updated>2022-07-21T07:33:58.445Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;关于代码生成器项目中的代码模板编写指南&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="工具使用" scheme="https://sunnyc.icu/categories/%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8/"/>
+    
+    
+    <category term="模板引擎" scheme="https://sunnyc.icu/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/"/>
+    
+  </entry>
   
   <entry>
     <title>Docker使用笔记</title>
@@ -406,25 +425,6 @@
     
     
     <category term="Java" scheme="https://sunnyc.icu/tags/Java/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>模拟并发环境代码段</title>
-    <link href="https://sunnyc.icu/articles/3b4b1d9a/"/>
-    <id>https://sunnyc.icu/articles/3b4b1d9a/</id>
-    <published>2022-02-28T13:41:03.000Z</published>
-    <updated>2022-03-31T02:57:45.214Z</updated>
-    
-    
-    <summary type="html">&lt;p&gt;使用&lt;code&gt;CountDownLatch&lt;/code&gt;来控制线程们一起启动模拟并发&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="Java基础" scheme="https://sunnyc.icu/categories/Java%E5%9F%BA%E7%A1%80/"/>
-    
-    
-    <category term="多线程" scheme="https://sunnyc.icu/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
     
   </entry>
   

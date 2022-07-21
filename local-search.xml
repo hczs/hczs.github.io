@@ -4,6 +4,31 @@
   
   
   <entry>
+    <title>FreeMarker模板编写指南</title>
+    <link href="/articles/4bfb823a/"/>
+    <url>/articles/4bfb823a/</url>
+    
+    <content type="html"><![CDATA[<p>关于代码生成器项目中的代码模板编写指南</p><span id="more"></span><!-- markdownlint-disable MD041 MD002--> <p>此文档搭配代码生成器工具使用：<a href="https://github.com/hczs/code-generator">https://github.com/hczs/code-generator</a></p><h2 id="项目已有参数"><a href="#项目已有参数" class="headerlink" title="项目已有参数"></a>项目已有参数</h2><p>参数配置表单参数：</p><table><thead><tr><th>参数名</th><th>参数含义</th><th>模板中使用</th></tr></thead><tbody><tr><td>author</td><td>作者</td><td>${author}</td></tr><tr><td>groupName</td><td>模板组名称</td><td>${groupName}</td></tr><tr><td>email</td><td>邮箱</td><td>${email}</td></tr><tr><td>ignorePrefix</td><td>忽略表名前缀</td><td>${ignorePrefix}</td></tr><tr><td>permission</td><td>权限标识</td><td>${permission}</td></tr><tr><td>requestMapping</td><td>URL映射路径</td><td>${requestMapping}</td></tr></tbody></table><p>表 SQL 语句会解析为 classInfo 对象，SQL 相关信息会映射为这个对象的属性值</p><table><thead><tr><th>参数名</th><th>参数含义</th><th>模板中使用</th></tr></thead><tbody><tr><td>classInfo.originTableName</td><td>原始表名</td><td>${classInfo.originTableName}</td></tr><tr><td>classInfo.tableName</td><td>表名（去掉表名前缀后）</td><td>${classInfo.tableName}</td></tr><tr><td>classInfo.className</td><td>类名（实体类的名字）</td><td>${classInfo.className}</td></tr><tr><td>classInfo.classComment</td><td>类注释</td><td>${classInfo.classComment}</td></tr></tbody></table><p>classInfo 对象还有一个 fieldList 属性，这个是 SQL 中各个字段的集合，使用的时候需要遍历</p><figure><div class="code-wrapper"><pre class="line-numbers language-ftl" data-language="ftl"><code class="language-ftl">&lt;#list classInfo.fieldList as fieldItem &gt;  字段名: $&#123;fieldItem.fieldName&#125;  字段类型: $&#123;fieldItem.fieldClass&#125;  字段注释信息: $&#123;fieldItem.fieldComment&#125;&lt;&#x2F;#list&gt;</code></pre></div></figure><h2 id="模板语法"><a href="#模板语法" class="headerlink" title="模板语法"></a>模板语法</h2><p>完整文档请查看模板开发指南：<a href="http://freemarker.foofun.cn/dgui_quickstart_template.html">http://freemarker.foofun.cn/dgui_quickstart_template.html</a></p><p>以下列出常用的语法</p><h3 id="分支判断（if）"><a href="#分支判断（if）" class="headerlink" title="分支判断（if）"></a>分支判断（if）</h3><p>语法规则：<code>&lt;#if condition&gt; xxx &lt;/#if&gt;</code></p><ul><li>condition：可以是一个判断句式，比如 author == “sunnyc”</li><li>xxx: 是 condition 为 true 的时候，会显示 xxx 内容，如果为 false，则什么都不显示</li></ul><p>实际使用样例，如果字段类型为 Date，则加上后面的 dateFormat 内容：</p><figure><div class="code-wrapper"><pre class="line-numbers language-ftl" data-language="ftl"><code class="language-ftl">&lt;#if fieldItem.fieldClass &#x3D;&#x3D; &quot;Date&quot;&gt;, dateFormat &#x3D; &quot;yyyy-MM-dd HH:mm:ss&quot;&lt;&#x2F;#if&gt;</code></pre></div></figure><h3 id="循环（list）"><a href="#循环（list）" class="headerlink" title="循环（list）"></a>循环（list）</h3><p>语法规则：<code>&lt;#list sequence as loopVariable&gt; repeatThis &lt;/#list&gt;</code></p><ul><li>sequence：是我们要遍历的目标对象</li><li>loopVariable：是目标对象里面的每一个元素</li><li>repeatThis：循环体内容</li></ul><p>实际使用样例，我们遍历 classInfo 对象的 fieldList 属性，这个属性是一个 List 集合：</p><figure><div class="code-wrapper"><pre class="line-numbers language-ftl" data-language="ftl"><code class="language-ftl">&lt;#list classInfo.fieldList as fieldItem &gt;  字段名: $&#123;fieldItem.fieldName&#125;  字段类型: $&#123;fieldItem.fieldClass&#125;  字段注释信息: $&#123;fieldItem.fieldComment&#125;&lt;&#x2F;#list&gt;</code></pre></div></figure><h3 id="常用函数"><a href="#常用函数" class="headerlink" title="常用函数"></a>常用函数</h3><ul><li>获取当前日期：<code>$&#123;.now?string(&#39;yyyy-MM-dd HH:mm:ss&#39;)&#125;</code></li><li>求 list 的大小：<code>$&#123;classInfo.fieldList?size&#125;</code></li><li>首字母小写：<code>$&#123;classInfo.className?uncap_first&#125;</code></li></ul><p>参考：</p><ul><li><a href="http://freemarker.foofun.cn/dgui_quickstart_template.html#autoid_7">http://freemarker.foofun.cn/dgui_quickstart_template.html#autoid_7</a></li><li><a href="http://freemarker.foofun.cn/ref_builtins.html">http://freemarker.foofun.cn/ref_builtins.html</a></li></ul>]]></content>
+    
+    
+    <categories>
+      
+      <category>工具使用</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>模板引擎</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>Docker使用笔记</title>
     <link href="/articles/ccc46239/"/>
     <url>/articles/ccc46239/</url>
@@ -1141,7 +1166,7 @@
     <link href="/"/>
     <url>/</url>
     
-    <content type="html"><![CDATA[<ul><li>狂奔的蜗牛<ul><li>后端开发</li><li>常用语言Java &amp; Python</li></ul></li><li>联系方式<ul><li>邮箱：<a href="mailto:&#x68;&#x63;&#122;&#115;&#x68;&#x64;&#x40;&#x67;&#x6d;&#x61;&#105;&#x6c;&#x2e;&#x63;&#x6f;&#109;">&#x68;&#x63;&#122;&#115;&#x68;&#x64;&#x40;&#x67;&#x6d;&#x61;&#105;&#x6c;&#x2e;&#x63;&#x6f;&#109;</a></li><li>微信：geniush15</li><li>Github：<a href="https://github.com/hczs">https://github.com/hczs</a></li></ul></li></ul>]]></content>
+    <content type="html"><![CDATA[<ul><li>狂奔的蜗牛<ul><li>后端开发</li><li>常用语言Java &amp; Python</li></ul></li><li>联系方式<ul><li>邮箱：<a href="mailto:&#x68;&#x63;&#122;&#115;&#x68;&#x64;&#64;&#103;&#x6d;&#97;&#105;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;">&#x68;&#x63;&#122;&#115;&#x68;&#x64;&#64;&#103;&#x6d;&#97;&#105;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;</a></li><li>微信：geniush15</li><li>Github：<a href="https://github.com/hczs">https://github.com/hczs</a></li></ul></li></ul>]]></content>
     
   </entry>
   
@@ -1149,17 +1174,6 @@
   
   <entry>
     <title>书单</title>
-    <link href="/"/>
-    <url>/</url>
-    
-    <content type="html"><![CDATA[]]></content>
-    
-  </entry>
-  
-  
-  
-  <entry>
-    <title>分类</title>
     <link href="/"/>
     <url>/</url>
     
@@ -1182,6 +1196,17 @@
   
   <entry>
     <title>Repositories</title>
+    <link href="/"/>
+    <url>/</url>
+    
+    <content type="html"><![CDATA[]]></content>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>分类</title>
     <link href="/"/>
     <url>/</url>
     
