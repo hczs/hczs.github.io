@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Caiden&#39;s Blog</title>
+  
+  <subtitle>不熬夜</subtitle>
+  <link href="https://www.powercheng.fun/atom.xml" rel="self"/>
+  
+  <link href="https://www.powercheng.fun/"/>
+  <updated>2025-11-19T03:04:36.715Z</updated>
+  <id>https://www.powercheng.fun/</id>
+  
+  <author>
+    <name>Caiden Hou</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>上下文工程（Context Engineering）</title>
+    <link href="https://www.powercheng.fun/articles/67775bb2/"/>
+    <id>https://www.powercheng.fun/articles/67775bb2/</id>
+    <published>2025-11-18T11:23:04.000Z</published>
+    <updated>2025-11-19T03:04:36.715Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;在 LLM 的上下文窗口内动态的组装和管理信息的过程，就是上下文工程，目的是开发具备状态感知能力的智能 Agent。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="AI" scheme="https://www.powercheng.fun/categories/AI/"/>
+    
+    
+    <category term="Context Engineering" scheme="https://www.powercheng.fun/tags/Context-Engineering/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>FunASR热词配置</title>
+    <link href="https://www.powercheng.fun/articles/15b3709a/"/>
+    <id>https://www.powercheng.fun/articles/15b3709a/</id>
+    <published>2025-09-05T06:22:22.000Z</published>
+    <updated>2025-11-19T03:04:36.681Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;FunASR 的热词配置使用方式说明，官方文档太太太太太太太简略&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="AI" scheme="https://www.powercheng.fun/categories/AI/"/>
+    
+    
+    <category term="ASR" scheme="https://www.powercheng.fun/tags/ASR/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>GPT-SoVITS 语音克隆教程</title>
+    <link href="https://www.powercheng.fun/articles/dd7fb449/"/>
+    <id>https://www.powercheng.fun/articles/dd7fb449/</id>
+    <published>2025-08-17T08:06:15.000Z</published>
+    <updated>2025-11-19T03:04:36.681Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;一个语音克隆，支持微调的 TTS 工具，还支持流式 TTS API 接口。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="AI" scheme="https://www.powercheng.fun/categories/AI/"/>
+    
+    
+    <category term="语音克隆" scheme="https://www.powercheng.fun/tags/%E8%AF%AD%E9%9F%B3%E5%85%8B%E9%9A%86/"/>
+    
+    <category term="TTS" scheme="https://www.powercheng.fun/tags/TTS/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>LangChain 极速入门</title>
+    <link href="https://www.powercheng.fun/articles/2bf26df/"/>
+    <id>https://www.powercheng.fun/articles/2bf26df/</id>
+    <published>2025-07-24T12:26:23.000Z</published>
+    <updated>2025-11-19T03:04:36.684Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;关于 LangChain 的 ChatModels、PromptTemplate、RAG、Agent 相关组件介绍&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="AI" scheme="https://www.powercheng.fun/categories/AI/"/>
+    
+    
+    <category term="LangChain" scheme="https://www.powercheng.fun/tags/LangChain/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>LangChain的大文本分块策略</title>
+    <link href="https://www.powercheng.fun/articles/3322b824/"/>
+    <id>https://www.powercheng.fun/articles/3322b824/</id>
+    <published>2025-07-11T11:42:40.000Z</published>
+    <updated>2025-11-19T03:04:36.699Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;LangChain 中大文本分块的策略总结&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="AI" scheme="https://www.powercheng.fun/categories/AI/"/>
+    
+    
+    <category term="LangChain" scheme="https://www.powercheng.fun/tags/LangChain/"/>
+    
+    <category term="TextSplitter" scheme="https://www.powercheng.fun/tags/TextSplitter/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MCP 服务从开发到发布全流程</title>
+    <link href="https://www.powercheng.fun/articles/42bb0f/"/>
+    <id>https://www.powercheng.fun/articles/42bb0f/</id>
+    <published>2025-07-07T11:33:21.000Z</published>
+    <updated>2025-11-19T03:04:36.699Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;使用 uv + Python 开发一个 MCP 服务从部署到发布全流程&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="AI" scheme="https://www.powercheng.fun/categories/AI/"/>
+    
+    
+    <category term="MCP" scheme="https://www.powercheng.fun/tags/MCP/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>CAMEL-AI 使用笔记</title>
+    <link href="https://www.powercheng.fun/articles/b282b723/"/>
+    <id>https://www.powercheng.fun/articles/b282b723/</id>
+    <published>2025-07-06T10:45:58.000Z</published>
+    <updated>2025-11-19T03:04:36.680Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;由于官方文档过于简洁，所以记一下 CAMEL-AI 多智能体框架使用笔记，包括基础 Agent 使用（Prompt、Message、Memory、Tool），role-playing（角色扮演）使用、Workforce（多智能体协作）使用、RAG&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="AI" scheme="https://www.powercheng.fun/categories/AI/"/>
+    
+    
+    <category term="agent" scheme="https://www.powercheng.fun/tags/agent/"/>
+    
+    <category term="multi-agent" scheme="https://www.powercheng.fun/tags/multi-agent/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Prompt Engineering（提示词工程）</title>
+    <link href="https://www.powercheng.fun/articles/e8acd9b1/"/>
+    <id>https://www.powercheng.fun/articles/e8acd9b1/</id>
+    <published>2025-06-03T09:06:42.000Z</published>
+    <updated>2025-11-19T03:04:36.710Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;LLM 提示词使用技巧&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="AI" scheme="https://www.powercheng.fun/categories/AI/"/>
+    
+    
+    <category term="Prompt Engineering" scheme="https://www.powercheng.fun/tags/Prompt-Engineering/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Spring在业务开发中常用技巧</title>
+    <link href="https://www.powercheng.fun/articles/7330ba6b/"/>
+    <id>https://www.powercheng.fun/articles/7330ba6b/</id>
+    <published>2025-03-20T12:13:15.000Z</published>
+    <updated>2025-11-19T03:04:36.776Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;Spring 在业务开发中常用技巧：IOC 实现策略模式、AOP 实现拦截、Event 异步解耦、事务管理&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="后端" scheme="https://www.powercheng.fun/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="SpringBoot" scheme="https://www.powercheng.fun/tags/SpringBoot/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>AI 大模型相关概念及工具总结</title>
+    <link href="https://www.powercheng.fun/articles/6bb481e/"/>
+    <id>https://www.powercheng.fun/articles/6bb481e/</id>
+    <published>2025-03-07T02:50:23.000Z</published>
+    <updated>2025-11-19T03:04:36.680Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;大模型相关概念讲解：模型、大模型、大语言模型、大模型分类、Token、向量数据库、RAG、Ollama、Dify&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="AI" scheme="https://www.powercheng.fun/categories/AI/"/>
+    
+    
+    <category term="AI" scheme="https://www.powercheng.fun/tags/AI/"/>
+    
+    <category term="Ollama" scheme="https://www.powercheng.fun/tags/Ollama/"/>
+    
+    <category term="大模型" scheme="https://www.powercheng.fun/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/"/>
+    
+    <category term="RAG" scheme="https://www.powercheng.fun/tags/RAG/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Ubuntu通过Ollama部署DeepSeek</title>
+    <link href="https://www.powercheng.fun/articles/bb527592/"/>
+    <id>https://www.powercheng.fun/articles/bb527592/</id>
+    <published>2025-02-17T11:55:03.000Z</published>
+    <updated>2025-11-19T03:04:36.712Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;在 Ubuntu 上使用 Ollama 部署 DeepSeek R1&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="AI" scheme="https://www.powercheng.fun/categories/AI/"/>
+    
+    
+    <category term="AI" scheme="https://www.powercheng.fun/tags/AI/"/>
+    
+    <category term="Ollama" scheme="https://www.powercheng.fun/tags/Ollama/"/>
+    
+    <category term="DeepSeek" scheme="https://www.powercheng.fun/tags/DeepSeek/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>我的2024年终总结</title>
+    <link href="https://www.powercheng.fun/articles/9d35ac13/"/>
+    <id>https://www.powercheng.fun/articles/9d35ac13/</id>
+    <published>2024-12-31T08:18:06.000Z</published>
+    <updated>2025-11-19T03:04:36.837Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;我的 2024 年工作和生活总结&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="杂谈" scheme="https://www.powercheng.fun/categories/%E6%9D%82%E8%B0%88/"/>
+    
+    
+    <category term="杂谈" scheme="https://www.powercheng.fun/tags/%E6%9D%82%E8%B0%88/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>私有音乐服务解决方案</title>
+    <link href="https://www.powercheng.fun/articles/13ce4a37/"/>
+    <id>https://www.powercheng.fun/articles/13ce4a37/</id>
+    <published>2024-08-04T09:11:51.000Z</published>
+    <updated>2025-11-19T03:04:36.822Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;使用 Melody 和 Navidrome 搭建私有音乐服务&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="折腾" scheme="https://www.powercheng.fun/categories/%E6%8A%98%E8%85%BE/"/>
+    
+    
+    <category term="VPS" scheme="https://www.powercheng.fun/tags/VPS/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>我的2023年终总结</title>
+    <link href="https://www.powercheng.fun/articles/e046aa4b/"/>
+    <id>https://www.powercheng.fun/articles/e046aa4b/</id>
+    <published>2023-12-02T10:44:50.000Z</published>
+    <updated>2025-11-19T03:04:36.837Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;我的 2023 年工作和生活总结&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="杂谈" scheme="https://www.powercheng.fun/categories/%E6%9D%82%E8%B0%88/"/>
+    
+    
+    <category term="杂谈" scheme="https://www.powercheng.fun/tags/%E6%9D%82%E8%B0%88/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Java 日志框架梳理</title>
+    <link href="https://www.powercheng.fun/articles/fe7bfd09/"/>
+    <id>https://www.powercheng.fun/articles/fe7bfd09/</id>
+    <published>2023-11-22T02:12:24.000Z</published>
+    <updated>2025-11-19T03:04:36.773Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;Java 日志相关框架五花八门，索性梳理下日志相关组件&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="后端" scheme="https://www.powercheng.fun/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="Java" scheme="https://www.powercheng.fun/tags/Java/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>基于Apache Commons Pool2封装FTP连接池</title>
+    <link href="https://www.powercheng.fun/articles/a53b9572/"/>
+    <id>https://www.powercheng.fun/articles/a53b9572/</id>
+    <published>2023-11-16T02:22:23.000Z</published>
+    <updated>2025-11-19T03:04:36.864Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;基于 Apache Commons Pool2 和 Hutool 的 FTP 工具类封装 FTP 连接池&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="造轮子" scheme="https://www.powercheng.fun/categories/%E9%80%A0%E8%BD%AE%E5%AD%90/"/>
+    
+    
+    <category term="SpringBoot" scheme="https://www.powercheng.fun/tags/SpringBoot/"/>
+    
+    <category term="Ftp" scheme="https://www.powercheng.fun/tags/Ftp/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>SpringBoot自动创建Kafka Topic</title>
+    <link href="https://www.powercheng.fun/articles/47bee030/"/>
+    <id>https://www.powercheng.fun/articles/47bee030/</id>
+    <published>2023-11-15T02:59:53.000Z</published>
+    <updated>2025-11-19T03:04:36.775Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;并做到分区、副本数可配置&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="后端" scheme="https://www.powercheng.fun/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="SpringBoot" scheme="https://www.powercheng.fun/tags/SpringBoot/"/>
+    
+    <category term="Kafka" scheme="https://www.powercheng.fun/tags/Kafka/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Linux 磁盘占用空间分析</title>
+    <link href="https://www.powercheng.fun/articles/bf14c86a/"/>
+    <id>https://www.powercheng.fun/articles/bf14c86a/</id>
+    <published>2023-10-26T14:03:46.000Z</published>
+    <updated>2025-11-19T03:04:36.753Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;Linux 分析磁盘空间占用情况常规步骤&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Linux" scheme="https://www.powercheng.fun/categories/Linux/"/>
+    
+    
+    <category term="Linux" scheme="https://www.powercheng.fun/tags/Linux/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>N1盒子折腾记</title>
+    <link href="https://www.powercheng.fun/articles/9da1b22b/"/>
+    <id>https://www.powercheng.fun/articles/9da1b22b/</id>
+    <published>2023-08-07T13:23:01.000Z</published>
+    <updated>2025-11-19T03:04:36.809Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;2023年拿斐讯N1盒子做旁路由记录，并安装青龙配置跑京东脚本&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="折腾" scheme="https://www.powercheng.fun/categories/%E6%8A%98%E8%85%BE/"/>
+    
+    
+    <category term="软路由" scheme="https://www.powercheng.fun/tags/%E8%BD%AF%E8%B7%AF%E7%94%B1/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>hexo 文章图床图片本地化</title>
+    <link href="https://www.powercheng.fun/articles/b5b57784/"/>
+    <id>https://www.powercheng.fun/articles/b5b57784/</id>
+    <published>2023-08-03T14:10:47.000Z</published>
+    <updated>2025-11-19T03:04:36.812Z</updated>
+    
+    
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot; /&gt;&lt;div class=&quot;.article-gallery&quot;&gt;&lt;p&gt;把 markdown 文章中引用腾讯云 COS 中存储的图片改为本地存储，并使用 hexo 发布&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="折腾" scheme="https://www.powercheng.fun/categories/%E6%8A%98%E8%85%BE/"/>
+    
+    
+    <category term="hexo" scheme="https://www.powercheng.fun/tags/hexo/"/>
+    
+  </entry>
+  
+</feed>
