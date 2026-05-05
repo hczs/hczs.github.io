@@ -1,1 +1,434 @@
-<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="HandheldFriendly" content="True"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5"><meta name="description" content="关于 Zookeeper 选举机制的说明"><meta property="og:type" content="article"><meta property="og:title" content="Zookeeper选举机制"><meta property="og:url" content="https://www.powercheng.fun/articles/3c6131bd/index.html"><meta property="og:site_name" content="Caiden&#39;s Blog"><meta property="og:description" content="关于 Zookeeper 选举机制的说明"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://www.powercheng.fun/articles/3c6131bd/2dE60d10C4image-20220506155808799.png"><meta property="og:image" content="https://www.powercheng.fun/articles/3c6131bd/c4010fd3A7image-20220506165531827.png"><meta property="article:published_time" content="2022-05-06T07:36:33.000Z"><meta property="article:modified_time" content="2026-05-04T14:04:38.983Z"><meta property="article:author" content="Caiden Hou"><meta property="article:tag" content="大数据"><meta property="article:tag" content="中间件"><meta property="article:tag" content="zookeeper"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://www.powercheng.fun/articles/3c6131bd/2dE60d10C4image-20220506155808799.png"><link rel="shortcut icon" href="/images/favicon.ico"><link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png"><link rel="stylesheet" href="https://gw.alipayobjects.com/os/k/font/lxgwwenkaiscreenr.css"><title>Zookeeper选举机制</title><link rel="stylesheet" href="/css/style.css"><link rel="alternate" href="/true" title="Caiden&#39;s Blog" type="application/atom+xml"><meta name="generator" content="Hexo 5.4.0"></head><body class="max-width mx-auto px3 ltr"><div id="header-post"><a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a> <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a> <a id="top-icon-tablet" href="#" aria-label="顶部" onclick='$("html, body").animate({scrollTop:0},"fast")' style="display:none"><i class="fa-solid fa-chevron-up fa-lg"></i></a> <span id="menu"><span id="nav"><ul><li><a href="/">首页</a></li><li><a href="/archives/">文章</a></li><li><a href="/categories/">分类</a></li><li><a href="/search/">搜索</a></li><li><a href="/about/">关于</a></li></ul></span><br><span id="actions"><ul><li><a class="icon" aria-label="上一篇" href="/articles/45393fb1/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover='$("#i-prev").toggle()' onmouseout='$("#i-prev").toggle()'></i></a></li><li><a class="icon" aria-label="下一篇" href="/articles/99c80bc2/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover='$("#i-next").toggle()' onmouseout='$("#i-next").toggle()'></i></a></li><li><a class="icon" aria-label="返回顶部" href="#" onclick='$("html, body").animate({scrollTop:0},"fast")'><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover='$("#i-top").toggle()' onmouseout='$("#i-top").toggle()'></i></a></li><li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover='$("#i-share").toggle()' onmouseout='$("#i-share").toggle()' onclick='return $("#share").toggle(),!1'></i></a></li></ul><span id="i-prev" class="info" style="display:none">上一篇</span> <span id="i-next" class="info" style="display:none">下一篇</span> <span id="i-top" class="info" style="display:none">返回顶部</span> <span id="i-share" class="info" style="display:none">分享文章</span></span><br><div id="share" style="display:none"><ul><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="http://www.facebook.com/sharer.php?u=https://www.powercheng.fun/articles/3c6131bd/"><i class="fab fa-facebook" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="https://twitter.com/share?url=https://www.powercheng.fun/articles/3c6131bd/&text=Zookeeper选举机制"><i class="fab fa-twitter" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="http://www.linkedin.com/shareArticle?url=https://www.powercheng.fun/articles/3c6131bd/&title=Zookeeper选举机制"><i class="fab fa-linkedin" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="https://pinterest.com/pin/create/bookmarklet/?url=https://www.powercheng.fun/articles/3c6131bd/&is_video=false&description=Zookeeper选举机制"><i class="fab fa-pinterest" aria-hidden="true"></i></a></li><li><a class="icon" href="mailto:?subject=Zookeeper选举机制&body=Check out this article: https://www.powercheng.fun/articles/3c6131bd/" rel="external nofollow noreferrer"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="https://getpocket.com/save?url=https://www.powercheng.fun/articles/3c6131bd/&title=Zookeeper选举机制"><i class="fab fa-get-pocket" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="http://reddit.com/submit?url=https://www.powercheng.fun/articles/3c6131bd/&title=Zookeeper选举机制"><i class="fab fa-reddit" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="http://www.stumbleupon.com/submit?url=https://www.powercheng.fun/articles/3c6131bd/&title=Zookeeper选举机制"><i class="fab fa-stumbleupon" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="http://digg.com/submit?url=https://www.powercheng.fun/articles/3c6131bd/&title=Zookeeper选举机制"><i class="fab fa-digg" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" href="http://www.tumblr.com/share/link?url=https://www.powercheng.fun/articles/3c6131bd/&name=Zookeeper选举机制&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34; /&gt;&lt;div class=&#34;.article-gallery&#34;&gt;&lt;p&gt;关于 Zookeeper 选举机制的说明&lt;/p&gt;"><i class="fab fa-tumblr" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="https://news.ycombinator.com/submitlink?u=https://www.powercheng.fun/articles/3c6131bd/&t=Zookeeper选举机制"><i class="fab fa-hacker-news" aria-hidden="true"></i></a></li></ul></div><div id="toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Zookeeper-%E9%80%89%E4%B8%BE%E6%9C%BA%E5%88%B6"><span class="toc-number">1.</span> <span class="toc-text">Zookeeper 选举机制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%89%E4%B8%BE%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5"><span class="toc-number">1.1.</span> <span class="toc-text">选举相关概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%90%AF%E5%8A%A8%E9%80%89%E4%B8%BE"><span class="toc-number">1.2.</span> <span class="toc-text">第一次启动选举</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E6%9C%9F%E7%9A%84-Zookeeper-%E9%80%89%E4%B8%BE"><span class="toc-number">1.3.</span> <span class="toc-text">运行时期的 Zookeeper 选举</span></a></li></ol></li></ol></div></span></div><div class="content index py4"><article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting"><header><h1 class="posttitle p-name" itemprop="name headline">Zookeeper选举机制</h1><div class="meta"><div class="postdate"><time datetime="2022-05-06T07:36:33.000Z" class="dt-published" itemprop="datePublished">2022-05-06</time> (Updated: <time datetime="2026-05-04T14:04:38.983Z" class="dt-updated" itemprop="dateModified">2026-05-04</time>)</div><div class="article-category"><i class="fa-solid fa-archive"></i> <a class="category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a></div><div class="article-tag"><i class="fa-solid fa-tag"></i> <a class="p-category" href="/tags/zookeeper/" rel="tag">zookeeper</a>, <a class="p-category" href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/" rel="tag">中间件</a>, <a class="p-category" href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" rel="tag">大数据</a></div></div></header><div class="content e-content" itemprop="articleBody"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery"><p>关于 Zookeeper 选举机制的说明</p><span id="more"></span><h1 id="Zookeeper-选举机制"><a href="#Zookeeper-选举机制" class="headerlink" title="Zookeeper 选举机制"></a>Zookeeper 选举机制</h1><h2 id="选举相关概念"><a href="#选举相关概念" class="headerlink" title="选举相关概念"></a>选举相关概念</h2><p><strong>（1）Server id（或sid）：服务器ID</strong></p><p>用来唯一标识一台 ZooKeeper 集群中的机器，每台机器不能重 复，和 myid 一致。</p><p>比如有三台服务器，编号分别是1,2,3。编号越大在选择算法中的权重越大，比如初始化启动时就是根据服务器ID进行比较。</p><p><strong>（2）Zxid：事务ID</strong></p><p>事务ID。ZXID是一个事务ID，用来 标识一次服务器状态的变更。在某一时刻， 集群中的每台机器的ZXID值不一定完全一 致，这和ZooKeeper服务器对于客户端“更 新请求”的处理逻辑有关。</p><p>值越大说明数据越新，在选举算法中数据越新权重越大。</p><p><strong>（3）Epoch：逻辑时钟</strong></p><p>也叫投票的次数，没有 Leader时同一轮投票过程中的逻辑时钟值是相同的，每投完一次票这个数据就会增加。</p><p><strong>（4）Server状态：选举状态</strong></p><p><code>LOOKING</code>，竞选状态。</p><p><code>FOLLOWING</code>，随从状态，同步leader状态，参与投票。</p><p><code>OBSERVING</code>，观察状态,同步leader状态，不参与投票。</p><p><code>LEADING</code>，领导者状态。</p><h2 id="第一次启动选举"><a href="#第一次启动选举" class="headerlink" title="第一次启动选举"></a>第一次启动选举</h2><p>目前是有五台服务器做 Zookeeper 集群，现在在这五台服务器中，分析 Zookeeper 选举 Leader 的过程</p><a href="/articles/3c6131bd/2dE60d10C4image-20220506155808799.png" class="gallery-item"><img src="/articles/3c6131bd/2dE60d10C4image-20220506155808799.png" title="image-20220506155808799"></a><p>选举步骤：</p><ol><li>服务器 1 启动，发起一次选举，服务器 1 投自己一票，现在情况只有服务器 1 自己 1 票，不够半数（2）以上（3 票），选举无法完成，状态保持 LOOKING</li><li>服务器 2 启动，再发起一次选举，<strong>服务器 1 和 服务器 2 分别投自己并交换选票信息，此时服务器 1 发现 服务器 2 的 myid 比自己大，所以把票投给服务器 2，</strong>所以现在服务器 1 票数 0 票，服务器 2 票数 2 票，依然没有超过半数（2），所以俩人都是 LOOKING 状态</li><li>服务器 3 启动，再发起一次选举，同样的经历，服务器 1 和 2 会发现 3 的 myid 比自己大，所以会把票投给 3，此时服务器 1 和 2 都是 0 票，服务器 3 是 3 票，超过了半数（2），所以出结果了，服务器 3 更改状态为 LEADING，服务器 1 和 2 状态为 FOLLOWING</li><li>服务器 4 启动，发起一次选举，此时服务器 1 2 3 都不是 LOOKING 状态，所以不会再更改选票信息，所以服务器 3 是 3 票，服务器 4 是 1 票，服务器 4 服从多数，更改选票信息为服务器 3，服务器 3 依旧是 LEADING，服务器 4 状态改为 FOLLOWING</li><li>服务器 5 启动，和 4 一样的过程，最后服务器 3 是 5 票，服务器 5 是 0 票，服务器 5 状态改为 FOLLOWING</li></ol><p>最终结果：服务器 3 是 Leader，状态为 LEADING，其他服务器为 Follower，状态为 FOLLOWING</p><h2 id="运行时期的-Zookeeper-选举"><a href="#运行时期的-Zookeeper-选举" class="headerlink" title="运行时期的 Zookeeper 选举"></a>运行时期的 Zookeeper 选举</h2><p>在 Zookeeper运行期间 <code>Leader</code> 和 <code>非 Leader</code> 各司其职，当有非 Leader 服务器宕机或加入不会影响 Leader，但是一旦 Leader 服务器挂了，那么整个 Zookeeper 集群将暂停对外服务，会触发新一轮的选举。</p><p>注意：而当一台机器进入 Leader 选举流程时，当前集群也可能会处于以下两种状态：</p><ul><li>集群中的 Leader 还是好好的，只是这个机器突然连接不上 Leader 了，当这个机器试图发起选举时，会被告知当前 Leader 的信息，然后对于这个机器来说只是重新建立下连接，同步下状态就行</li><li>集群的 Leader 确实挂了</li></ul><p>假设目前 Zookeeper 集群是由五台服务器组成，SID 分别是 1、2、3、4、5，ZXID 分别是 8、8、8、7、7，并且此时作为 Leader 的 server3 挂掉了</p><a href="/articles/3c6131bd/c4010fd3A7image-20220506165531827.png" class="gallery-item"><img src="/articles/3c6131bd/c4010fd3A7image-20220506165531827.png" title="image-20220506165531827"></a><p>现在 1 2 4 5 开始选举</p><table><thead><tr><th>服务器</th><th>EPOCH</th><th>ZXID</th><th>SID</th></tr></thead><tbody><tr><td>server1</td><td>1</td><td>8</td><td>1</td></tr><tr><td>server2</td><td>1</td><td>8</td><td>2</td></tr><tr><td>server4</td><td>1</td><td>7</td><td>4</td></tr><tr><td>server5</td><td>1</td><td>7</td><td>5</td></tr></tbody></table><p>选举规则：</p><ol><li>EPOCH 大的直接胜出</li><li>EPOCH 相同的，ZXID 大的直接胜出，因为数据最新</li><li>EPOCH、ZXID 都相同的，服务器 ID 大的胜出</li></ol><p>选举过程：</p><ol><li>第一次投票，每台机器都会将票投给自己。</li><li>接着每台机器都会将自己的投票发给其他机器，比如 server1 收到了三张票，发现自己的 ZXID 和 server2 的相同，所以比较 SID，发现 server2 SID 比自己大，所以把投票更改为server2；其他机器类似，都是先比较 EPOCH，再比较 ZXID，最后比较 SID</li></ol><p>所以 server2 就是新的 Leader</p><p>参考：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://mp.weixin.qq.com/s/TNF7FZJMJd4YEAN2AvWsCw">https://mp.weixin.qq.com/s/TNF7FZJMJd4YEAN2AvWsCw</a></p></div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>var options;"undefined"!=typeof lightGallery&&(options={selector:".gallery-item"},lightGallery(document.getElementsByClassName(".article-gallery")[0],options))</script></div></article><div class="blog-post-comments"><div id="disqus_thread"><noscript>加载评论需要在浏览器启用 JavaScript 脚本支持。</noscript></div></div><div id="footer-post-container"><div id="footer-post"><div id="nav-footer" style="display:none"><ul><li><a href="/">首页</a></li><li><a href="/archives/">文章</a></li><li><a href="/categories/">分类</a></li><li><a href="/search/">搜索</a></li><li><a href="/about/">关于</a></li></ul></div><div id="toc-footer" style="display:none"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Zookeeper-%E9%80%89%E4%B8%BE%E6%9C%BA%E5%88%B6"><span class="toc-number">1.</span> <span class="toc-text">Zookeeper 选举机制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%89%E4%B8%BE%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5"><span class="toc-number">1.1.</span> <span class="toc-text">选举相关概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%90%AF%E5%8A%A8%E9%80%89%E4%B8%BE"><span class="toc-number">1.2.</span> <span class="toc-text">第一次启动选举</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E6%9C%9F%E7%9A%84-Zookeeper-%E9%80%89%E4%B8%BE"><span class="toc-number">1.3.</span> <span class="toc-text">运行时期的 Zookeeper 选举</span></a></li></ol></li></ol></div><div id="share-footer" style="display:none"><ul><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="http://www.facebook.com/sharer.php?u=https://www.powercheng.fun/articles/3c6131bd/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="https://twitter.com/share?url=https://www.powercheng.fun/articles/3c6131bd/&text=Zookeeper选举机制"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="http://www.linkedin.com/shareArticle?url=https://www.powercheng.fun/articles/3c6131bd/&title=Zookeeper选举机制"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="https://pinterest.com/pin/create/bookmarklet/?url=https://www.powercheng.fun/articles/3c6131bd/&is_video=false&description=Zookeeper选举机制"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li><li><a class="icon" href="mailto:?subject=Zookeeper选举机制&body=Check out this article: https://www.powercheng.fun/articles/3c6131bd/" rel="external nofollow noreferrer"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="https://getpocket.com/save?url=https://www.powercheng.fun/articles/3c6131bd/&title=Zookeeper选举机制"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="http://reddit.com/submit?url=https://www.powercheng.fun/articles/3c6131bd/&title=Zookeeper选举机制"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="http://www.stumbleupon.com/submit?url=https://www.powercheng.fun/articles/3c6131bd/&title=Zookeeper选举机制"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="http://digg.com/submit?url=https://www.powercheng.fun/articles/3c6131bd/&title=Zookeeper选举机制"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" href="http://www.tumblr.com/share/link?url=https://www.powercheng.fun/articles/3c6131bd/&name=Zookeeper选举机制&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34; /&gt;&lt;div class=&#34;.article-gallery&#34;&gt;&lt;p&gt;关于 Zookeeper 选举机制的说明&lt;/p&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li><li><a class="icon" target="_blank" rel="noopener external nofollow noreferrer" href="https://news.ycombinator.com/submitlink?u=https://www.powercheng.fun/articles/3c6131bd/&t=Zookeeper选举机制"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li></ul></div><div id="actions-footer"><a id="menu" class="icon" href="#" onclick='return $("#nav-footer").toggle(),!1'><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a> <a id="toc" class="icon" href="#" onclick='return $("#toc-footer").toggle(),!1'><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a> <a id="share" class="icon" href="#" onclick='return $("#share-footer").toggle(),!1'><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a> <a id="top" style="display:none" class="icon" href="#" onclick='$("html, body").animate({scrollTop:0},"fast")'><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a></div></div></div><footer id="footer"><div class="footer-left">Copyright &copy; 2021-2026 Caiden Hou</div><div class="footer-right"><nav><ul><li><a href="/">首页</a></li><li><a href="/archives/">文章</a></li><li><a href="/categories/">分类</a></li><li><a href="/search/">搜索</a></li><li><a href="/about/">关于</a></li></ul></nav></div></footer></div><link rel="preload" href="/lib/font-awesome/css/all.min.css" as="style" onload='this.onload=null,this.rel="stylesheet"'><noscript><link rel="stylesheet" href="/lib/font-awesome/css/all.min.css"></noscript><script src="/lib/jquery/jquery.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript">$(function(){$(".highlight table").before('<span class="btn-copy tooltipped tooltipped-sw" aria-label="复制到粘贴板！"><i class="fa-regular fa-clone"></i></span>'),new ClipboardJS(".btn-copy",{text:function(e){return Array.from(e.nextElementSibling.querySelectorAll(".code")).reduce((e,t)=>e+t.innerText+"\n","")}}).on("success",function(e){e.trigger.setAttribute("aria-label","复制成功！"),e.clearSelection()})})</script><script src="/js/main.js"></script><script type="text/javascript">var disqus_shortname="caidens-blog";!function(){var e=document.createElement("script");e.type="text/javascript",e.async=!0,e.src="//"+disqus_shortname+".disqus.com/embed.js",(document.getElementsByTagName("head")[0]||document.getElementsByTagName("body")[0]).appendChild(e)}()</script></body></html>
+<!DOCTYPE html><html dir="ltr" lang="zh-CN" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://www.powercheng.fun/articles/3c6131bd/"><meta name="generator" content="Astro v5.16.6"><!-- Load Font --><style>@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/ebe081c5cf2bc9bf.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:300;font-style:italic;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/ebe081c5cf2bc9bf.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:400;font-style:italic;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/ebe081c5cf2bc9bf.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:500;font-style:italic;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/ebe081c5cf2bc9bf.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:600;font-style:italic;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/ebe081c5cf2bc9bf.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:700;font-style:italic;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/dfc33a259d798962.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:300;font-style:normal;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/dfc33a259d798962.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:400;font-style:normal;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/dfc33a259d798962.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:500;font-style:normal;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/dfc33a259d798962.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:600;font-style:normal;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/dfc33a259d798962.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:700;font-style:normal;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/81a5937787ff8a0a.woff") format("woff");font-display:swap;font-weight:300;font-style:italic;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/13e056157b226e18.woff") format("woff");font-display:swap;font-weight:400;font-style:italic;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/bd02cfaa9ae16fb7.woff") format("woff");font-display:swap;font-weight:500;font-style:italic;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/fcaa83a753eb8a72.woff") format("woff");font-display:swap;font-weight:600;font-style:italic;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/28887fc4ef2e3de1.woff") format("woff");font-display:swap;font-weight:700;font-style:italic;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/a75e78cafb91aeae.woff") format("woff");font-display:swap;font-weight:300;font-style:normal;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/dcf1118e4db364a7.woff") format("woff");font-display:swap;font-weight:400;font-style:normal;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/7e09f3d8f911bde0.woff") format("woff");font-display:swap;font-weight:500;font-style:normal;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/ba411907dc1f87d9.woff") format("woff");font-display:swap;font-weight:600;font-style:normal;}@font-face{font-family:"Google Sans Code-04a186ad63205992";src:url("/_astro/fonts/fcc9533aee1bcfad.woff") format("woff");font-display:swap;font-weight:700;font-style:normal;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:300;font-style:italic;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:400;font-style:italic;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:500;font-style:italic;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:600;font-style:italic;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:700;font-style:italic;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:300;font-style:normal;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:400;font-style:normal;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:500;font-style:normal;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:600;font-style:normal;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:700;font-style:normal;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:300;font-style:italic;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:400;font-style:italic;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:500;font-style:italic;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:600;font-style:italic;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:700;font-style:italic;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:300;font-style:normal;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:400;font-style:normal;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:500;font-style:normal;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:600;font-style:normal;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}@font-face{font-family:"Google Sans Code-04a186ad63205992 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:700;font-style:normal;size-adjust:99.9837%;ascent-override:96.6157%;descent-override:28.6047%;}:root{--font-google-sans-code:"Google Sans Code-04a186ad63205992","Google Sans Code-04a186ad63205992 fallback: Courier New",monospace;}</style><!-- General Meta Tags --><title>Zookeeper选举机制 | Caiden&#39;s Blog</title><meta name="title" content="Zookeeper选举机制 | Caiden's Blog"><meta name="description" content="关于 Zookeeper 选举机制的说明"><meta name="author" content="Caiden Hou"><link rel="sitemap" href="/sitemap-index.xml"><!-- Open Graph / Facebook --><meta property="og:title" content="Zookeeper选举机制 | Caiden's Blog"><meta property="og:description" content="关于 Zookeeper 选举机制的说明"><meta property="og:url" content="https://www.powercheng.fun/articles/3c6131bd/"><meta property="og:image" content="https://www.powercheng.fun/articles/3c6131bd/index.png"><!-- Article Published/Modified time --><meta property="article:published_time" content="2022-05-06T07:36:33.000Z"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://www.powercheng.fun/articles/3c6131bd/"><meta property="twitter:title" content="Zookeeper选举机制 | Caiden's Blog"><meta property="twitter:description" content="关于 Zookeeper 选举机制的说明"><meta property="twitter:image" content="https://www.powercheng.fun/articles/3c6131bd/index.png"><!-- Google JSON-LD Structured data --><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Zookeeper选举机制 | Caiden's Blog","image":"https://www.powercheng.fun/articles/3c6131bd/index.png","datePublished":"2022-05-06T07:36:33.000Z","author":[{"@type":"Person","name":"Caiden Hou","url":"https://github.com/hczs"}]}</script><!-- Enable RSS feed auto-discovery  --><!-- https://docs.astro.build/en/recipes/rss/#enabling-rss-feed-auto-discovery --><link rel="alternate" type="application/rss+xml" title="Caiden's Blog" href="https://www.powercheng.fun/rss.xml"><meta name="theme-color" content=""><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.QW52Ox2j.js"></script><!-- Minimal inline script to prevent FOUC - sets theme immediately --><script>
+      (function () {
+        const initialColorScheme = ""; // "light" | "dark"
+        const currentTheme = localStorage.getItem("theme");
+
+        function getPreferTheme() {
+          if (currentTheme) return currentTheme;
+          if (initialColorScheme) return initialColorScheme;
+          return window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        }
+
+        const themeValue = getPreferTheme();
+
+        // Set theme immediately to prevent flash
+        document.firstElementChild?.setAttribute("data-theme", themeValue);
+
+        // Export minimal API for external script
+        window.theme = {
+          themeValue: themeValue,
+          getTheme: () => window.theme.themeValue,
+          setTheme: val => {
+            window.theme.themeValue = val;
+          },
+        };
+      })();
+    </script><style>:where([data-astro-image]){object-fit:var(--fit);object-position:var(--pos);height:auto}:where([data-astro-image=full-width]){width:100%}:where([data-astro-image=constrained]){max-width:100%}
+</style>
+<link rel="stylesheet" href="/_astro/about.9E-2E5SH.css">
+<style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media (prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
+</style><style>[data-astro-transition-scope="astro-fam6wyqg-1"] { view-transition-name: zookeeper\9009\4E3E\673A\5236; }@layer astro { ::view-transition-old(zookeeper\9009\4E3E\673A\5236) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(zookeeper\9009\4E3E\673A\5236) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(zookeeper\9009\4E3E\673A\5236) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(zookeeper\9009\4E3E\673A\5236) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-fam6wyqg-1"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-fam6wyqg-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-fam6wyqg-1"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-fam6wyqg-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-fam6wyqg-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-fam6wyqg-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-fam6wyqg-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-fam6wyqg-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-2"] { view-transition-name: \5927\6570\636E; }@layer astro { ::view-transition-old(\5927\6570\636E) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(\5927\6570\636E) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(\5927\6570\636E) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(\5927\6570\636E) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-3"] { view-transition-name: zookeeper; }@layer astro { ::view-transition-old(zookeeper) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(zookeeper) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(zookeeper) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(zookeeper) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-4"] { view-transition-name: \4E2D\95F4\4EF6; }@layer astro { ::view-transition-old(\4E2D\95F4\4EF6) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(\4E2D\95F4\4EF6) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(\4E2D\95F4\4EF6) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(\4E2D\95F4\4EF6) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style></head> <body>  <a id="skip-to-content" href="#main-content" class="absolute start-16 -top-full z-50 bg-background px-3 py-2 text-accent backdrop-blur-lg transition-all focus:top-4"> 跳到内容 </a> <header class="app-layout flex flex-col items-center justify-between sm:flex-row"> <div id="top-nav-wrap" class="py-4 sm:py-6 border-b border-border relative w-full bg-background flex items-baseline justify-between sm:items-center"> <a href="/" class="absolute py-1 text-xl leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-2xl sm:leading-none"> Caiden&#39;s Blog </a> <nav id="nav-menu" class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:space-x-4 sm:py-0"> <button id="menu-btn" class="focus-outline self-end p-2 sm:hidden" aria-label="打开菜单" aria-expanded="false" aria-controls="menu-items"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden" id="close-icon"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-deep" id="menu-icon"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 6h16" /><path d="M7 12h13" /><path d="M10 18h10" /></svg> </button> <ul id="menu-items" class="mt-4 grid w-44 grid-cols-2 place-content-center gap-2 [&#38;>li>a]:block [&#38;>li>a]:px-4 [&#38;>li>a]:py-3 [&#38;>li>a]:text-center [&#38;>li>a]:font-medium [&#38;>li>a]:hover:text-accent sm:[&#38;>li>a]:px-2 sm:[&#38;>li>a]:py-1 hidden sm:mt-0 sm:flex sm:w-auto sm:gap-x-5 sm:gap-y-0"> <li class="col-span-2"> <a href="/articles" class="active-nav"> 文章 </a> </li> <li class="col-span-2"> <a href="/tags"> 标签 </a> </li> <li class="col-span-2"> <a href="/about"> 关于 </a> </li> <li class="col-span-2"> <a href="/archives" title="归档" aria-label="archives" class="group inline-flex items-center gap-1 hover:text-accent focus-outline flex justify-center p-3 sm:p-1">  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden sm:inline-block"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 4m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" /><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" /><path d="M10 12l4 0" /></svg> <span class="sm:sr-only">归档</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <a href="/search" title="搜索" aria-label="search" class="group inline-flex items-center gap-1 hover:text-accent focus-outline flex p-3 sm:p-1">  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-search"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg> <span class="sr-only">搜索</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <button id="theme-btn" class="focus-outline relative size-12 p-4 sm:size-8 hover:[&>svg]:stroke-accent" title="切换亮/暗模式" aria-label="auto" aria-live="polite"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute top-[50%] left-[50%] -translate-[50%] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" /></svg> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute top-[50%] left-[50%] -translate-[50%] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M14.828 14.828a4 4 0 1 0 -5.656 -5.656a4 4 0 0 0 5.656 5.656z" /><path d="M6.343 17.657l-1.414 1.414" /><path d="M6.343 6.343l-1.414 -1.414" /><path d="M17.657 6.343l1.414 -1.414" /><path d="M17.657 17.657l1.414 1.414" /><path d="M4 12h-2" /><path d="M12 4v-2" /><path d="M20 12h2" /><path d="M12 20v2" /></svg> </button> </li> </ul> </nav> </div> </header> <script type="module">function s(){const e=document.querySelector("#menu-btn"),t=document.querySelector("#menu-items"),n=document.querySelector("#menu-icon"),o=document.querySelector("#close-icon");!e||!t||!n||!o||e.addEventListener("click",()=>{const c=e.getAttribute("aria-expanded")==="true";e.setAttribute("aria-expanded",c?"false":"true"),e.setAttribute("aria-label",c?"打开菜单":"关闭菜单"),t.classList.toggle("hidden"),n.classList.toggle("hidden"),o.classList.toggle("hidden")})}s();document.addEventListener("astro:after-swap",s);</script> <div class="app-layout flex items-center justify-start"><a id="back-button" href="/" class="group inline-flex items-center gap-1 hover:text-accent focus-outline -ms-2 mt-8 mb-2 hover:text-foreground/75"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 rtl:rotate-180"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15 6l-6 6l6 6" /></svg><span>返回</span> </a></div><script type="module">function o(){const t=document.querySelector("#back-button"),e=sessionStorage.getItem("backUrl");e&&t&&(t.href=e)}document.addEventListener("astro:page-load",o);o();</script> <main id="main-content" class="app-layout pb-12" data-pagefind-body> <h1 class="inline-block text-2xl font-bold text-accent sm:text-3xl" data-astro-transition-scope="astro-fam6wyqg-1"> Zookeeper选举机制 </h1> <div class="my-2 flex items-center gap-2"> <div class="flex items-center gap-x-2 opacity-80"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 min-w-5.5"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M7 14h.013" /><path d="M10.01 14h.005" /><path d="M13.01 14h.005" /><path d="M16.015 14h.005" /><path d="M13.015 17h.005" /><path d="M7.01 17h.005" /><path d="M10.01 17h.005" /></svg>  <time class="text-sm sm:text-base" datetime="2022-05-06T07:36:33.000Z">2022年05月06日</time> </div> <span aria-hidden="true" class="max-sm:hidden hidden">|</span>  </div> <article id="article" class="app-prose mt-8 w-full max-w-app prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"> <p>关于 Zookeeper 选举机制的说明</p>
+<h1 id="zookeeper-选举机制">Zookeeper 选举机制</h1>
+<h2 id="选举相关概念">选举相关概念</h2>
+<p><strong>（1）Server id（或sid）：服务器ID</strong></p>
+<p>用来唯一标识一台 ZooKeeper 集群中的机器，每台机器不能重 复，和 myid 一致。</p>
+<p>比如有三台服务器，编号分别是1,2,3。编号越大在选择算法中的权重越大，比如初始化启动时就是根据服务器ID进行比较。</p>
+<p><strong>（2）Zxid：事务ID</strong></p>
+<p>事务ID。ZXID是一个事务ID，用来 标识一次服务器状态的变更。在某一时刻， 集群中的每台机器的ZXID值不一定完全一 致，这和ZooKeeper服务器对于客户端“更 新请求”的处理逻辑有关。</p>
+<p>值越大说明数据越新，在选举算法中数据越新权重越大。</p>
+<p><strong>（3）Epoch：逻辑时钟</strong></p>
+<p>也叫投票的次数，没有 Leader时同一轮投票过程中的逻辑时钟值是相同的，每投完一次票这个数据就会增加。</p>
+<p><strong>（4）Server状态：选举状态</strong></p>
+<p><code>LOOKING</code>，竞选状态。</p>
+<p><code>FOLLOWING</code>，随从状态，同步leader状态，参与投票。</p>
+<p><code>OBSERVING</code>，观察状态,同步leader状态，不参与投票。</p>
+<p><code>LEADING</code>，领导者状态。</p>
+<h2 id="第一次启动选举">第一次启动选举</h2>
+<p>目前是有五台服务器做 Zookeeper 集群，现在在这五台服务器中，分析 Zookeeper 选举 Leader 的过程</p>
+<p><img src="/images/posts/3c6131bd/2dE60d10C4image-20220506155808799.png" alt="image-20220506155808799"></p>
+<p>选举步骤：</p>
+<ol>
+<li>服务器 1 启动，发起一次选举，服务器 1 投自己一票，现在情况只有服务器 1 自己 1 票，不够半数（2）以上（3 票），选举无法完成，状态保持 LOOKING</li>
+<li>服务器 2 启动，再发起一次选举，**服务器 1 和 服务器 2 分别投自己并交换选票信息，此时服务器 1 发现 服务器 2 的 myid 比自己大，所以把票投给服务器 2，**所以现在服务器 1 票数 0 票，服务器 2 票数 2 票，依然没有超过半数（2），所以俩人都是 LOOKING 状态</li>
+<li>服务器 3 启动，再发起一次选举，同样的经历，服务器 1 和 2 会发现 3 的 myid 比自己大，所以会把票投给 3，此时服务器 1 和 2 都是 0 票，服务器 3 是 3  票，超过了半数（2），所以出结果了，服务器 3 更改状态为 LEADING，服务器 1 和 2 状态为 FOLLOWING</li>
+<li>服务器 4 启动，发起一次选举，此时服务器 1 2 3 都不是 LOOKING 状态，所以不会再更改选票信息，所以服务器 3 是 3 票，服务器 4 是 1 票，服务器 4 服从多数，更改选票信息为服务器 3，服务器 3 依旧是 LEADING，服务器 4 状态改为 FOLLOWING</li>
+<li>服务器 5 启动，和 4 一样的过程，最后服务器 3 是 5 票，服务器 5 是 0 票，服务器 5 状态改为 FOLLOWING</li>
+</ol>
+<p>最终结果：服务器 3 是 Leader，状态为 LEADING，其他服务器为 Follower，状态为 FOLLOWING</p>
+<h2 id="运行时期的-zookeeper-选举">运行时期的 Zookeeper 选举</h2>
+<p>在 Zookeeper运行期间 <code>Leader</code> 和 <code>非 Leader</code> 各司其职，当有非 Leader 服务器宕机或加入不会影响 Leader，但是一旦 Leader 服务器挂了，那么整个 Zookeeper 集群将暂停对外服务，会触发新一轮的选举。</p>
+<p>注意：而当一台机器进入 Leader 选举流程时，当前集群也可能会处于以下两种状态：</p>
+<ul>
+<li>集群中的 Leader 还是好好的，只是这个机器突然连接不上 Leader 了，当这个机器试图发起选举时，会被告知当前 Leader 的信息，然后对于这个机器来说只是重新建立下连接，同步下状态就行</li>
+<li>集群的 Leader 确实挂了</li>
+</ul>
+<p>假设目前 Zookeeper 集群是由五台服务器组成，SID 分别是 1、2、3、4、5，ZXID 分别是 8、8、8、7、7，并且此时作为 Leader 的 server3 挂掉了</p>
+<p><img src="/images/posts/3c6131bd/c4010fd3A7image-20220506165531827.png" alt="image-20220506165531827"></p>
+<p>现在 1 2 4 5 开始选举</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>服务器</th><th>EPOCH</th><th>ZXID</th><th>SID</th></tr></thead><tbody><tr><td>server1</td><td>1</td><td>8</td><td>1</td></tr><tr><td>server2</td><td>1</td><td>8</td><td>2</td></tr><tr><td>server4</td><td>1</td><td>7</td><td>4</td></tr><tr><td>server5</td><td>1</td><td>7</td><td>5</td></tr></tbody></table>
+<p>选举规则：</p>
+<ol>
+<li>EPOCH 大的直接胜出</li>
+<li>EPOCH 相同的，ZXID 大的直接胜出，因为数据最新</li>
+<li>EPOCH、ZXID 都相同的，服务器 ID 大的胜出</li>
+</ol>
+<p>选举过程：</p>
+<ol>
+<li>第一次投票，每台机器都会将票投给自己。</li>
+<li>接着每台机器都会将自己的投票发给其他机器，比如 server1 收到了三张票，发现自己的 ZXID 和 server2 的相同，所以比较 SID，发现 server2 SID 比自己大，所以把投票更改为server2；其他机器类似，都是先比较 EPOCH，再比较 ZXID，最后比较 SID</li>
+</ol>
+<p>所以 server2 就是新的 Leader</p>
+<p>参考：<a href="https://mp.weixin.qq.com/s/TNF7FZJMJd4YEAN2AvWsCw">https://mp.weixin.qq.com/s/TNF7FZJMJd4YEAN2AvWsCw</a></p> </article> <hr class="my-8 border-dashed">  <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8"> <li> <a href="/tags/大数据/" class="flex items-center gap-0.5 border-b-2 border-dashed border-foreground hover:-mt-0.5 hover:border-accent hover:text-accent focus-visible:border-none focus-visible:text-accent text-sm" data-astro-transition-scope="astro-36ssibgs-2"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-80 size-4"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 9l14 0" /><path d="M5 15l14 0" /><path d="M11 4l-4 16" /><path d="M17 4l-4 16" /></svg> 大数据 </a> </li><li> <a href="/tags/zookeeper/" class="flex items-center gap-0.5 border-b-2 border-dashed border-foreground hover:-mt-0.5 hover:border-accent hover:text-accent focus-visible:border-none focus-visible:text-accent text-sm" data-astro-transition-scope="astro-36ssibgs-3"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-80 size-4"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 9l14 0" /><path d="M5 15l14 0" /><path d="M11 4l-4 16" /><path d="M17 4l-4 16" /></svg> zookeeper </a> </li><li> <a href="/tags/中间件/" class="flex items-center gap-0.5 border-b-2 border-dashed border-foreground hover:-mt-0.5 hover:border-accent hover:text-accent focus-visible:border-none focus-visible:text-accent text-sm" data-astro-transition-scope="astro-36ssibgs-4"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-80 size-4"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 9l14 0" /><path d="M5 15l14 0" /><path d="M11 4l-4 16" /><path d="M17 4l-4 16" /></svg> 中间件 </a> </li> </ul> <div id="btt-btn-container" class="fixed end-4 bottom-8 z-50 md:sticky md:end-auto md:float-end md:me-1 translate-y-14 opacity-0 transition duration-500"> <button data-button="back-to-top" class="group relative bg-background px-2 py-1 size-14 rounded-full shadow-xl md:h-8 md:w-fit md:rounded-md md:shadow-none md:focus-visible:rounded-none md:bg-background/35 md:bg-clip-padding md:backdrop-blur-lg"> <span id="progress-indicator" class="absolute inset-0 -z-10 block size-14 scale-110 rounded-full bg-transparent md:hidden md:h-8 md:rounded-md"></span> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block rotate-90 md:hidden"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15 6l-6 6l6 6" /></svg> <span class="sr-only text-sm group-hover:text-accent md:not-sr-only"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-4"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 5l0 14" /><path d="M16 9l-4 -4" /><path d="M8 9l4 -4" /></svg> 回到顶部 </span> </button> </div> <script data-astro-rerun>
+  /** Scrolls the document to the top when
+   * the "Back to Top" button is clicked. */
+  function backToTop() {
+    const rootElement = document.documentElement;
+    const btnContainer = document.querySelector("#btt-btn-container");
+    const backToTopBtn = document.querySelector("[data-button='back-to-top']");
+    const progressIndicator = document.querySelector("#progress-indicator");
+
+    if (!rootElement || !btnContainer || !backToTopBtn || !progressIndicator)
+      return;
+
+    // Attach click event handler for back-to-top button
+    backToTopBtn.addEventListener("click", () => {
+      document.body.scrollTop = 0; // For Safari
+      document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+    });
+
+    // Handle button visibility according to scroll position
+    let lastVisible = null;
+    function handleScroll() {
+      const scrollTotal = rootElement.scrollHeight - rootElement.clientHeight;
+      const scrollTop = rootElement.scrollTop;
+      const scrollPercent = Math.floor((scrollTop / scrollTotal) * 100);
+
+      progressIndicator.style.setProperty(
+        "background-image",
+        `conic-gradient(var(--accent), var(--accent) ${scrollPercent}%, transparent ${scrollPercent}%)`
+      );
+
+      const isVisible = scrollTop / scrollTotal > 0.3;
+
+      if (isVisible !== lastVisible) {
+        btnContainer.classList.toggle("opacity-100", isVisible);
+        btnContainer.classList.toggle("translate-y-0", isVisible);
+        btnContainer.classList.toggle("opacity-0", !isVisible);
+        btnContainer.classList.toggle("translate-y-14", !isVisible);
+        lastVisible = isVisible;
+      }
+    }
+
+    let ticking = false;
+    document.addEventListener("scroll", () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+  }
+  backToTop();
+</script> <div class="flex flex-none flex-col items-center justify-center gap-1 md:items-start"><span class="italic">分享到：</span><div class="text-center"><a href="https://wa.me/?text=https://www.powercheng.fun/articles/3c6131bd/" title="通过 WhatsApp 分享" class="group inline-flex items-center gap-1 hover:text-accent scale-90 p-2 hover:rotate-6 sm:p-1"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9" /><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1" /></svg><span class="sr-only">通过 WhatsApp 分享</span> </a><a href="https://www.facebook.com/sharer.php?u=https://www.powercheng.fun/articles/3c6131bd/" title="分享到 Facebook" class="group inline-flex items-center gap-1 hover:text-accent scale-90 p-2 hover:rotate-6 sm:p-1"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 10v4h3v7h4v-7h3l1 -4h-4v-2a1 1 0 0 1 1 -1h3v-4h-3a5 5 0 0 0 -5 5v2h-3" /></svg><span class="sr-only">分享到 Facebook</span> </a><a href="https://x.com/intent/post?url=https://www.powercheng.fun/articles/3c6131bd/" title="分享到 X" class="group inline-flex items-center gap-1 hover:text-accent scale-90 p-2 hover:rotate-6 sm:p-1"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 4l11.733 16h4.267l-11.733 -16z" /><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" /></svg><span class="sr-only">分享到 X</span> </a><a href="https://t.me/share/url?url=https://www.powercheng.fun/articles/3c6131bd/" title="通过 Telegram 分享" class="group inline-flex items-center gap-1 hover:text-accent scale-90 p-2 hover:rotate-6 sm:p-1"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" /></svg><span class="sr-only">通过 Telegram 分享</span> </a><a href="https://pinterest.com/pin/create/button/?url=https://www.powercheng.fun/articles/3c6131bd/" title="分享到 Pinterest" class="group inline-flex items-center gap-1 hover:text-accent scale-90 p-2 hover:rotate-6 sm:p-1"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M8 20l4 -9" /><path d="M10.7 14c.437 1.263 1.43 2 2.55 2c2.071 0 3.75 -1.554 3.75 -4a5 5 0 1 0 -9.7 1.7" /><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /></svg><span class="sr-only">分享到 Pinterest</span> </a><a href="mailto:?subject=See%20this%20post&#38;body=https://www.powercheng.fun/articles/3c6131bd/" title="通过邮件分享" class="group inline-flex items-center gap-1 hover:text-accent scale-90 p-2 hover:rotate-6 sm:p-1"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10z" /><path d="M3 7l9 6l9 -6" /></svg><span class="sr-only">通过邮件分享</span> </a></div></div> <hr class="my-6 border-dashed"> <!-- Previous/Next Post Buttons --> <div data-pagefind-ignore class="grid grid-cols-1 gap-6 sm:grid-cols-2"> <a href="/articles/45393fb1" class="flex w-full gap-1 hover:opacity-75"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block flex-none rtl:rotate-180"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15 6l-6 6l6 6" /></svg> <div> <span>上一篇</span> <div class="text-sm text-accent/85">Zookeeper客户端常用命令</div> </div> </a> <a href="/articles/99c80bc2" class="flex w-full justify-end gap-1 text-end hover:opacity-75 sm:col-start-2"> <div> <span>下一篇</span> <div class="text-sm text-accent/85">Zookeeper安装记录</div> </div> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block flex-none rtl:rotate-180"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 6l6 6l-6 6" /></svg> </a> </div> </main> <footer class="app-layout mt-auto"> <div class="py-6 sm:py-4 border-t border-border flex flex-col items-center justify-between sm:flex-row-reverse"> <div class="flex flex-wrap items-center gap-1"> <a href="https://github.com/hczs" title="Caiden's Blog 的 GitHub" class="group inline-flex items-center gap-1 hover:text-accent p-2 hover:rotate-6 sm:p-1">  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" /></svg> <span class="sr-only">Caiden&#39;s Blog 的 GitHub</span>  </a> </div> <div class="my-2 flex flex-col items-center whitespace-nowrap sm:flex-row"> <span>Copyright © 2026</span> <span class="hidden sm:inline">&nbsp;|&nbsp;</span> <span>保留所有权利。</span> </div> </div> </footer>  <!-- Load full theme logic --> <script type="module">const d="theme",r="light",m="dark";function i(){const e=localStorage.getItem(d);return e||(window.matchMedia("(prefers-color-scheme: dark)").matches?m:r)}let t=window.theme?.themeValue??i();function c(){localStorage.setItem(d,t),o()}function o(){document.firstElementChild?.setAttribute("data-theme",t),document.querySelector("#theme-btn")?.setAttribute("aria-label",t);const e=document.body;if(e){const n=window.getComputedStyle(e).backgroundColor;document.querySelector("meta[name='theme-color']")?.setAttribute("content",n)}}window.theme?(window.theme.setPreference=c,window.theme.reflectPreference=o):window.theme={themeValue:t,setPreference:c,reflectPreference:o,getTheme:()=>t,setTheme:e=>{t=e}};o();function s(){o(),document.querySelector("#theme-btn")?.addEventListener("click",()=>{t=t===r?m:r,window.theme?.setTheme(t),c()})}s();document.addEventListener("astro:after-swap",s);document.addEventListener("astro:before-swap",e=>{const a=e,n=document.querySelector("meta[name='theme-color']")?.getAttribute("content");n&&a.newDocument.querySelector("meta[name='theme-color']")?.setAttribute("content",n)});window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",({matches:e})=>{t=e?m:r,window.theme?.setTheme(t),c()});</script> </body> </html> <script data-astro-rerun>
+  /** Create a progress indicator
+   *  at the top */
+  function createProgressBar() {
+    // Create the main container div
+    const progressContainer = document.createElement("div");
+    progressContainer.className =
+      "progress-container fixed top-0 z-10 h-1 w-full bg-background";
+
+    // Create the progress bar div
+    const progressBar = document.createElement("div");
+    progressBar.className = "progress-bar h-1 w-0 bg-accent";
+    progressBar.id = "myBar";
+
+    // Append the progress bar to the progress container
+    progressContainer.appendChild(progressBar);
+
+    // Append the progress container to the document body or any other desired parent element
+    document.body.appendChild(progressContainer);
+  }
+  createProgressBar();
+
+  /** Update the progress bar
+   *  when user scrolls */
+  function updateScrollProgress() {
+    document.addEventListener("scroll", () => {
+      const winScroll =
+        document.body.scrollTop || document.documentElement.scrollTop;
+      const height =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      if (document) {
+        const myBar = document.getElementById("myBar");
+        if (myBar) {
+          myBar.style.width = scrolled + "%";
+        }
+      }
+    });
+  }
+  updateScrollProgress();
+
+  /** Attaches links to headings in the document,
+   *  allowing sharing of sections easily */
+  function addHeadingLinks() {
+    const headings = Array.from(
+      document.querySelectorAll("h2, h3, h4, h5, h6")
+    );
+    for (const heading of headings) {
+      heading.classList.add("group");
+      const link = document.createElement("a");
+      link.className =
+        "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
+      link.href = "#" + heading.id;
+
+      const span = document.createElement("span");
+      span.ariaHidden = "true";
+      span.innerText = "#";
+      link.appendChild(span);
+      heading.appendChild(link);
+    }
+  }
+  addHeadingLinks();
+
+  /** Attaches copy buttons to code blocks in the document,
+   * allowing users to copy code easily. */
+  function attachCopyButtons() {
+    const copyButtonLabel = "复制";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      // Check if --file-name-offset custom property exists
+      const computedStyle = getComputedStyle(codeBlock);
+      const hasFileNameOffset =
+        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+
+      // Determine the top positioning class
+      const topClass = hasFileNameOffset
+        ? "top-(--file-name-offset)"
+        : "-top-3";
+
+      const copyButton = document.createElement("button");
+      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.innerHTML = copyButtonLabel;
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      // wrap codebock with relative parent element
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block, button) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      // visual feedback that task is completed
+      button.innerText = "已复制";
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+
+  /* Go to page start after page swap */
+  document.addEventListener("astro:after-swap", () =>
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+  );
+</script>
