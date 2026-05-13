@@ -1,0 +1,585 @@
+<!DOCTYPE html><html dir="ltr" lang="zh-CN" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://www.powercheng.fun/articles/z-7iNXpb/"><meta name="generator" content="Astro v6.3.0"><!-- Load Font: 霞鹜文楷 (LXGW WenKai) --><link rel="preconnect" href="https://npm.elemecdn.com" crossorigin><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-webfont@1.7.0/style.css" id="lxgw-font-css"><script>
+      (function () {
+        var link = document.getElementById("lxgw-font-css");
+        if (link) {
+          link.addEventListener("error", function () {
+            link.href =
+              "https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css";
+          });
+        }
+      })();
+    </script><!-- Load Font: 霞鹜文楷屏幕阅读版 (LXGW WenKai Screen) — optimized for body text --><link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont@1.7.0/style.css" id="lxgw-screen-font-css"><script>
+      (function () {
+        var link = document.getElementById("lxgw-screen-font-css");
+        if (link) {
+          link.addEventListener("error", function () {
+            link.href =
+              "https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.7.0/style.css";
+          });
+        }
+      })();
+    </script><!-- General Meta Tags --><title>Docker Compose 部署 Nginx 并配置 SSL 自动续期 | Caiden&#39;s Blog</title><meta name="title" content="Docker Compose 部署 Nginx 并配置 SSL 自动续期 | Caiden's Blog"><meta name="description" content="用 Docker Compose 跑 Nginx 是目前比较省心的部署方式，配置文件管容器参数，目录挂载管持久化，容器删了数据还在。这篇从零开始，把 Nginx 部署、反向代理、HTTPS 证书申请和自动续期整个流程走一遍，顺便记录几个容易踩的坑。"><meta name="author" content="Caiden Hou"><link rel="sitemap" href="/sitemap-index.xml"><!-- Open Graph / Facebook --><meta property="og:title" content="Docker Compose 部署 Nginx 并配置 SSL 自动续期 | Caiden's Blog"><meta property="og:description" content="用 Docker Compose 跑 Nginx 是目前比较省心的部署方式，配置文件管容器参数，目录挂载管持久化，容器删了数据还在。这篇从零开始，把 Nginx 部署、反向代理、HTTPS 证书申请和自动续期整个流程走一遍，顺便记录几个容易踩的坑。"><meta property="og:url" content="https://www.powercheng.fun/articles/z-7iNXpb/"><meta property="og:image" content="https://www.powercheng.fun/articles/z-7iNXpb/index.png"><!-- Article Published/Modified time --><meta property="article:published_time" content="2026-05-13T06:08:13.000Z"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://www.powercheng.fun/articles/z-7iNXpb/"><meta property="twitter:title" content="Docker Compose 部署 Nginx 并配置 SSL 自动续期 | Caiden's Blog"><meta property="twitter:description" content="用 Docker Compose 跑 Nginx 是目前比较省心的部署方式，配置文件管容器参数，目录挂载管持久化，容器删了数据还在。这篇从零开始，把 Nginx 部署、反向代理、HTTPS 证书申请和自动续期整个流程走一遍，顺便记录几个容易踩的坑。"><meta property="twitter:image" content="https://www.powercheng.fun/articles/z-7iNXpb/index.png"><!-- Google JSON-LD Structured data --><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Docker Compose 部署 Nginx 并配置 SSL 自动续期 | Caiden's Blog","image":"https://www.powercheng.fun/articles/z-7iNXpb/index.png","datePublished":"2026-05-13T06:08:13.000Z","author":[{"@type":"Person","name":"Caiden Hou","url":"https://github.com/hczs"}]}</script><!-- Enable RSS feed auto-discovery  --><!-- https://docs.astro.build/en/recipes/rss/#enabling-rss-feed-auto-discovery --><link rel="alternate" type="application/rss+xml" title="Caiden's Blog" href="https://www.powercheng.fun/rss.xml"><meta name="theme-color" content=""><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CAqDO0tx.js"></script><!-- Minimal inline script to prevent FOUC - sets theme immediately --><script>
+      (function () {
+        const initialColorScheme = ""; // "light" | "dark"
+        const currentTheme = localStorage.getItem("theme");
+
+        function getPreferTheme() {
+          if (currentTheme) return currentTheme;
+          if (initialColorScheme) return initialColorScheme;
+          return window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        }
+
+        const themeValue = getPreferTheme();
+
+        // Set theme immediately to prevent flash
+        document.firstElementChild?.setAttribute("data-theme", themeValue);
+
+        // Export minimal API for external script
+        window.theme = {
+          themeValue: themeValue,
+          getTheme: () => window.theme.themeValue,
+          setTheme: val => {
+            window.theme.themeValue = val;
+          },
+        };
+      })();
+    </script><link rel="stylesheet" href="/_astro/Footer.C0uL7KoH.css">
+<style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
+.toc-sidebar[data-astro-cid-xvrfupwn]{display:none;position:fixed;top:5rem;right:max(1.5rem,calc((100vw - 72rem)/2 - 14rem));width:12rem;max-height:calc(100vh - 6rem);overflow-y:auto;scrollbar-width:none;font-size:.875rem;line-height:1.5;z-index:20}.toc-sidebar[data-astro-cid-xvrfupwn]::-webkit-scrollbar{display:none}.toc-sidebar__label[data-astro-cid-xvrfupwn]{display:block;font-size:.75rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--foreground);opacity:.4;margin-bottom:.75rem;padding-left:1rem}.toc-sidebar__list[data-astro-cid-xvrfupwn]{list-style:none;margin:0;padding:0;border-left:1px solid var(--border)}.toc-sidebar__item[data-astro-cid-xvrfupwn] a[data-astro-cid-xvrfupwn]{display:block;padding:.25rem 0 .25rem 1rem;margin-left:-1px;color:var(--foreground);opacity:.5;text-decoration:none;border-left:1.5px solid transparent;transition:opacity .25s ease,border-color .25s ease;line-height:1.55;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.toc-sidebar__item[data-astro-cid-xvrfupwn] a[data-astro-cid-xvrfupwn]:hover{opacity:.85}.toc-sidebar__item--child[data-astro-cid-xvrfupwn] a[data-astro-cid-xvrfupwn]{padding-left:1.75rem;font-size:.8125rem}.toc-sidebar__item[data-astro-cid-xvrfupwn] a[data-astro-cid-xvrfupwn].active{opacity:1;color:var(--accent);border-left-color:var(--accent)}@media(min-width:1200px){.toc-sidebar[data-astro-cid-xvrfupwn]{display:block}}.toc-mobile[data-astro-cid-xvrfupwn]{display:block;margin-bottom:1.5rem;border:1px solid var(--border);border-radius:.5rem;overflow:hidden;background:color-mix(in srgb,var(--background) 60%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.toc-mobile__toggle[data-astro-cid-xvrfupwn]{display:flex;align-items:center;width:100%;padding:.625rem .875rem;background:none;border:none;font:inherit;font-size:.9375rem;color:var(--foreground);gap:.5rem}.toc-mobile__toggle-text[data-astro-cid-xvrfupwn]{font-weight:600;opacity:.7;flex-shrink:0}.toc-mobile__current[data-astro-cid-xvrfupwn]{flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.9375rem;color:var(--accent)}.toc-mobile__chevron[data-astro-cid-xvrfupwn]{width:1rem;height:1rem;flex-shrink:0;opacity:.45;transition:transform .2s ease}.toc-mobile[data-astro-cid-xvrfupwn][aria-expanded=true] .toc-mobile__chevron[data-astro-cid-xvrfupwn]{transform:rotate(180deg)}.toc-mobile__body[data-astro-cid-xvrfupwn]{display:none;padding:0 .875rem .75rem;border-top:1px solid var(--border)}.toc-mobile[data-astro-cid-xvrfupwn][aria-expanded=true] .toc-mobile__body[data-astro-cid-xvrfupwn]{display:block}.toc-mobile__list[data-astro-cid-xvrfupwn]{list-style:none;margin:0;padding:0}.toc-mobile__item[data-astro-cid-xvrfupwn] a[data-astro-cid-xvrfupwn]{display:block;padding:.3rem 0;color:var(--foreground);opacity:.6;text-decoration:none;font-size:.9375rem;transition:opacity .2s ease,color .2s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.toc-mobile__item[data-astro-cid-xvrfupwn] a[data-astro-cid-xvrfupwn]:hover{opacity:.9}.toc-mobile__item--child[data-astro-cid-xvrfupwn] a[data-astro-cid-xvrfupwn]{padding-left:1rem;font-size:.875rem}.toc-mobile__item[data-astro-cid-xvrfupwn] a[data-astro-cid-xvrfupwn].active{opacity:1;color:var(--accent);font-weight:500}@media(min-width:1200px){.toc-mobile[data-astro-cid-xvrfupwn]{display:none}}
+</style><style>[data-astro-transition-scope="astro-fam6wyqg-1"] { view-transition-name: docker-compose-\90E8\7F72-nginx-\5E76\914D\7F6E-ssl-\81EA\52A8\7EED\671F; }@layer astro { ::view-transition-old(docker-compose-\90E8\7F72-nginx-\5E76\914D\7F6E-ssl-\81EA\52A8\7EED\671F) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(docker-compose-\90E8\7F72-nginx-\5E76\914D\7F6E-ssl-\81EA\52A8\7EED\671F) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(docker-compose-\90E8\7F72-nginx-\5E76\914D\7F6E-ssl-\81EA\52A8\7EED\671F) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(docker-compose-\90E8\7F72-nginx-\5E76\914D\7F6E-ssl-\81EA\52A8\7EED\671F) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-fam6wyqg-1"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-fam6wyqg-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-fam6wyqg-1"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-fam6wyqg-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-fam6wyqg-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-fam6wyqg-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-fam6wyqg-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-fam6wyqg-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-2"] { view-transition-name: \8FD0\7EF4; }@layer astro { ::view-transition-old(\8FD0\7EF4) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(\8FD0\7EF4) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(\8FD0\7EF4) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(\8FD0\7EF4) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style></head> <body>  <a id="skip-to-content" href="#main-content" class="absolute start-16 -top-full z-50 bg-background px-3 py-2 text-accent backdrop-blur-lg transition-all focus:top-4"> 跳到内容 </a> <header class="app-layout flex flex-col items-center justify-between sm:flex-row"> <div id="top-nav-wrap" class="py-4 sm:py-6 border-b border-border relative w-full bg-background flex items-baseline justify-between sm:items-center"> <a href="/" class="absolute py-1 text-xl leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-2xl sm:leading-none"> Caiden&#39;s Blog </a> <nav id="nav-menu" class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:space-x-4 sm:py-0"> <button id="menu-btn" class="focus-outline self-end p-2 sm:hidden" aria-label="打开菜单" aria-expanded="false" aria-controls="menu-items"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden" id="close-icon"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-deep" id="menu-icon"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 6h16" /><path d="M7 12h13" /><path d="M10 18h10" /></svg> </button> <ul id="menu-items" class="mt-4 grid w-44 grid-cols-2 place-content-center gap-2 [&#38;>li>a]:block [&#38;>li>a]:px-4 [&#38;>li>a]:py-3 [&#38;>li>a]:text-center [&#38;>li>a]:font-medium [&#38;>li>a]:hover:text-accent sm:[&#38;>li>a]:px-2 sm:[&#38;>li>a]:py-1 hidden sm:mt-0 sm:flex sm:w-auto sm:gap-x-5 sm:gap-y-0"> <li class="col-span-2"> <a href="/articles" class="active-nav"> 文章 </a> </li> <li class="col-span-2"> <a href="/tags"> 标签 </a> </li> <li class="col-span-2"> <a href="/about"> 关于 </a> </li> <li class="col-span-2"> <a href="/archives" title="归档" aria-label="archives" class="group inline-flex items-center gap-1 hover:text-accent focus-outline flex justify-center p-3 sm:p-1">  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden sm:inline-block"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 4m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" /><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" /><path d="M10 12l4 0" /></svg> <span class="sm:sr-only">归档</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <a href="/search" title="搜索" aria-label="search" class="group inline-flex items-center gap-1 hover:text-accent focus-outline flex p-3 sm:p-1">  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-search"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg> <span class="sr-only">搜索</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <button id="theme-btn" class="focus-outline relative size-12 p-4 sm:size-8 hover:[&>svg]:stroke-accent" title="切换亮/暗模式" aria-label="auto" aria-live="polite"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute top-[50%] left-[50%] -translate-[50%] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" /></svg> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute top-[50%] left-[50%] -translate-[50%] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M14.828 14.828a4 4 0 1 0 -5.656 -5.656a4 4 0 0 0 5.656 5.656z" /><path d="M6.343 17.657l-1.414 1.414" /><path d="M6.343 6.343l-1.414 -1.414" /><path d="M17.657 6.343l1.414 -1.414" /><path d="M17.657 17.657l1.414 1.414" /><path d="M4 12h-2" /><path d="M12 4v-2" /><path d="M20 12h2" /><path d="M12 20v2" /></svg> </button> </li> </ul> </nav> </div> </header> <script type="module">function s(){const e=document.querySelector("#menu-btn"),t=document.querySelector("#menu-items"),n=document.querySelector("#menu-icon"),o=document.querySelector("#close-icon");!e||!t||!n||!o||e.addEventListener("click",()=>{const c=e.getAttribute("aria-expanded")==="true";e.setAttribute("aria-expanded",c?"false":"true"),e.setAttribute("aria-label",c?"打开菜单":"关闭菜单"),t.classList.toggle("hidden"),n.classList.toggle("hidden"),o.classList.toggle("hidden")})}s();document.addEventListener("astro:after-swap",s);</script> <div class="app-layout flex items-center justify-start"><a id="back-button" href="/" class="group inline-flex items-center gap-1 hover:text-accent focus-outline -ms-2 mt-8 mb-2 hover:text-foreground/75"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 rtl:rotate-180"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15 6l-6 6l6 6" /></svg><span>返回</span> </a></div><script type="module">function o(){const t=document.querySelector("#back-button"),e=sessionStorage.getItem("backUrl");e&&t&&(t.href=e)}document.addEventListener("astro:page-load",o);o();</script> <main id="main-content" class="app-layout pb-12" data-pagefind-body> <h1 class="inline-block text-3xl font-bold text-accent sm:text-4xl" data-astro-transition-scope="astro-fam6wyqg-1"> Docker Compose 部署 Nginx 并配置 SSL 自动续期 </h1> <div class="my-2 flex items-center gap-2"> <div class="flex items-center gap-x-2 opacity-80"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 min-w-5.5"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M7 14h.013" /><path d="M10.01 14h.005" /><path d="M13.01 14h.005" /><path d="M16.015 14h.005" /><path d="M13.015 17h.005" /><path d="M7.01 17h.005" /><path d="M10.01 17h.005" /></svg>  <time class="text-sm sm:text-base" datetime="2026-05-13T06:08:13.000Z">2026年05月13日</time> </div> <span aria-hidden="true" class="max-sm:hidden hidden">|</span>  </div> <nav class="toc-sidebar" aria-label="Table of Contents" data-astro-cid-xvrfupwn><span class="toc-sidebar__label" data-astro-cid-xvrfupwn>目录</span><ul class="toc-sidebar__list" data-astro-cid-xvrfupwn><li class="toc-sidebar__item toc-sidebar__item--child" data-astro-cid-xvrfupwn><a href="#创建目录结构" data-toc-id="创建目录结构" data-astro-cid-xvrfupwn>创建目录结构</a></li><li class="toc-sidebar__item toc-sidebar__item--child" data-astro-cid-xvrfupwn><a href="#编写-docker-composeyml" data-toc-id="编写-docker-composeyml" data-astro-cid-xvrfupwn>编写 docker-compose.yml</a></li><li class="toc-sidebar__item toc-sidebar__item--child" data-astro-cid-xvrfupwn><a href="#写个维护脚本" data-toc-id="写个维护脚本" data-astro-cid-xvrfupwn>写个维护脚本</a></li><li class="toc-sidebar__item toc-sidebar__item--child" data-astro-cid-xvrfupwn><a href="#配置反向代理" data-toc-id="配置反向代理" data-astro-cid-xvrfupwn>配置反向代理</a></li><li class="toc-sidebar__item toc-sidebar__item--child" data-astro-cid-xvrfupwn><a href="#配置-ssl-证书" data-toc-id="配置-ssl-证书" data-astro-cid-xvrfupwn>配置 SSL 证书</a></li><li class="toc-sidebar__item toc-sidebar__item--child" data-astro-cid-xvrfupwn><a href="#踩坑记录" data-toc-id="踩坑记录" data-astro-cid-xvrfupwn>踩坑记录</a></li></ul></nav><div class="toc-mobile" data-astro-cid-xvrfupwn><button class="toc-mobile__toggle" aria-expanded="false" aria-controls="toc-mobile-body" data-astro-cid-xvrfupwn><span class="toc-mobile__toggle-text" data-astro-cid-xvrfupwn>目录</span><span class="toc-mobile__current" data-astro-cid-xvrfupwn></span><svg class="toc-mobile__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-xvrfupwn><path d="M6 9l6 6 6-6" data-astro-cid-xvrfupwn></path></svg></button><div class="toc-mobile__body" id="toc-mobile-body" data-astro-cid-xvrfupwn><ul class="toc-mobile__list" data-astro-cid-xvrfupwn><li class="toc-mobile__item toc-mobile__item--child" data-astro-cid-xvrfupwn><a href="#创建目录结构" data-toc-id="创建目录结构" data-astro-cid-xvrfupwn>创建目录结构</a></li><li class="toc-mobile__item toc-mobile__item--child" data-astro-cid-xvrfupwn><a href="#编写-docker-composeyml" data-toc-id="编写-docker-composeyml" data-astro-cid-xvrfupwn>编写 docker-compose.yml</a></li><li class="toc-mobile__item toc-mobile__item--child" data-astro-cid-xvrfupwn><a href="#写个维护脚本" data-toc-id="写个维护脚本" data-astro-cid-xvrfupwn>写个维护脚本</a></li><li class="toc-mobile__item toc-mobile__item--child" data-astro-cid-xvrfupwn><a href="#配置反向代理" data-toc-id="配置反向代理" data-astro-cid-xvrfupwn>配置反向代理</a></li><li class="toc-mobile__item toc-mobile__item--child" data-astro-cid-xvrfupwn><a href="#配置-ssl-证书" data-toc-id="配置-ssl-证书" data-astro-cid-xvrfupwn>配置 SSL 证书</a></li><li class="toc-mobile__item toc-mobile__item--child" data-astro-cid-xvrfupwn><a href="#踩坑记录" data-toc-id="踩坑记录" data-astro-cid-xvrfupwn>踩坑记录</a></li></ul></div></div><script data-astro-rerun>
+  (function () {
+    const sidebarLinks = document.querySelectorAll(
+      ".toc-sidebar a[data-toc-id]"
+    );
+    const mobileLinks = document.querySelectorAll(
+      ".toc-mobile a[data-toc-id]"
+    );
+    const allLinks = [...sidebarLinks, ...mobileLinks];
+
+    if (allLinks.length === 0) return;
+
+    /* ---- Mobile toggle ---- */
+    const mobileContainer = document.querySelector(".toc-mobile");
+    if (mobileContainer) {
+      const toggle = mobileContainer.querySelector(".toc-mobile__toggle");
+      if (toggle) {
+        toggle.addEventListener("click", () => {
+          const expanded =
+            mobileContainer.getAttribute("aria-expanded") === "true";
+          mobileContainer.setAttribute(
+            "aria-expanded",
+            expanded ? "false" : "true"
+          );
+        });
+      }
+    }
+
+    /* ---- Scroll spy ---- */
+    const ids = Array.from(allLinks)
+      .map(a => a.getAttribute("data-toc-id"))
+      .filter((v, i, arr) => v && arr.indexOf(v) === i);
+
+    let ticking = false;
+
+    function updateActive() {
+      const scrollY = window.scrollY;
+      let activeId = "";
+
+      for (let i = ids.length - 1; i >= 0; i--) {
+        const el = document.getElementById(ids[i]);
+        if (el && el.offsetTop <= scrollY + 96) {
+          activeId = ids[i];
+          break;
+        }
+      }
+
+      allLinks.forEach(link => {
+        const id = link.getAttribute("data-toc-id");
+        if (id === activeId) {
+          link.classList.add("active");
+        } else {
+          link.classList.remove("active");
+        }
+      });
+
+      /* Update mobile current heading label */
+      const currentLabel = document.querySelector(".toc-mobile__current");
+      if (currentLabel && activeId) {
+        const activeLink = document.querySelector(
+          `.toc-sidebar a[data-toc-id="${activeId}"]`
+        );
+        if (activeLink) {
+          currentLabel.textContent = activeLink.textContent;
+        }
+      }
+    }
+
+    function onScroll() {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          updateActive();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    updateActive();
+  })();
+</script> <article id="article" class="app-prose mt-8 w-full max-w-app prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"> <p>用 Docker Compose 跑 Nginx 是目前比较省心的部署方式，配置文件管容器参数，目录挂载管持久化，容器删了数据还在。这篇从零开始，把 Nginx 部署、反向代理、HTTPS 证书申请和自动续期整个流程走一遍，顺便记录几个容易踩的坑。</p>
+<h3 id="创建目录结构">创建目录结构</h3>
+<p>在服务器上建一个专属目录，把 Nginx 相关的东西都放进去：</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">mkdir</span><span style="--shiki-light:#2B5581;--shiki-dark:#82AAFF"> -p</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> nginx-docker/{html,conf.d,logs,certs}</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">cd</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> nginx-docker</span></span></code></pre>
+<p>目录结构大概是这样：</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="plaintext"><code><span class="line"><span>nginx-docker/</span></span>
+<span class="line"><span>├── conf.d/            # 站点配置文件</span></span>
+<span class="line"><span>├── html/              # 静态网页</span></span>
+<span class="line"><span>├── logs/              # Nginx 日志</span></span>
+<span class="line"><span>├── certs/             # SSL 证书（后面用）</span></span>
+<span class="line"><span>└── docker-compose.yml</span></span></code></pre>
+<h3 id="编写-docker-composeyml">编写 docker-compose.yml</h3>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="yaml"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">services</span><span style="--shiki-light:#D32F2F;--shiki-dark:#D6DEEB">:</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">  nginx</span><span style="--shiki-light:#D32F2F;--shiki-dark:#D6DEEB">:</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">    image</span><span style="--shiki-light:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D"> nginx:latest</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">    container_name</span><span style="--shiki-light:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D"> my-nginx</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">    restart</span><span style="--shiki-light:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D"> always</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">    ports</span><span style="--shiki-light:#D32F2F;--shiki-dark:#D6DEEB">:</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">      - </span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">80:80</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">      - </span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">443:443</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">    extra_hosts</span><span style="--shiki-light:#D32F2F;--shiki-dark:#D6DEEB">:</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">      - </span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">host.docker.internal:host-gateway</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#C2C3C5;--shiki-light-font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">  # 让容器能访问宿主机</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">    volumes</span><span style="--shiki-light:#D32F2F;--shiki-dark:#D6DEEB">:</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">      - </span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">./html:/usr/share/nginx/html</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">      - </span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">./conf.d:/etc/nginx/conf.d</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">      - </span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">./logs:/var/log/nginx</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">      - </span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">./certs:/etc/nginx/certs</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">    environment</span><span style="--shiki-light:#D32F2F;--shiki-dark:#D6DEEB">:</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">      - </span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">TZ=Asia/Shanghai</span></span></code></pre>
+<p>这里几个要点：<code>restart: always</code> 保证容器挂了自动重启、开机自启；<code>extra_hosts</code> 那行很关键，它让 Nginx 容器能通过 <code>host.docker.internal</code> 访问宿主机上的服务，后面反向代理全靠它；<code>certs</code> 目录先挂上，后面申请证书时直接往里放文件就行。</p>
+<p>启动容器：</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">docker</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> compose</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> up</span><span style="--shiki-light:#2B5581;--shiki-dark:#82AAFF"> -d</span></span></code></pre>
+<h3 id="写个维护脚本">写个维护脚本</h3>
+<p>每次手动敲 <code>docker exec</code> 命令太麻烦，写个脚本封装常用操作：</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#C2C3C5;--shiki-light-font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">#!/bin/bash</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">CONTAINER_NAME</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">=</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">my-nginx</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">GREEN</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">=</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">'</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">\033[0;32m</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">'</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">YELLOW</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">=</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">'</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">\033[1;33m</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">'</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">RED</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">=</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">'</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">\033[0;31m</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">'</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">NC</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">=</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">'</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">\033[0m</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">'</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">show_help</span><span style="--shiki-light:#212121;--shiki-dark:#D6DEEB">()</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">    echo</span><span style="--shiki-light:#2B5581;--shiki-dark:#82AAFF"> -e</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">${</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">GREEN</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">}Nginx 容器维护脚本${</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">NC</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">}</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">    echo</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">用法: ./nginx-manage.sh [命令]</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">    echo</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> ""</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">    echo</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">可用命令:</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">    echo</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">  start   - 启动容器</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">    echo</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">  stop    - 停止容器</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">    echo</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">  down    - 停止并删除容器</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">    echo</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">  test    - 测试配置文件语法</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">    echo</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">  reload  - 平滑重载配置</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">    echo</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">  logs    - 查看日志</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">    echo</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">  status  - 查看运行状态</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">if</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> [ </span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">-z</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#D7DBE0">$1</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> ]; </span><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">then</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">    show_help</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">    exit</span><span style="--shiki-light:#1976D2;--shiki-dark:#F78C6C"> 1</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">fi</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">check_compose_file</span><span style="--shiki-light:#212121;--shiki-dark:#D6DEEB">()</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">    if</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> [ </span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">!</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA"> -f</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">docker-compose.yml</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> ] </span><span style="--shiki-light:#212121;--shiki-dark:#D6DEEB">&#x26;&#x26;</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> [ </span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">!</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA"> -f</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">docker-compose.yaml</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> ]; </span><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">then</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">        echo</span><span style="--shiki-light:#2B5581;--shiki-dark:#82AAFF"> -e</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">${</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">RED</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">}错误: 当前目录找不到 docker-compose.yml${</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">NC</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">}</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">        exit</span><span style="--shiki-light:#1976D2;--shiki-dark:#F78C6C"> 1</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">    fi</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">case</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#D7DBE0">$1</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic"> in</span></span>
+<span class="line"><span style="--shiki-light:#22863A;--shiki-dark:#5CA7E4">    start</span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">)</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">        check_compose_file</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">        docker</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> compose</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> up</span><span style="--shiki-light:#2B5581;--shiki-dark:#82AAFF"> -d</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">        echo</span><span style="--shiki-light:#2B5581;--shiki-dark:#82AAFF"> -e</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">${</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">GREEN</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">}容器启动完成${</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">NC</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">}</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">        ;;</span></span>
+<span class="line"><span style="--shiki-light:#22863A;--shiki-dark:#5CA7E4">    stop</span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">)</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">        check_compose_file</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">        docker</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> compose</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> stop</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">        ;;</span></span>
+<span class="line"><span style="--shiki-light:#22863A;--shiki-dark:#5CA7E4">    down</span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">)</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">        check_compose_file</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">        docker</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> compose</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> down</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">        ;;</span></span>
+<span class="line"><span style="--shiki-light:#22863A;--shiki-dark:#5CA7E4">    test</span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">)</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">        docker</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> exec</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">$CONTAINER_NAME</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> nginx</span><span style="--shiki-light:#2B5581;--shiki-dark:#82AAFF"> -t</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">        ;;</span></span>
+<span class="line"><span style="--shiki-light:#22863A;--shiki-dark:#5CA7E4">    reload</span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">)</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">        if</span><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> docker</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> exec</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">$CONTAINER_NAME</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> nginx</span><span style="--shiki-light:#2B5581;--shiki-dark:#82AAFF"> -t</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">; </span><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">then</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">            docker</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> exec</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">$CONTAINER_NAME</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> nginx</span><span style="--shiki-light:#2B5581;--shiki-dark:#82AAFF"> -s</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> reload</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">            echo</span><span style="--shiki-light:#2B5581;--shiki-dark:#82AAFF"> -e</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">${</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">GREEN</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">}配置重载完成${</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">NC</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">}</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">        else</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">            echo</span><span style="--shiki-light:#2B5581;--shiki-dark:#82AAFF"> -e</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">${</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">RED</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">}配置文件有语法错误，放弃重载${</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">NC</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">}</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">        fi</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">        ;;</span></span>
+<span class="line"><span style="--shiki-light:#22863A;--shiki-dark:#5CA7E4">    logs</span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">)</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">        check_compose_file</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">        docker</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> compose</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> logs</span><span style="--shiki-light:#2B5581;--shiki-dark:#82AAFF"> -f</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> nginx</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">        ;;</span></span>
+<span class="line"><span style="--shiki-light:#22863A;--shiki-dark:#5CA7E4">    status</span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">)</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">        docker</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> ps</span><span style="--shiki-light:#2B5581;--shiki-dark:#82AAFF"> -f</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> name=</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">$CONTAINER_NAME</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">        ;;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">    *)</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">        echo</span><span style="--shiki-light:#2B5581;--shiki-dark:#82AAFF"> -e</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">${</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">RED</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">}未知命令: </span><span style="--shiki-light:#22863A;--shiki-dark:#D7DBE0">$1</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">${</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">NC</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">}</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">        show_help</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">        exit</span><span style="--shiki-light:#1976D2;--shiki-dark:#F78C6C"> 1</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">        ;;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">esac</span></span></code></pre>
+<p>保存后给执行权限：</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">chmod</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> +x</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> nginx-manage.sh</span></span></code></pre>
+<p>以后修改了配置文件，跑 <code>./nginx-manage.sh reload</code> 就行，脚本会先测语法再重载，不用担心写错配置把服务搞挂。</p>
+<h3 id="配置反向代理">配置反向代理</h3>
+<p>假设有个服务跑在宿主机的 <code>127.0.0.1:41373</code>，想通过 <code>news.caiden.asia</code> 这个域名访问。</p>
+<p>在 <code>conf.d</code> 目录下新建 <code>news.caiden.asia.conf</code>：</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="nginx"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">server</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    listen </span><span style="--shiki-light:#1976D2;--shiki-dark:#F78C6C">80</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    server_name </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">news.caiden.asia;</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    location</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> / {</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_pass </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">http://host.docker.internal:41373;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">Host $</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">host</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">X-Real-IP $</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">remote_addr</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">X-Forwarded-For $</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">proxy_add_x_forwarded_for</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">X-Forwarded-Proto $</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">scheme</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">Upgrade $</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">http_upgrade</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">Connection </span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">"upgrade"</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">    }</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">}</span></span></code></pre>
+<p>注意 <code>proxy_pass</code> 里写的是 <code>host.docker.internal</code> 而不是 <code>127.0.0.1</code>，因为 <code>127.0.0.1</code> 在容器里指的是容器自己，不是宿主机。</p>
+<p>重载配置：</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">./nginx-manage.sh</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> reload</span></span></code></pre>
+<p>确认域名的 A 记录解析到服务器 IP，防火墙放行 80 端口，就能通过域名访问了。</p>
+<h3 id="配置-ssl-证书">配置 SSL 证书</h3>
+<p>用 <code>acme.sh</code> 申请 Let’s Encrypt 的免费证书，到期前自动续期，基本免维护。</p>
+<h4 id="安装-acmesh">安装 acme.sh</h4>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">curl</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> https://get.acme.sh</span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA"> |</span><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> sh</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#C5E478;--shiki-dark-font-style:italic">source</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> ~/.bashrc</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">~</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">/.acme.sh/acme.sh --set-default-ca --server letsencrypt</span></span></code></pre>
+<h4 id="修改-nginx-配置放行验证请求">修改 Nginx 配置，放行验证请求</h4>
+<p>Let’s Encrypt 发证书前会访问 <code>http://域名/.well-known/acme-challenge/xxx</code> 来验证域名所有权。在 Nginx 配置里加个 location 处理这个请求：</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="nginx"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">server</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    listen </span><span style="--shiki-light:#1976D2;--shiki-dark:#F78C6C">80</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    server_name </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">news.caiden.asia;</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    location</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> /.well-known/acme-challenge/ {</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        root </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">/usr/share/nginx/html;</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    location</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> / {</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_pass </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">http://host.docker.internal:41373;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">Host $</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">host</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">X-Real-IP $</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">remote_addr</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">X-Forwarded-For $</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">proxy_add_x_forwarded_for</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">X-Forwarded-Proto $</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">scheme</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">Upgrade $</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">http_upgrade</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">Connection </span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">"upgrade"</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">    }</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">}</span></span></code></pre>
+<p>重载配置让规则生效：</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">./nginx-manage.sh</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> reload</span></span></code></pre>
+<h4 id="申请证书">申请证书</h4>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">~</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">/.acme.sh/acme.sh --issue -d news.caiden.asia -w </span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">~</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">/apps/nginx/html</span></span></code></pre>
+<p>看到绿色的 <code>Cert success!</code> 就说明申请成功了。</p>
+<h4 id="安装证书并设置自动续期">安装证书并设置自动续期</h4>
+<p>这一步把证书复制到 <code>certs</code> 目录，同时告诉 <code>acme.sh</code> 续期后自动重载 Nginx：</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">~</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">/.acme.sh/acme.sh --install-cert -d news.caiden.asia </span><span style="--shiki-light:#24292EFF;--shiki-dark:#F78C6C">\</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">--key-file</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D">       /home/ubuntu/apps/nginx/certs/news.caiden.asia.key</span><span style="--shiki-light:#24292EFF;--shiki-dark:#F78C6C">  \</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">--fullchain-file </span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D">/home/ubuntu/apps/nginx/certs/news.caiden.asia.cer</span><span style="--shiki-light:#24292EFF;--shiki-dark:#F78C6C"> \</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">--reloadcmd     </span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">sudo docker exec my-nginx nginx -s reload</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span></span></code></pre>
+<p>以后证书快过期时，<code>acme.sh</code> 的后台定时任务会自动续期，续完自动执行 <code>reloadcmd</code> 重载 Nginx，全程不用人工干预。</p>
+<h4 id="启用-https">启用 HTTPS</h4>
+<p>最后一次修改 Nginx 配置，把 HTTP 跳转到 HTTPS：</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="nginx"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">server</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    listen </span><span style="--shiki-light:#1976D2;--shiki-dark:#F78C6C">80</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    server_name </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">news.caiden.asia;</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    location</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> /.well-known/acme-challenge/ {</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        root </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">/usr/share/nginx/html;</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    location</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> / {</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">        return</span><span style="--shiki-light:#1976D2;--shiki-dark:#F78C6C"> 301</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> https://$</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">host</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">$</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">request_uri</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">    }</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">server</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    listen </span><span style="--shiki-light:#1976D2;--shiki-dark:#F78C6C">443</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> ssl;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    server_name </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">news.caiden.asia;</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    ssl_certificate </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">/etc/nginx/certs/news.caiden.asia.cer;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    ssl_certificate_key </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">/etc/nginx/certs/news.caiden.asia.key;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    ssl_protocols </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">TLSv1.2 TLSv1.3;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    ssl_ciphers </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">HIGH:!aNULL:!MD5;</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">    location</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> / {</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_pass </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">http://host.docker.internal:41373;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">Host $</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">host</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">X-Real-IP $</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">remote_addr</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">X-Forwarded-For $</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">proxy_add_x_forwarded_for</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">X-Forwarded-Proto $</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">scheme</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">Upgrade $</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478">http_upgrade</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">        proxy_set_header </span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">Connection </span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">"upgrade"</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">    }</span></span>
+<span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">}</span></span></code></pre>
+<p>重载配置：</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="bash"><code><span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">./nginx-manage.sh</span><span style="--shiki-light:#2B5581;--shiki-dark:#ECC48D"> reload</span></span></code></pre>
+<p>访问 <code>https://news.caiden.asia</code>，浏览器地址栏会显示安全锁，证书受全球浏览器信任。</p>
+<h3 id="踩坑记录">踩坑记录</h3>
+<p><strong>Ubuntu 下用 <code>sh</code> 跑 bash 脚本报语法错误。</strong> Ubuntu 的 <code>sh</code> 默认指向 <code>dash</code>，不支持 <code>function show_help() { ... }</code> 这种写法。要么用 <code>bash nginx-manage.sh</code> 执行，要么把函数定义改成 <code>show_help() { ... }</code>（去掉 <code>function</code> 关键字）。</p>
+<p><strong>acme.sh 不要加 sudo 执行。</strong> <code>acme.sh</code> 装在当前用户目录下，加了 <code>sudo</code> 会去 <code>/root</code> 找配置文件，找不到就报错。先确保 <code>certs</code> 目录权限正确：<code>sudo chown -R $USER:$USER /home/ubuntu/apps/nginx/certs</code>，然后去掉命令前面的 <code>sudo</code> 执行。注意 <code>--reloadcmd</code> 里面的 <code>sudo</code> 要保留，不然定时任务没权限重启容器。</p> </article> <hr class="my-8 border-dashed">  <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8"> <li> <a href="/tags/运维/" class="flex items-center gap-0.5 border-b-2 border-dashed border-foreground hover:-mt-0.5 hover:border-accent hover:text-accent focus-visible:border-none focus-visible:text-accent text-sm" data-astro-transition-scope="astro-36ssibgs-2"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-80 size-4"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 9l14 0" /><path d="M5 15l14 0" /><path d="M11 4l-4 16" /><path d="M17 4l-4 16" /></svg> 运维 </a> </li> </ul> <div id="btt-btn-container" class="fixed end-4 bottom-8 z-50 md:sticky md:end-auto md:float-end md:me-1 translate-y-14 opacity-0 transition duration-500"> <button data-button="back-to-top" class="group relative bg-background px-2 py-1 size-14 rounded-full shadow-xl md:h-8 md:w-fit md:rounded-md md:shadow-none md:focus-visible:rounded-none md:bg-background/35 md:bg-clip-padding md:backdrop-blur-lg"> <span id="progress-indicator" class="absolute inset-0 -z-10 block size-14 scale-110 rounded-full bg-transparent md:hidden md:h-8 md:rounded-md"></span> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block rotate-90 md:hidden"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15 6l-6 6l6 6" /></svg> <span class="sr-only text-sm group-hover:text-accent md:not-sr-only"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-4"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 5l0 14" /><path d="M16 9l-4 -4" /><path d="M8 9l4 -4" /></svg> 回到顶部 </span> </button> </div> <script data-astro-rerun>
+  /** Scrolls the document to the top when
+   * the "Back to Top" button is clicked. */
+  function backToTop() {
+    const rootElement = document.documentElement;
+    const btnContainer = document.querySelector("#btt-btn-container");
+    const backToTopBtn = document.querySelector("[data-button='back-to-top']");
+    const progressIndicator = document.querySelector("#progress-indicator");
+
+    if (!rootElement || !btnContainer || !backToTopBtn || !progressIndicator)
+      return;
+
+    // Attach click event handler for back-to-top button
+    backToTopBtn.addEventListener("click", () => {
+      document.body.scrollTop = 0; // For Safari
+      document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+    });
+
+    // Handle button visibility according to scroll position
+    let lastVisible = null;
+    function handleScroll() {
+      const scrollTotal = rootElement.scrollHeight - rootElement.clientHeight;
+      const scrollTop = rootElement.scrollTop;
+      const scrollPercent = Math.floor((scrollTop / scrollTotal) * 100);
+
+      progressIndicator.style.setProperty(
+        "background-image",
+        `conic-gradient(var(--accent), var(--accent) ${scrollPercent}%, transparent ${scrollPercent}%)`
+      );
+
+      const isVisible = scrollTop / scrollTotal > 0.3;
+
+      if (isVisible !== lastVisible) {
+        btnContainer.classList.toggle("opacity-100", isVisible);
+        btnContainer.classList.toggle("translate-y-0", isVisible);
+        btnContainer.classList.toggle("opacity-0", !isVisible);
+        btnContainer.classList.toggle("translate-y-14", !isVisible);
+        lastVisible = isVisible;
+      }
+    }
+
+    let ticking = false;
+    document.addEventListener("scroll", () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+  }
+  backToTop();
+</script> <div class="flex flex-none flex-col items-center justify-center gap-1 md:items-start"><span class="italic">分享到：</span><div class="text-center"><a href="https://wa.me/?text=https://www.powercheng.fun/articles/z-7iNXpb/" title="通过 WhatsApp 分享" class="group inline-flex items-center gap-1 hover:text-accent scale-90 p-2 hover:rotate-6 sm:p-1"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9" /><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1" /></svg><span class="sr-only">通过 WhatsApp 分享</span> </a><a href="https://www.facebook.com/sharer.php?u=https://www.powercheng.fun/articles/z-7iNXpb/" title="分享到 Facebook" class="group inline-flex items-center gap-1 hover:text-accent scale-90 p-2 hover:rotate-6 sm:p-1"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 10v4h3v7h4v-7h3l1 -4h-4v-2a1 1 0 0 1 1 -1h3v-4h-3a5 5 0 0 0 -5 5v2h-3" /></svg><span class="sr-only">分享到 Facebook</span> </a><a href="https://x.com/intent/post?url=https://www.powercheng.fun/articles/z-7iNXpb/" title="分享到 X" class="group inline-flex items-center gap-1 hover:text-accent scale-90 p-2 hover:rotate-6 sm:p-1"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 4l11.733 16h4.267l-11.733 -16z" /><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" /></svg><span class="sr-only">分享到 X</span> </a><a href="https://t.me/share/url?url=https://www.powercheng.fun/articles/z-7iNXpb/" title="通过 Telegram 分享" class="group inline-flex items-center gap-1 hover:text-accent scale-90 p-2 hover:rotate-6 sm:p-1"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" /></svg><span class="sr-only">通过 Telegram 分享</span> </a><a href="https://pinterest.com/pin/create/button/?url=https://www.powercheng.fun/articles/z-7iNXpb/" title="分享到 Pinterest" class="group inline-flex items-center gap-1 hover:text-accent scale-90 p-2 hover:rotate-6 sm:p-1"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M8 20l4 -9" /><path d="M10.7 14c.437 1.263 1.43 2 2.55 2c2.071 0 3.75 -1.554 3.75 -4a5 5 0 1 0 -9.7 1.7" /><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /></svg><span class="sr-only">分享到 Pinterest</span> </a><a href="mailto:?subject=See%20this%20post&#38;body=https://www.powercheng.fun/articles/z-7iNXpb/" title="通过邮件分享" class="group inline-flex items-center gap-1 hover:text-accent scale-90 p-2 hover:rotate-6 sm:p-1"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10z" /><path d="M3 7l9 6l9 -6" /></svg><span class="sr-only">通过邮件分享</span> </a></div></div> <hr class="my-6 border-dashed"> <!-- Previous/Next Post Buttons --> <div data-pagefind-ignore class="grid grid-cols-1 gap-6 sm:grid-cols-2">  <a href="/articles/5d71c844" class="flex w-full justify-end gap-1 text-end hover:opacity-75 sm:col-start-2"> <div> <span>下一篇</span> <div class="text-sm text-accent/85">PaddleOCR v5 Windows 安装与使用</div> </div> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block flex-none rtl:rotate-180"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 6l6 6l-6 6" /></svg> </a> </div> </main> <footer class="app-layout mt-auto"> <div class="py-6 sm:py-4 border-t border-border flex flex-col items-center justify-between sm:flex-row-reverse"> <div class="flex flex-wrap items-center gap-1"> <a href="https://github.com/hczs" title="Caiden's Blog 的 GitHub" class="group inline-flex items-center gap-1 hover:text-accent p-2 hover:rotate-6 sm:p-1">  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" /></svg> <span class="sr-only">Caiden&#39;s Blog 的 GitHub</span>  </a> </div> <div class="my-2 flex flex-col items-center whitespace-nowrap sm:flex-row"> <span>Copyright © 2026</span> <span class="hidden sm:inline">&nbsp;|&nbsp;</span> <span>保留所有权利。</span> </div> </div> </footer>  <!-- Load full theme logic --> <script type="module">const d="theme",r="light",m="dark";function i(){const e=localStorage.getItem(d);return e||(window.matchMedia("(prefers-color-scheme: dark)").matches?m:r)}let t=window.theme?.themeValue??i();function c(){localStorage.setItem(d,t),o()}function o(){document.firstElementChild?.setAttribute("data-theme",t),document.querySelector("#theme-btn")?.setAttribute("aria-label",t);const e=document.body;if(e){const n=window.getComputedStyle(e).backgroundColor;document.querySelector("meta[name='theme-color']")?.setAttribute("content",n)}}window.theme?(window.theme.setPreference=c,window.theme.reflectPreference=o):window.theme={themeValue:t,setPreference:c,reflectPreference:o,getTheme:()=>t,setTheme:e=>{t=e}};o();function s(){o(),document.querySelector("#theme-btn")?.addEventListener("click",()=>{t=t===r?m:r,window.theme?.setTheme(t),c()})}s();document.addEventListener("astro:after-swap",s);document.addEventListener("astro:before-swap",e=>{const a=e,n=document.querySelector("meta[name='theme-color']")?.getAttribute("content");n&&a.newDocument.querySelector("meta[name='theme-color']")?.setAttribute("content",n)});window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",({matches:e})=>{t=e?m:r,window.theme?.setTheme(t),c()});</script> <!-- Loading bar for page transitions --> <script type="module">const a="page-loading-bar";function s(){let e=document.getElementById(a);return e||(e=document.createElement("div"),e.id=a,document.documentElement.prepend(e)),e}function o(){const e=s();e.className="",e.offsetHeight,e.classList.add("is-loading")}function i(){const e=s();e.classList.remove("is-loading"),e.classList.add("is-complete");let t=!1;const n=()=>{t||(t=!0,e.classList.remove("is-complete"))};e.addEventListener("transitionend",n,{once:!0}),setTimeout(n,700)}document.addEventListener("astro:before-preparation",o);document.addEventListener("astro:after-swap",i);</script> </body> </html> <script data-astro-rerun>
+  /** Create a progress indicator
+   *  at the top */
+  function createProgressBar() {
+    // Create the main container div
+    const progressContainer = document.createElement("div");
+    progressContainer.className =
+      "progress-container fixed top-0 z-10 h-1 w-full bg-background";
+
+    // Create the progress bar div
+    const progressBar = document.createElement("div");
+    progressBar.className = "progress-bar h-1 w-0 bg-accent";
+    progressBar.id = "myBar";
+
+    // Append the progress bar to the progress container
+    progressContainer.appendChild(progressBar);
+
+    // Append the progress container to the document body or any other desired parent element
+    document.body.appendChild(progressContainer);
+  }
+  createProgressBar();
+
+  /** Update the progress bar
+   *  when user scrolls */
+  function updateScrollProgress() {
+    document.addEventListener("scroll", () => {
+      const winScroll =
+        document.body.scrollTop || document.documentElement.scrollTop;
+      const height =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      if (document) {
+        const myBar = document.getElementById("myBar");
+        if (myBar) {
+          myBar.style.width = scrolled + "%";
+        }
+      }
+    });
+  }
+  updateScrollProgress();
+
+  /** Attaches links to headings in the document,
+   *  allowing sharing of sections easily */
+  function addHeadingLinks() {
+    const headings = Array.from(
+      document.querySelectorAll("h2, h3, h4, h5, h6")
+    );
+    for (const heading of headings) {
+      heading.classList.add("group");
+      const link = document.createElement("a");
+      link.className =
+        "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
+      link.href = "#" + heading.id;
+
+      const span = document.createElement("span");
+      span.ariaHidden = "true";
+      span.innerText = "#";
+      link.appendChild(span);
+      heading.appendChild(link);
+    }
+  }
+  addHeadingLinks();
+
+  /** Attaches copy buttons to code blocks in the document,
+   * allowing users to copy code easily. */
+  function attachCopyButtons() {
+    const copyButtonLabel = "复制";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      // Check if --file-name-offset custom property exists
+      const computedStyle = getComputedStyle(codeBlock);
+      const hasFileNameOffset =
+        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+
+      // Determine the top positioning class
+      const topClass = hasFileNameOffset
+        ? "top-(--file-name-offset)"
+        : "-top-3";
+
+      const copyButton = document.createElement("button");
+      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.innerHTML = copyButtonLabel;
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      // wrap codebock with relative parent element
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block, button) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      // visual feedback that task is completed
+      button.innerText = "已复制";
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+
+  /* Go to page start after page swap */
+  document.addEventListener("astro:after-swap", () =>
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+  );
+</script>
